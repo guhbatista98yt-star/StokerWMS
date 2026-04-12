@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "project": "GLA WMS",
+    "date": "2026-02-06",
+    "prepared_by": "Software Development Manager"
+  },
+  "product_overview": "GLA WMS is a Warehouse Management System designed to optimize logistics operations focusing on detailed control of order picking, verification, and counter service processes to ensure traceability and efficiency.",
+  "core_goals": [
+    "Provide a robust and responsive platform to manage order flow from ERP input to final order verification.",
+    "Enable efficient and secure management of warehouse workflows including picking, verification, and counter service.",
+    "Ensure data integrity and reliability in concurrent environments with locking and audit mechanisms.",
+    "Offer role-based access control to ensure proper authorization levels for supervisors, pickers, verifiers, and counter attendants.",
+    "Support mobile and desktop optimized interfaces for different user roles."
+  ],
+  "key_features": [
+    "Secure login with session-based cookie authentication and role-based access control (RBAC).",
+    "Order management with statuses covering from pending to finalized, synchronized with ERP.",
+    "Work unit management with locking, TTL, and heartbeat to prevent concurrent conflicts.",
+    "Detailed warehouse operations for picking (separação), verification (conferência), and exception handling.",
+    "Supervisor dashboard for managing users and orders with unlocking capabilities.",
+    "Auditing and logging for traceability of all critical actions.",
+    "Integration with barcode scanners for product validation.",
+    "Exception recording for damaged or missing items during processing."
+  ],
+  "user_flow_summary": [
+    "User logs in through secure authentication and is assigned role-based access to features.",
+    "Supervisors manage users, unlock tasks, view dashboards, and oversee orders.",
+    "Pickers receive locked work units to process order picking and scanning of items.",
+    "Verification users confirm picked items, record exceptions if any, and finalize orders.",
+    "Counter attendants manage quick delivery orders and attend customer orders at the counter.",
+    "All actions are logged for auditing and supervisors can perform forced unlocks if needed."
+  ],
+  "validation_criteria": [
+    "All users must authenticate successfully before gaining access to system features.",
+    "RBAC properly restricts or grants access based on user roles.",
+    "Order status transitions correctly reflect the workflow states without skipping steps.",
+    "Locks on work units prevent multiple users from processing the same order simultaneously.",
+    "Audit logs capture all critical actions including user identity, timestamps, and changes made.",
+    "Barcode scanning integration correctly validates product items during picking and verification.",
+    "Exception cases (damaged, missing, expired items) must be recorded and associated with relevant orders.",
+    "Performance benchmarks ensure responsive UI on both mobile collectors and desktop devices.",
+    "Supervisors must be able to create, update, delete users and unlock tasks as needed."
+  ],
+  "code_summary": {
+    "tech_stack": [
+      "TypeScript",
+      "Express",
+      "React",
+      "SQLite",
+      "Drizzle ORM",
+      "Vite",
+      "TailwindCSS"
+    ],
+    "features": [
+      {
+        "name": "Auth",
+        "description": "Authentication endpoints including login, logout, and session checks.",
+        "files": [
+          "server/routes.ts",
+          "server/auth.ts"
+        ]
+      },
+      {
+        "name": "Order Management",
+        "description": "Endpoints for managing orders, assigning routes, and launching orders.",
+        "files": [
+          "server/routes.ts",
+          "server/storage.ts"
+        ]
+      },
+      {
+        "name": "Warehouse Operations",
+        "description": "Core warehouse operations: sorting (separação), checking (conferência), and work unit management.",
+        "files": [
+          "server/routes.ts",
+          "server/storage.ts"
+        ]
+      },
+      {
+        "name": "User Management",
+        "description": "CRUD operations for users, restricted to supervisors.",
+        "files": [
+          "server/routes.ts",
+          "server/storage.ts"
+        ]
+      },
+      {
+        "name": "Frontend - Login",
+        "description": "Login page.",
+        "files": [
+          "client/src/pages/login.tsx"
+        ]
+      },
+      {
+        "name": "Frontend - Supervisor Dashboard",
+        "description": "Dashboard for supervisors to manage orders and users.",
+        "files": [
+          "client/src/pages/supervisor/*"
+        ]
+      },
+      {
+        "name": "Frontend - Picking",
+        "description": "Interface for picking items (separação).",
+        "files": [
+          "client/src/pages/separacao/*"
+        ]
+      }
+    ]
+  }
+}

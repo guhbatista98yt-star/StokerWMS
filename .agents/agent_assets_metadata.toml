@@ -1,0 +1,20 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "m1oEz8k4NfZq_bqDBT6wr"
+uri = "file://docs/separacao-modulo-tecnico.md"
+type = "text"
+title = "Documentação Técnica — RISK-11 e RISK-12 refinados"
+
+[[outputs]]
+id = "a7vCPvXD9jjbyLfRmGtSB"
+uri = "file://docs/homologacao-separacao.md"
+type = "text"
+title = "Plano de Homologação — Módulo Separação"
+
+[[outputs]]
+id = "tYzQATTDL9lkPoeCfwn4j"
+uri = "file://docs/backlog-tecnico-separacao.md"
+type = "text"
+title = "Backlog — Revisão 3 (TASK-S2-05 e TASK-S3-04 refinadas)"

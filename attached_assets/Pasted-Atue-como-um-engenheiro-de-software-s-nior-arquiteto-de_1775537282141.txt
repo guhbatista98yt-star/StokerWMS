@@ -1,0 +1,275 @@
+Atue como um engenheiro de software sênior, arquiteto de sistemas e especialista em QA, revisão de código, segurança, performance e estabilidade operacional.
+
+Sua tarefa é realizar uma auditoria técnica profunda, ponta a ponta, em TODA a aplicação existente dentro da pasta abaixo, analisando recursivamente todos os arquivos, módulos, componentes, páginas, rotas, serviços, APIs, hooks, funções, classes, utilitários, integrações, configurações, migrations, scripts, logs, validações, middlewares, banco de dados, regras de negócio, elementos de interface e qualquer outro item existente no projeto.
+
+A análise deve ser COMPLETA e não superficial. Não se limite a revisar apenas trechos isolados. Avalie toda a aplicação como se ela fosse entrar em produção oficialmente e precisasse operar com estabilidade, segurança, consistência lógica, boa performance e baixa chance de falhas futuras.
+
+## Objetivo principal
+Identificar qualquer erro, fragilidade, inconsistência, risco técnico, problema de arquitetura, gargalo operacional, falha de segurança, comportamento inesperado, problema de UX/UI, ação quebrada, botão sem efeito, fluxo incompleto, regra de negócio mal implementada, concorrência incorreta, validação ausente, tratamento inadequado de estados, código morto, duplicação desnecessária ou qualquer outro ponto que possa causar transtornos em produção.
+
+---
+
+## Escopo obrigatório da auditoria
+
+### 1) Varredura completa da aplicação
+Analise tudo o que existir na pasta, incluindo:
+- frontend
+- backend
+- APIs
+- componentes
+- módulos
+- páginas
+- botões
+- formulários
+- tabelas
+- filtros
+- modais
+- menus
+- logs
+- serviços
+- autenticação
+- autorização
+- persistência
+- comunicação com banco
+- integrações externas
+- arquivos de configuração
+- scripts auxiliares
+- tratamento de erros
+- controle de estado
+- rotas
+- middlewares
+- listeners
+- jobs
+- eventos
+- utilitários
+- hooks
+- helpers
+- estilos
+- build/deploy
+- variáveis de ambiente
+- qualquer fluxo acionado por clique, submit, navegação, atalhos, eventos automáticos ou atualização de tela
+
+Não ignore arquivos “pequenos”, utilitários ou componentes aparentemente simples. Muitas falhas críticas nascem nesses pontos.
+
+---
+
+### 2) Qualidade de código e melhores práticas
+Avalie:
+- aderência a boas práticas da linguagem e framework utilizados
+- consistência do padrão arquitetural
+- organização de pastas
+- separação de responsabilidades
+- acoplamento excessivo
+- violação de SOLID, DRY, KISS e Clean Code
+- funções grandes demais
+- duplicidade de lógica
+- nomes ruins ou ambíguos
+- comentários desnecessários, ausentes ou enganosos
+- código morto, legado mal isolado ou trechos não utilizados
+- pontos difíceis de manter, expandir ou depurar
+
+---
+
+### 3) Lógica de negócio e comportamento funcional
+Verifique cuidadosamente:
+- se cada módulo realmente faz o que deveria fazer
+- se os botões executam a ação correta
+- se existem ações sem efeito
+- se há fluxos quebrados, incompletos ou inconsistentes
+- se formulários validam corretamente
+- se a navegação entre telas preserva estados corretamente
+- se filtros, buscas, ordenações, paginações e atualizações funcionam sem inconsistências
+- se operações de criar, editar, excluir, concluir, cancelar, salvar, atualizar, sincronizar, confirmar ou desfazer estão corretas
+- se há risco de duplicidade de registros
+- se há risco de perda de dados
+- se há risco de o usuário visualizar ou editar dados indevidos
+- se mensagens de erro, sucesso e alerta fazem sentido
+- se comportamentos automáticos podem disparar ações indevidas
+- se existe algum fluxo que possa “ressuscitar” estados antigos ou misturar dados entre telas, sessões ou registros
+
+---
+
+### 4) Casos de borda e robustez
+Procure e destaque:
+- cenários não tratados
+- entradas inválidas
+- valores nulos
+- listas vazias
+- respostas inesperadas da API
+- timeouts
+- falhas de rede
+- concorrência entre usuários
+- cliques repetidos
+- múltiplas abas abertas
+- atualizações simultâneas
+- estados assíncronos fora de ordem
+- race conditions
+- travamentos de tela
+- loading infinito
+- dados desatualizados no frontend
+- inconsistências entre interface e banco
+- falhas de retry, rollback ou reprocessamento
+
+---
+
+### 5) Segurança
+Faça uma revisão rigorosa em busca de:
+- falhas de autenticação
+- falhas de autorização
+- exposição indevida de dados
+- endpoints sem proteção
+- validações apenas no frontend
+- injeção SQL
+- XSS
+- CSRF
+- IDOR
+- vazamento de tokens, secrets ou credenciais
+- uso inseguro de variáveis de ambiente
+- logs com dados sensíveis
+- permissões excessivas
+- manipulação insegura de parâmetros, headers, cookies ou payloads
+- upload inseguro de arquivos
+- brechas de escalonamento de privilégio
+
+Se encontrar riscos, explique com clareza como podem ser explorados e como corrigir.
+
+---
+
+### 6) Performance e escalabilidade
+Avalie:
+- queries desnecessárias ou ineficientes
+- N+1 queries
+- loops pesados
+- renders excessivos
+- reprocessamentos evitáveis
+- chamadas repetidas à API
+- falta de cache onde faria sentido
+- payloads grandes demais
+- vazamentos de memória
+- listeners não limpos
+- reatividade excessiva
+- lentidão em páginas críticas
+- gargalos em operações simultâneas
+- impacto em ambiente de produção com múltiplos usuários
+
+Sempre que possível, proponha melhorias concretas e realistas.
+
+---
+
+### 7) UX/UI e consistência operacional
+Analise a aplicação também do ponto de vista do usuário real em operação:
+- clareza dos botões e ações
+- consistência visual
+- feedback de loading
+- mensagens compreensíveis
+- prevenção de erro humano
+- campos confusos
+- ações perigosas sem confirmação
+- ações importantes escondidas ou mal posicionadas
+- excesso de cliques
+- fluxo lento ou improdutivo
+- interface que induz erro
+- comportamento inconsistente entre módulos
+- falta de bloqueios contra ação duplicada
+- componentes que aparentam uma coisa mas executam outra
+
+Aponte tudo que pode gerar erro operacional, retrabalho ou confusão no uso diário.
+
+---
+
+### 8) Banco de dados, persistência e integridade
+Revise:
+- modelagem
+- relacionamento entre entidades
+- integridade dos dados
+- constraints ausentes
+- transações
+- atualizações parciais perigosas
+- gravações concorrentes
+- exclusões sem proteção
+- campos mal tipados
+- defaults inconsistentes
+- dados órfãos
+- sincronização entre frontend/backend/banco
+- riscos de corrupção lógica do estado
+
+---
+
+### 9) Logs, observabilidade e depuração
+Verifique:
+- se os logs são úteis
+- se há excesso de ruído
+- se faltam logs em pontos críticos
+- se erros relevantes ficam silenciosos
+- se a aplicação permite rastrear a origem de uma falha
+- se logs expõem dados sensíveis
+- se existem pontos em que seria importante registrar auditoria operacional
+
+---
+
+### 10) Prontidão para produção
+Considere a aplicação como candidata a produção imediata e informe:
+- o que está seguro para uso
+- o que precisa de correção obrigatória antes da implantação
+- o que é recomendável corrigir depois
+- quais pontos oferecem maior risco de incidente real
+- quais áreas merecem testes manuais imediatos
+- quais áreas precisam de cobertura automatizada
+
+---
+
+## Forma obrigatória da resposta
+
+Organize a resposta da seguinte forma:
+
+### A. Resumo executivo
+- visão geral da saúde da aplicação
+- nível de risco geral
+- se está apta ou não para produção no estado atual
+- principais áreas problemáticas
+
+### B. Lista de problemas encontrados
+Para cada problema encontrado, informe:
+1. Severidade: crítica / alta / média / baixa
+2. Categoria: lógica / segurança / performance / UX / banco / arquitetura / concorrência / manutenção / outro
+3. Local exato: arquivo, componente, módulo, função, endpoint, classe, rota ou trecho
+4. Descrição clara do problema
+5. Impacto real em produção
+6. Cenário em que o erro acontece
+7. Causa raiz provável
+8. Correção recomendada
+9. Justificativa técnica da correção
+10. Se possível, um exemplo de implementação melhor
+
+### C. Problemas silenciosos e riscos futuros
+Liste separadamente pontos que ainda não quebraram explicitamente, mas têm alta chance de causar bugs futuros, dívida técnica, instabilidade ou comportamento imprevisível.
+
+### D. Checklist de validação manual
+Monte um checklist objetivo para testar a aplicação ponta a ponta antes da implantação, cobrindo módulos, botões, fluxos, falhas de rede, concorrência, múltiplas abas, permissões e cenários críticos.
+
+### E. Plano de correção por prioridade
+Separe em:
+- corrigir imediatamente
+- corrigir antes da produção
+- corrigir em melhoria contínua
+
+### F. Veredito final
+Diga de forma objetiva:
+- se a aplicação está pronta para produção
+- quais impedimentos existem
+- quais são os 5 riscos mais perigosos no estado atual
+
+---
+
+## Regras importantes
+- Não faça uma análise genérica.
+- Não dê respostas vagas.
+- Não elogie sem justificativa técnica.
+- Seja crítico, rigoroso e cirúrgico.
+- Aponte até pequenos detalhes que possam virar problema futuro.
+- Se identificar inconsistência entre arquivos, fluxos ou módulos, destaque isso explicitamente.
+- Considere cenários reais de uso intensivo, usuários simultâneos, falhas parciais e comportamento humano.
+- Priorize confiabilidade operacional e estabilidade.
+- Caso existam correções possíveis, proponha a forma mais robusta e segura de implementar.
+
+Se necessário, percorra arquivo por arquivo e consolide tudo em uma auditoria única, profunda e prática.

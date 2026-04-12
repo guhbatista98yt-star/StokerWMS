@@ -1,0 +1,167 @@
+Atue como engenheiro principal de software, especialista em hardening de produção, QA final, integridade de dados, concorrência e homologação operacional.
+
+A aplicação já passou por uma rodada importante de correções. Agora sua tarefa é executar a ETAPA FINAL DE FECHAMENTO, com foco em remover os últimos bloqueios e validar se o sistema realmente está pronto para produção.
+
+Considere toda a aplicação da pasta:
+
+```ticketmonitor.ai```
+
+Você NÃO deve recomeçar do zero.
+Você deve trabalhar em cima do que já foi corrigido e concluir a estabilização final.
+
+==================================================
+OBJETIVO
+==================================================
+
+Sua missão agora é:
+
+1. validar tecnicamente as correções já aplicadas
+2. corrigir as pendências restantes
+3. verificar regressões
+4. executar uma homologação técnica final
+5. emitir um veredito honesto: produção liberada ou não
+
+==================================================
+CORREÇÕES JÁ APLICADAS QUE DEVEM SER VALIDADAS
+==================================================
+
+Valide se realmente ficaram corretas e sem regressão:
+
+- ocultação da opção “administrador” para não-admins no frontend
+- melhoria das mensagens de erro nas mutações de usuário
+- correção do race condition no POST de endereços WMS com operação atômica
+- paginação no GET de endereços WMS
+- substituição de confirm() por AlertDialog em pontos críticos
+- isolamento da fila offline por usuário e empresa
+- estado visual de erro no indicador de conexão
+- demais correções críticas já implementadas anteriormente nesta auditoria
+
+Para cada item acima:
+- confirme se a implementação ficou correta
+- diga se ficou apenas cosmética ou realmente robusta
+- identifique qualquer regressão ou brecha residual
+
+==================================================
+PENDÊNCIAS QUE DEVEM SER TRATADAS AGORA
+==================================================
+
+Corrija, ou se não for possível corrigir imediatamente, explique com precisão técnica o motivo e entregue a estratégia segura de implantação:
+
+1. timestamps ainda modelados incorretamente, migrando de text para timestamptz
+2. enums ainda frágeis no banco, migrando para pgEnum real
+3. foreign key de defaultCompanyId
+4. session store distribuída para produção
+5. rate limit por contexto mais seguro
+6. confirm() restantes
+7. qualquer risco residual de produção ainda aberto
+8. qualquer ponto onde a UI ainda possa mentir “salvo/sincronizado” sem confirmação real
+9. qualquer falha remanescente de concorrência, multiaba, replay, reconexão ou troca de usuário
+
+==================================================
+O QUE VOCÊ DEVE VERIFICAR OBRIGATORIAMENTE
+==================================================
+
+A) Segurança
+- RBAC real no backend
+- rotas críticas protegidas
+- ausência de escalonamento de privilégio
+- proteção de sessão
+- riscos residuais de CSRF, IDOR, XSS ou validação insuficiente
+
+B) Integridade de dados
+- operações críticas atômicas
+- ausência de estado parcial
+- consistência entre frontend, backend e banco
+- constraints realmente existentes
+- proteção contra dados órfãos
+
+C) Concorrência e scanner
+- replay
+- duplicação
+- dedupe
+- reconexão
+- fila offline
+- troca de usuário
+- troca de empresa
+- múltiplas abas
+- ACK confiável
+- feedback claro em falha
+
+D) Produção
+- session store
+- comportamento em deploy com múltiplas instâncias
+- locks
+- logs
+- observabilidade
+- rastreabilidade
+- falha parcial
+- reinício do servidor
+- comportamento após logout/login em dispositivo compartilhado
+
+==================================================
+FORMATO OBRIGATÓRIO DA RESPOSTA
+==================================================
+
+A. Resumo executivo final
+- nível de risco atual
+- o que foi realmente resolvido
+- o que ainda preocupa
+- se está pronta para produção ou não
+
+B. Validação das correções já aplicadas
+Para cada correção já feita:
+1. arquivo
+2. implementação encontrada
+3. se está correta
+4. se falta algo
+5. risco residual
+
+C. Pendências corrigidas nesta rodada
+Para cada uma:
+1. severidade
+2. local exato
+3. causa raiz
+4. correção aplicada
+5. impacto positivo
+6. risco de regressão
+7. como testar
+
+D. Pendências que não puderam ser corrigidas agora
+Explique:
+- por que não
+- o impacto real
+- o risco de produção
+- a forma correta de implantação
+
+E. Migrações e passos de infraestrutura
+Liste exatamente:
+- migrations necessárias
+- ordem segura de execução
+- backup recomendado
+- validação pós-migração
+- rollback plan
+
+F. Checklist final de homologação
+Monte um checklist completo de testes manuais cobrindo:
+- login/logout
+- troca de empresa
+- troca de usuário no mesmo dispositivo
+- criação/edição de usuário
+- exclusão
+- picking online
+- picking offline
+- reconexão
+- multiaba
+- falha de rede
+- sessão expirada
+- criação de endereço WMS
+- paginação
+- filtros
+- deploy multi-instância
+
+G. Veredito final
+Responder objetivamente:
+- PRONTO PARA PRODUÇÃO: SIM ou NÃO
+- bloqueios restantes
+- riscos residuais
+- ordem final de implantação

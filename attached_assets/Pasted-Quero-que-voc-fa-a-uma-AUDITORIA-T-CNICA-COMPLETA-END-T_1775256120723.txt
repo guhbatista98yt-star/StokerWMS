@@ -1,0 +1,598 @@
+Quero que você faça uma AUDITORIA TÉCNICA COMPLETA, END-TO-END, da minha aplicação inteira antes do go-live oficial, analisando frontend, backend, banco de dados, integrações, módulos, botões, rotas, eventos, logs, estados, fluxos e regras de negócio.
+
+O objetivo não é apenas “melhorar visualmente” ou “corrigir bugs pontuais”.
+O objetivo é preparar a aplicação para rodar oficialmente com o máximo de estabilidade, agilidade, previsibilidade e segurança operacional possível.
+
+IMPORTANTE:
+Esta aplicação irá entrar em uso oficial.
+Portanto, trate este trabalho como HARDENING DE PRODUÇÃO + AUDITORIA DE QUALIDADE + CORREÇÃO ESTRUTURAL.
+Quero uma revisão ponta a ponta, profunda, crítica e sem superficialidade.
+
+PRINCÍPIOS OBRIGATÓRIOS
+- Não presuma nada sem validar no código.
+- Não faça alterações cosméticas antes de garantir estabilidade.
+- Não esconda problemas.
+- Não deixe TODOs críticos em aberto.
+- Não silencie erros.
+- Não masque falhas com “try/catch genérico”.
+- Não altere regra de negócio sem entender o impacto.
+- Não mantenha lógica frágil por medo de refatorar.
+- Corrija causa raiz, não apenas sintoma.
+- Preserve a operação.
+- Priorize confiabilidade, clareza, rastreabilidade e performance.
+
+OBJETIVO FINAL
+Quero que você:
+1. analise a aplicação inteira ponta a ponta
+2. encontre falhas, riscos, inconsistências, bugs reais e bugs potenciais
+3. corrija erros e lógicas erradas
+4. fortaleça os fluxos e módulos
+5. revise todos os botões e ações
+6. revise e padronize logs
+7. elimine comportamentos imprevisíveis
+8. reduza ao máximo a chance de futuros transtornos em produção
+9. entregue a aplicação mais estável, ágil e confiável possível
+
+ESCOPO COMPLETO DA AUDITORIA
+
+1) MAPEAMENTO GERAL DA APLICAÇÃO
+Antes de alterar qualquer coisa:
+- identifique a stack completa
+- identifique estrutura de frontend
+- identifique estrutura de backend
+- identifique banco(s) de dados
+- identifique rotas
+- identifique serviços
+- identifique módulos
+- identifique integrações
+- identifique pontos críticos de operação
+- identifique fluxos principais e secundários
+- identifique dependências frágeis
+- identifique acoplamentos perigosos
+- identifique trechos duplicados
+- identifique código morto ou legado perigoso
+- identifique áreas sem tratamento de erro
+- identifique áreas sem validação
+- identifique pontos com risco de concorrência
+
+Crie uma visão real da aplicação antes de começar a corrigir.
+
+2) AUDITORIA DE MÓDULOS
+Quero revisão completa de todos os módulos existentes.
+Para cada módulo, valide:
+- objetivo funcional
+- fluxo principal
+- fluxos alternativos
+- estados possíveis
+- transições entre estados
+- dependências internas e externas
+- regras de negócio
+- mensagens de erro
+- consistência dos dados
+- navegação entre telas
+- carregamento
+- bloqueios
+- reaberturas
+- cancelamentos
+- exceções
+- retornos inesperados
+- falhas silenciosas
+- inconsistência visual/funcional
+
+Se houver módulo mal estruturado, refatore da melhor forma possível sem quebrar a operação.
+
+3) AUDITORIA DE BOTÕES, AÇÕES E EVENTOS
+Quero uma revisão cirúrgica de TODOS os botões, ícones clicáveis, ações de tabela, ações de card, atalhos, confirmações, submits, filtros, toggles e ações automatizadas do sistema.
+
+Para cada ação, valide:
+- se realmente funciona
+- se está ligada ao endpoint/handler correto
+- se dispara a lógica correta
+- se não dispara múltiplas vezes por clique duplo
+- se possui loading state
+- se possui disabled state quando necessário
+- se possui feedback visual claro
+- se possui tratamento de sucesso
+- se possui tratamento de erro
+- se impede duplicidade de execução
+- se protege contra race condition
+- se atualiza a UI corretamente após execução
+- se sincroniza corretamente com o backend
+- se não deixa tela travada
+- se não deixa estado inconsistente
+- se não deixa dados fantasmas
+- se não causa regressão em outros módulos
+
+Também quero revisão de:
+- botões invisíveis porém clicáveis
+- ações duplicadas
+- ações sem confirmação quando deveriam ter
+- ações com confirmação exagerada e desnecessária
+- ações que parecem funcionar mas falham silenciosamente
+- ações que alteram estado sem refletir na tela
+- ações que dependem de refresh manual
+- ações que funcionam em uma tela mas quebram em outra
+
+Quero eliminar qualquer risco de botão quebrado, ação muda, clique duplo destrutivo, submit duplicado ou evento mal encadeado.
+
+4) AUDITORIA DE LOGS
+Este ponto é prioritário.
+Quero padronização e fortalecimento dos logs da aplicação.
+
+Analise:
+- logs do backend
+- logs do frontend, se existirem
+- logs de integração
+- logs de erro
+- logs de eventos críticos
+- logs de autenticação
+- logs de operações sensíveis
+- logs de falhas de rede
+- logs de banco
+- logs de jobs/processos assíncronos, se existirem
+
+Quero que os logs sejam:
+- úteis para diagnóstico real
+- organizados
+- consistentes
+- com contexto suficiente
+- sem ruído desnecessário
+- sem dados sensíveis expostos
+- sem mensagens vagas
+- sem stack trace perdido
+- sem erro engolido
+
+PADRÃO DE LOG DESEJADO
+Sempre que fizer sentido, registrar:
+- timestamp
+- nível (info, warn, error, debug)
+- módulo
+- ação/evento
+- usuário ou contexto operacional
+- id da entidade relevante (pedido, work unit, item, operador, etc.)
+- request id / correlation id
+- resultado da operação
+- duração da operação
+- mensagem clara
+- stack trace quando houver erro
+- payload sanitizado quando necessário
+
+IMPORTANTE:
+- não registrar senha, token sensível, segredo ou dados indevidos
+- não deixar log genérico tipo “deu erro”
+- não esconder erro real atrás de mensagem vaga
+- não encher o log de ruído inútil
+- diferenciar log operacional de log técnico
+
+Também quero:
+- padronização do formato dos logs
+- melhoria de nomenclatura
+- captura de erros não tratados
+- melhor rastreabilidade de problemas em produção
+- revisão de logs redundantes ou inúteis
+- log de falha de integração com contexto
+- log de erro de regra de negócio com contexto
+- log de timeout/retry/falha de rede
+- log de falha de persistência
+- log de falha em transição de status
+- log de inconsistência detectada
+
+5) AUDITORIA DE LÓGICA DE NEGÓCIO
+Quero revisão minuciosa das lógicas do sistema.
+
+Verifique:
+- validações insuficientes
+- validações erradas
+- regras duplicadas em locais diferentes
+- regras contraditórias entre frontend e backend
+- mudanças de status inválidas
+- estado impossível sendo aceito
+- atualização parcial de dados
+- falta de transação
+- falta de rollback
+- inconsistência em sequência de ações
+- registros órfãos
+- exclusão perigosa
+- dependência implícita de ordem de execução
+- cálculos errados
+- contagens duplicadas
+- filtros errados
+- consultas que retornam dados incorretos
+- comportamento diferente entre tela e API
+- regras que funcionam “por sorte”
+- lógicas frágeis com risco de quebrar em produção
+
+IMPORTANTE:
+Sempre que encontrar lógica errada ou frágil:
+- explique a causa
+- corrija a estrutura
+- valide impacto
+- proteja contra regressão
+- melhore a legibilidade do código
+
+6) AUDITORIA DE FLUXOS END-TO-END
+Quero que você percorra e valide os fluxos reais da aplicação do começo ao fim.
+
+Para cada fluxo crítico, teste:
+- criação
+- edição
+- listagem
+- detalhamento
+- confirmação
+- cancelamento
+- reprocessamento
+- navegação
+- retorno de erro
+- retorno de sucesso
+- estados vazios
+- dados inválidos
+- retry
+- refresh
+- concorrência
+- sessão expirada
+- falha de rede
+- timeout
+- dados parciais
+- usuário sem permissão
+- resposta atrasada
+- ação repetida
+
+Quero especial atenção aos fluxos críticos de operação do WMS, incluindo os módulos mais sensíveis e qualquer rotina que altere status, estoque, separação, conferência, endereçamento, romaneio, movimentação, recebimento, pedidos ou registros operacionais.
+
+7) FRONTEND – ESTABILIDADE E COMPORTAMENTO
+Analise o frontend inteiro e corrija:
+- estados quebrados
+- loading infinito
+- tela vazia sem motivo
+- atualização incorreta após ação
+- erro não exibido
+- erro exibido errado
+- useEffects perigosos
+- chamadas duplicadas
+- race conditions
+- stale state
+- stale response
+- re-render desnecessário
+- sincronização errada com API
+- botões sem proteção
+- falta de debounce/throttle quando necessário
+- componentes mal reutilizados
+- props inconsistentes
+- navegação quebrada
+- filtros que não limpam corretamente
+- paginação errada
+- ordenação inconsistente
+- dados “fantasmas” persistindo na tela
+- seleção indevida entre registros diferentes
+- estado anterior contaminando o próximo fluxo
+
+Também quero:
+- loading states corretos
+- empty states corretos
+- error states corretos
+- disabled states corretos
+- atualização confiável após sucesso
+- feedback claro ao usuário
+- melhor previsibilidade de comportamento
+
+8) BACKEND – ROBUSTEZ E CONFIABILIDADE
+Analise o backend inteiro e corrija:
+- endpoints frágeis
+- validação insuficiente
+- falta de validação de entrada
+- exceções mal tratadas
+- retorno inconsistente
+- códigos HTTP errados
+- duplicidade de lógica
+- concorrência insegura
+- transações ausentes
+- idempotência ausente em ações críticas
+- acoplamento ruim entre serviços
+- falha em rollback
+- queries incorretas
+- queries pesadas
+- tratamento ruim de timeout
+- ausência de retry onde faz sentido
+- retry perigoso onde não deveria existir
+- race conditions
+- atualização parcial de entidade
+- mutação indevida de estado
+- lógica dispersa
+
+Também revisar:
+- contratos de API
+- payloads
+- schemas
+- validações
+- serialização
+- nomenclatura
+- handlers
+- services
+- repositories
+- middlewares
+- permissões
+- autenticação/autorização
+- tratamento global de erro
+
+Quero backend previsível, consistente e fácil de manter.
+
+9) BANCO DE DADOS – CONSISTÊNCIA E PERFORMANCE
+Revisar o banco e a camada de persistência.
+
+Validar:
+- modelagem
+- chaves primárias
+- chaves estrangeiras
+- constraints
+- índices
+- integridade referencial
+- tipos de campo
+- nulabilidade incorreta
+- risco de duplicidade
+- risco de dados órfãos
+- consultas lentas
+- joins desnecessários
+- selects pesados
+- updates perigosos
+- deletes inseguros
+- migrations frágeis
+- falta de migration
+- falta de campo de auditoria quando necessário
+- colunas que deveriam ser indexadas
+- ausência de unicidade em entidade crítica
+- inconsistência entre banco e modelo da aplicação
+
+Se houver gargalo, corrija.
+Se houver risco de integridade, corrija.
+Se houver migration ruim, ajuste.
+Se houver estrutura mal desenhada, melhore com segurança.
+
+10) PERMISSÕES, SESSÃO E SEGURANÇA OPERACIONAL
+Quero revisão de:
+- login
+- logout
+- sessão
+- expiração
+- refresh de credenciais, se houver
+- permissões por módulo
+- permissões por ação
+- proteção de rotas
+- proteção de endpoint
+- acesso indevido por URL direta
+- ações sensíveis sem validação
+- exposição indevida de dados
+- dados visíveis para perfil errado
+- usuário sem permissão conseguindo executar ação
+- falha em troca de usuário
+- cache/estado de usuário contaminando outro usuário
+
+Importante:
+Não quero foco em segurança teórica apenas.
+Quero foco em SEGURANÇA OPERACIONAL REAL do sistema em produção.
+
+11) DESEMPENHO E FLUIDEZ
+A aplicação precisa ficar ágil.
+
+Audite:
+- gargalos no frontend
+- gargalos no backend
+- gargalos no banco
+- N+1 queries
+- chamadas repetidas
+- renderizações desnecessárias
+- filtros lentos
+- tabelas lentas
+- telas com excesso de consultas
+- cálculos em lugar errado
+- loops desnecessários
+- processamento redundante
+- payloads maiores do que o necessário
+- falta de paginação
+- falta de cache onde fizer sentido
+- cache perigoso onde não deveria existir
+
+Quero equilíbrio entre:
+- velocidade
+- consistência
+- confiabilidade
+- rastreabilidade
+
+12) OBSERVABILIDADE E DIAGNÓSTICO
+Quero que a aplicação fique fácil de diagnosticar em produção.
+
+Implemente ou melhore:
+- tratamento global de erro
+- request id
+- correlation id
+- logs úteis
+- mensagens de falha claras
+- rastreamento de operações críticas
+- captura de erro inesperado
+- diferenciação entre erro de negócio e erro técnico
+- contexto suficiente para reproduzir problemas
+
+Se possível na stack atual:
+- centralizar erro de frontend
+- melhorar logging de API
+- padronizar resposta de erro
+- criar pontos de inspeção para falhas críticas
+
+13) TESTES E VALIDAÇÃO
+Quero que você NÃO entregue apenas código alterado.
+Quero validação real.
+
+Faça:
+- testes unitários para lógicas críticas
+- testes de integração para fluxos críticos
+- testes end-to-end/smoke dos fluxos mais sensíveis
+- testes de regressão nas áreas alteradas
+- testes de erro
+- testes de loading
+- testes de concorrência, onde aplicável
+- testes de ações duplicadas
+- testes de permissão
+- testes de transição de status
+- testes de consistência após falha
+
+Se a base atual não tiver testes:
+- crie uma estrutura mínima séria
+- cubra primeiro os fluxos críticos
+- não perca tempo com teste superficial enquanto áreas críticas estiverem frágeis
+
+14) EXPERIÊNCIA DO USUÁRIO EM CASO DE ERRO
+Quero que a aplicação trate falhas de forma madura.
+
+Ao ocorrer erro:
+- o usuário deve entender o que aconteceu
+- a UI não pode ficar travada
+- a tela não pode entrar em estado incoerente
+- o log deve registrar contexto suficiente
+- a ação crítica não pode ser executada parcialmente sem controle
+- a aplicação deve reagir de forma previsível
+
+Revisar:
+- mensagens de erro ruins
+- ausência de feedback
+- toast genérico inútil
+- spinner infinito
+- modal preso
+- botão ativo durante erro
+- sucesso falso
+- falha invisível
+- inconsistência após exceção
+
+15) REFATORAÇÃO E QUALIDADE DE CÓDIGO
+Quero melhoria de qualidade interna do código:
+- nomes mais claros
+- separação de responsabilidades
+- redução de duplicação
+- remoção de código morto
+- remoção de código comentado inútil
+- redução de gambiarras
+- redução de acoplamento
+- melhoria de legibilidade
+- melhoria de manutenibilidade
+- organização mais limpa por domínio/módulo
+- padronização de tratamento de erro
+- padronização de retorno
+- padronização de validação
+- padronização de logs
+
+Não refatore por estética.
+Refatore para robustez, clareza e estabilidade.
+
+16) REGRAS DE EXECUÇÃO
+Quero que você trabalhe em etapas disciplinadas:
+
+FASE 1 – DIAGNÓSTICO COMPLETO
+- mapear arquitetura
+- mapear módulos
+- mapear fluxos
+- listar falhas encontradas
+- classificar por severidade
+- identificar causa raiz
+- identificar riscos de produção
+
+FASE 2 – CORREÇÃO ESTRUTURAL
+- corrigir falhas críticas
+- corrigir lógicas erradas
+- corrigir ações quebradas
+- corrigir logs
+- corrigir concorrência
+- corrigir validações
+- corrigir inconsistências de estado
+- corrigir integração frontend/backend
+
+FASE 3 – HARDENING DE PRODUÇÃO
+- reforçar tratamento de erro
+- reforçar observabilidade
+- reforçar idempotência e transações
+- reforçar feedback de UI
+- revisar performance
+- revisar consistência de banco
+
+FASE 4 – TESTES E PROVA DE ESTABILIDADE
+- testar fluxos críticos
+- testar regressão
+- testar casos de erro
+- testar sessão/permissão
+- testar cliques repetidos
+- testar estados anormais
+- testar cenários de concorrência
+
+FASE 5 – ENTREGA FINAL
+- relatório do que existia
+- o que foi corrigido
+- por que foi corrigido
+- riscos eliminados
+- riscos remanescentes
+- recomendações finais de produção
+- checklist de go-live
+
+17) ENTREGÁVEIS OBRIGATÓRIOS
+Quero receber:
+
+1. Diagnóstico completo da aplicação
+2. Lista de problemas encontrados
+3. Classificação por severidade:
+   - crítico
+   - alto
+   - médio
+   - baixo
+4. Explicação da causa raiz de cada problema relevante
+5. Correções implementadas
+6. Módulos revisados
+7. Botões e ações revisados
+8. Padronização de logs
+9. Melhorias de estabilidade
+10. Melhorias de performance
+11. Melhorias de consistência
+12. Melhorias de UX em erro/loading/sucesso
+13. Testes realizados
+14. Riscos remanescentes
+15. Checklist de publicação oficial
+
+18) CRITÉRIOS DE ACEITAÇÃO
+Só considerar concluído se:
+- a aplicação estiver mais estável e previsível
+- os módulos estiverem consistentes
+- os botões e ações estiverem confiáveis
+- os logs estiverem úteis e padronizados
+- erros críticos tiverem sido corrigidos
+- lógicas frágeis tiverem sido reforçadas
+- houver proteção contra cliques duplicados e estados incoerentes
+- frontend e backend estiverem sincronizados corretamente
+- os fluxos principais estiverem validados
+- a aplicação estiver apta para produção com risco operacional muito menor
+
+19) IMPORTANTE FINAL
+Quero postura crítica e técnica.
+Não quero respostas superficiais.
+Não quero mudanças cosméticas para “parecer melhor”.
+Quero uma aplicação realmente pronta para uso oficial, com revisão profunda, correção de lógica, reforço estrutural e redução máxima de risco operacional.
+
+Se encontrar qualquer falha grave, não contorne.
+Corrija da forma mais robusta possível.
+Se encontrar arquitetura frágil, fortaleça.
+Se encontrar fluxo perigoso, reestruture.
+Se encontrar log inútil, padronize.
+Se encontrar botão frágil, corrija.
+Se encontrar regra errada, ajuste com segurança.
+
+Prioridades absolutas:
+- estabilidade
+- consistência
+- agilidade
+- rastreabilidade
+- confiabilidade
+- operação real sem transtornos
+
+
+Observação crítica:
+Minha prioridade não é “deixar bonito”, e sim “deixar confiável”.
+Quero que você trate esta aplicação como sistema oficial prestes a entrar em produção, então faça uma revisão severa e profissional.
+Prefiro uma refatoração mais profunda e correta do que vários remendos superficiais.
+Toda correção precisa pensar em evitar dor futura, principalmente em módulos, botões, fluxos críticos e logs.
+
+Não quero apenas identificar problemas.
+Quero que você implemente as correções necessárias, valide o funcionamento e me entregue a aplicação endurecida para produção.

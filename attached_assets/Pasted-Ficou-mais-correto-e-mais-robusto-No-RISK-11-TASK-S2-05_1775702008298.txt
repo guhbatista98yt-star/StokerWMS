@@ -1,0 +1,29 @@
+Ficou mais correto e mais robusto.
+
+No RISK-11 / TASK-S2-05, esse refinamento fecha a brecha mais perigosa que ainda existia no fluxo do QtyModal. A documentação do módulo mostra que, hoje, ao confirmar o modal, o cliente já gera msgId, grava contexto em pendingScanContextRef e chama sendScan(workUnitId, barcode, qty, msgId) imediatamente. Ou seja: o scan deixa de ser só “intenção do operador” e já vira uma operação com contexto técnico definido. Se durante o sync você apenas “segura o despacho”, mas deixa a resolução do alvo para depois, reabre exatamente o risco de roteamento errado que o próprio RISK-05 quer eliminar. Congelar workUnitId, orderItemId, itemEpoch, multiplier e barcode no enqueue é a decisão certa.
+
+Também concordo com a regra de rejeição explícita quando esse contexto congelado ficar inválido. A base atual do módulo já trata lock como barreira de segurança e condiciona a operação ao locked_by e ao lock_expires_at. Então, se o sync termina e o lock expirou no intervalo, o melhor comportamento não é “tentar ajustar”; é rejeitar com sync_blocked, logar e tornar investigável. Isso é muito melhor do que qualquer fallback silencioso.
+
+A hierarquia overQtyModalOpen > syncInProgress > normal também faz sentido. O módulo já tem o worker da fila, modais que interrompem o fluxo e o polling suspenso durante processamento; sem uma precedência explícita, cada trecho do código pode interpretar o estado global de um jeito diferente. Formalizar essa ordem evita comportamento inconsistente entre worker, modal e reconexão.
+
+No RISK-12 / TASK-S3-04, padronizar validation_result para todos os 9 casos foi um refinamento excelente. A documentação atual já diferencia vários ack.status no cliente e no servidor, mas o desenho antigo de observabilidade deixaria parte das rejeições com contexto rico e parte dependente de mensagem solta. Isso é ruim para forense. A invariante reason === ack_status resolve isso muito bem, porque permite consulta direta e consistente por motivo, sem depender de texto livre de operador ou de UI.
+
+O ganho maior aqui é prático: com validation_result estruturado para target_mismatch, stale_epoch, lock_expired, already_complete, over_quantity, not_found, error, sync_blocked e os demais casos do ACK, você passa a conseguir responder perguntas reais de operação com evidência:
+“foi roteamento errado?”, “foi epoch antigo?”, “foi lock vencido?”, “foi scan repetido em item já completo?”, “foi bloqueio durante sync?”. Sem isso, o log só prova que falhou; não prova por quê.
+
+Meu parecer final: essas duas mudanças deixaram o backlog tecnicamente mais sólido do que antes.
+Você saiu de:
+
+“vamos segurar scan durante sync”
+para
+“vamos preservar o pacote resolvido e rejeitar explicitamente se ele apodrecer”.
+
+E saiu de:
+
+“vamos logar status de ACK”
+para
+“vamos ter uma taxonomia investigável de rejeições”.
+
+Isso é exatamente o tipo de refinamento que evita bug raro virar lenda de operação.
+
+O único ajuste fino que eu ainda faria é este: no pacote congelado do scan, além de workUnitId, orderItemId, itemEpoch, multiplier e barcode, eu também registraria resolvedAt e syncGeneration. Assim você consegue provar se o scan foi resolvido antes do sync atual e despachado depois dele, o que ajuda muito em análise de incidente.

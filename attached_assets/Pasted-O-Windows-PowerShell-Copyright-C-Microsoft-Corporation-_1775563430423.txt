@@ -1,0 +1,50 @@
+O Windows PowerShell
+Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+
+Instale o PowerShell mais recente para obter novos recursos e aprimoramentos! https://aka.ms/PSWindows
+
+PS C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test> npm run build
+
+> rest-express@1.0.0 build
+> tsx script/build.ts
+
+building client...
+vite v7.3.1 building client environment for production...
+transforming (5) ..\vite\preload-helper.js
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 3501 modules transformed.
+../dist/public/manifest.webmanifest                            0.85 kB
+../dist/public/index.html                                      3.61 kB │ gzip:   1.38 kB
+../dist/public/assets/index-_gJ1hLzd.css                     133.55 kB │ gzip:  21.16 kB
+../dist/public/assets/workbox-window.prod.es5-BIl4cyR9.js      5.76 kB │ gzip:   2.37 kB
+../dist/public/assets/JsBarcode-MgWuNlEw.js                   68.47 kB │ gzip:  14.75 kB
+../dist/public/assets/index-BKxfa1As.js                    2,169.20 kB │ gzip: 610.00 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 15.99s
+
+PWA v1.2.0
+mode      generateSW
+precache  25 entries (4424.60 KiB)
+files generated
+  ../dist/public/sw.js
+  ../dist/public/workbox-1d305bb8.js
+building server...
+
+  dist\index.cjs  1.4mb
+
+Done in 1093ms
+PS C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test> NODE_ENV=production PORT=411 npx tsx server/index.ts
+NODE_ENV=production : O termo 'NODE_ENV=production' não é reconhecido como nome de cmdlet, função, arquivo de script
+ou programa operável. Verifique a grafia do nome ou, se um caminho tiver sido incluído, veja se o caminho está correto
+e tente novamente.
+No linha:1 caractere:1
++ NODE_ENV=production PORT=411 npx tsx server/index.ts
++ ~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (NODE_ENV=production:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test>

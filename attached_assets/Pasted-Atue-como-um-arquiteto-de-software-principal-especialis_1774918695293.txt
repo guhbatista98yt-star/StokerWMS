@@ -1,0 +1,387 @@
+Atue como um arquiteto de software principal, especialista sênior em segurança ofensiva e defensiva, engenharia de performance, confiabilidade, concorrência, integridade transacional, QA, observabilidade e hardening de aplicações críticas de produção.
+
+Sua tarefa é executar uma AUDITORIA TÉCNICA COMPLETA, PROFUNDA E CIRÚRGICA em toda a minha aplicação, com postura de dono técnico responsável por colocar esse sistema em operação real, sob risco operacional e financeiro.
+
+NÃO faça análise superficial.
+NÃO assuma que algo está correto apenas porque aparentemente funciona.
+NÃO aceite gambiarra, paliativo, código frágil, comportamento implícito, fluxo ambíguo, validação incompleta, arquitetura confusa, concorrência mal controlada, tratamento incompleto de erro, ou lógica suscetível a regressões.
+NÃO me entregue opinião genérica.
+NÃO me entregue apenas “melhores práticas”.
+EU QUERO diagnóstico real, causa raiz, risco real, correção real, prevenção real e validação real.
+
+CONTEXTO DO NEGÓCIO E CRITICIDADE:
+Os módulos mais críticos da aplicação são:
+- Separação
+- Conferência
+- Balcão
+
+Esses módulos são o coração do sistema e sustentam a operação prática dos operadores.
+Eles precisam funcionar com:
+- máxima precisão
+- máxima estabilidade
+- máxima agilidade
+- máxima consistência
+- máxima previsibilidade operacional
+
+Qualquer erro nesses módulos pode gerar:
+- separação errada
+- conferência errada
+- entrega errada
+- mistura de pedidos
+- baixa incorreta
+- status incorreto
+- perda de confiança operacional
+- retrabalho
+- prejuízo financeiro
+- falha grave de processo
+
+TRATE COMO CRÍTICO qualquer possibilidade de:
+- pedido aparecer para operador errado
+- pedido ser processado por mais de um operador simultaneamente sem controle
+- item de um pedido contaminar outro pedido
+- estado antigo reaparecer
+- lock não ser liberado corretamente
+- lock ser burlado
+- conclusão indevida
+- conclusão automática sem ação explícita
+- validação insuficiente de item, quantidade, barcode, pedido, operador, empresa ou etapa
+- quantidades excedentes serem aceitas indevidamente
+- múltiplas abas/sessões causarem inconsistência
+- stale state
+- corrida entre frontend/backend
+- atualização tardia sobrescrever estado atual
+- erro de sincronização entre tela, API e banco
+- reprocessamento
+- duplicidade de ação
+- perda de transação
+- rollback incompleto
+- fluxo visual induzir erro humano
+
+OBJETIVO:
+Quero que você revise absolutamente toda a aplicação e aja como um programador sênior extremamente experiente, crítico e rigoroso, encontrando tudo o que um especialista de verdade jamais deixaria passar em um sistema que vai para produção.
+
+ESCOPO OBRIGATÓRIO DA AUDITORIA
+
+1) SEGURANÇA
+Analise profundamente:
+- autenticação
+- autorização
+- segregação por perfil
+- segregação por módulo
+- segregação por empresa
+- controle de acesso quebrado
+- IDOR
+- privilege escalation
+- SQL Injection
+- XSS
+- CSRF
+- SSRF
+- path traversal
+- command injection
+- mass assignment
+- enumeração de registros
+- exposição de endpoints sensíveis
+- vazamento de credenciais
+- segredos hardcoded
+- tokens inseguros
+- sessão insegura
+- cookies inseguros
+- CORS incorreto
+- headers de segurança ausentes
+- rate limit ausente
+- brute force
+- logs expondo dados sensíveis
+- respostas detalhadas demais para o cliente
+- dependências vulneráveis
+- bibliotecas desatualizadas e perigosas
+- armazenamento inseguro no frontend
+- manipulação insegura de localStorage/sessionStorage
+- qualquer dado sensível exposto no client
+
+2) CONCORRÊNCIA, CONSISTÊNCIA E INTEGRIDADE OPERACIONAL
+Analise profundamente:
+- race conditions
+- competição entre operadores
+- inconsistência entre múltiplas sessões
+- múltiplas abas
+- stale responses
+- promises atrasadas contaminando tela atual
+- concorrência sobre o mesmo pedido
+- locking lógico e físico
+- idempotência
+- deduplicação de requisições
+- double click
+- double submit
+- reentrada indevida
+- estados presos
+- estados órfãos
+- estados “fantasma”
+- contaminação de contexto entre pedidos
+- reuso indevido de estado
+- limpeza incompleta ao trocar de pedido
+- avanço de status sem garantia transacional
+- falha de rollback
+- atualização parcial
+- falta de transações em fluxos sensíveis
+- inconsistência entre banco, backend e frontend
+- bugs de fluxo que só aparecem em produção real
+
+3) PERFORMANCE E ESCALABILIDADE
+Audite:
+- gargalos de API
+- gargalos de banco
+- N+1 queries
+- falta de índices
+- consultas mal estruturadas
+- serialização excessiva
+- overfetching
+- processamento desnecessário
+- renderizações excessivas
+- componentes pesados
+- cálculos repetidos sem necessidade
+- polling mal implementado
+- ausência de debounce/throttle quando necessário
+- uso ruim de memória
+- vazamentos de memória
+- tempo de resposta nos módulos críticos
+- comportamento sob carga
+- pontos que podem degradar quando o uso crescer
+
+4) ARQUITETURA E QUALIDADE DE CÓDIGO
+Procure e corrija:
+- funções grandes demais
+- regras de negócio espalhadas
+- duplicação de lógica
+- acoplamento excessivo
+- responsabilidades misturadas
+- controller fazendo regra de negócio
+- frontend decidindo regra crítica indevidamente
+- ausência de camadas claras
+- ausência de contratos fortes
+- tipos frouxos
+- código implícito e difícil de manter
+- nomes ruins
+- tratamento inconsistente de erros
+- falhas de padronização
+- pontos frágeis para manutenção futura
+- código que parece funcionar mas é perigoso
+- trechos que um sênior experiente reescreveria imediatamente
+
+5) BANCO DE DADOS E TRANSAÇÕES
+Verifique:
+- constraints ausentes
+- índices ausentes
+- chaves frágeis
+- inconsistência de status
+- integridade referencial
+- risco de escrita parcial
+- falta de transações
+- falta de isolamento adequado
+- risco de concorrência na persistência
+- estrutura de tabela inadequada para o fluxo operacional
+- campos sem validação
+- inconsistência temporal
+- atualização fora de ordem
+- falhas de auditoria de dados
+
+6) UX OPERACIONAL CRÍTICA
+Analise se a interface induz erro humano.
+Quero que você trate como grave qualquer tela que:
+- permita ambiguidade sobre qual pedido está em uso
+- permita ações perigosas com 1 clique sem proteção
+- não bloqueie requisições duplicadas
+- não sinalize loading corretamente
+- não trate atrasos/reconexão
+- não deixe claro quando uma ação falhou
+- permita usuário acreditar que concluiu algo que não foi salvo
+- permita confusão entre item, quantidade, pedido ou operador
+- não destaque estados críticos
+- não trate corretamente falha de rede
+- não proteja contra ações repetidas
+
+7) OBSERVABILIDADE, AUDITORIA E PRODUÇÃO
+Verifique:
+- logs insuficientes
+- logs excessivos
+- ausência de trilha de auditoria
+- ausência de correlation id
+- dificuldade de rastrear incidente
+- falhas sem contexto suficiente
+- ausência de métricas
+- ausência de alertas
+- ausência de monitoramento dos fluxos críticos
+- baixa capacidade de diagnosticar erro de produção
+
+METODOLOGIA DE EXECUÇÃO
+Quero que você siga esta ordem:
+
+FASE 1 — MAPEAMENTO TOTAL
+- Mapear a arquitetura
+- Identificar módulos
+- Identificar fluxos críticos
+- Identificar dependências
+- Identificar pontos de entrada
+- Identificar pontos de escrita/leitura
+- Identificar regras críticas de negócio
+- Identificar onde Separação, Conferência e Balcão compartilham lógica, estado, validação ou risco
+
+FASE 2 — AUDITORIA PROFUNDA
+- Revisar arquivo por arquivo
+- Revisar endpoints
+- Revisar serviços
+- Revisar hooks/estado/frontend
+- Revisar queries
+- Revisar autenticação/autorização
+- Revisar persistência
+- Revisar sincronização de estado
+- Revisar locks
+- Revisar fluxos transacionais
+- Revisar tratamento de erro
+- Revisar comportamento em cenários extremos
+
+FASE 3 — CLASSIFICAÇÃO DOS PROBLEMAS
+Classifique tudo por severidade:
+- CRÍTICO
+- ALTO
+- MÉDIO
+- BAIXO
+
+Para cada problema encontrado, informe obrigatoriamente:
+1. título
+2. severidade
+3. local exato
+4. descrição objetiva
+5. causa raiz
+6. cenário real de falha
+7. impacto operacional
+8. impacto de segurança
+9. impacto de performance
+10. impacto de manutenção
+11. correção recomendada
+12. prioridade de correção
+13. risco de regressão
+14. necessidade ou não de testes adicionais
+
+FASE 4 — CORREÇÃO CIRÚRGICA
+- Corrija os problemas encontrados
+- Não faça refatoração cosmética sem ganho real
+- Preserve o comportamento correto existente
+- Elimine comportamentos implícitos perigosos
+- Fortaleça validações
+- Fortaleça segregação de acesso
+- Adicione proteções contra concorrência
+- Adicione idempotência onde necessário
+- Adicione transações onde necessário
+- Garanta limpeza de estado
+- Garanta rollback seguro
+- Garanta bloqueio correto de ações críticas
+- Garanta consistência entre frontend, backend e banco
+- Garanta previsibilidade de fluxo
+
+FASE 5 — PROTEÇÃO CONTRA REGRESSÃO
+Crie ou ajuste testes para impedir retorno de bugs.
+Cobertura obrigatória, principalmente em Separação, Conferência e Balcão:
+- fluxo feliz
+- fluxo inválido
+- usuário sem permissão
+- operador concorrente
+- múltiplas abas
+- troca rápida de pedido
+- clique duplo
+- requisição duplicada
+- resposta atrasada
+- falha de rede
+- falha parcial
+- rollback
+- item inválido
+- item excedente
+- pedido errado
+- contaminação de estado entre pedidos
+- lock não liberado
+- lock burlado
+- conclusão indevida
+- regressão de bugs históricos
+- consistência após erro
+
+REGRAS IMPORTANTES
+- Seja conservador em fluxos críticos
+- Onde houver dúvida entre “mais flexível” e “mais seguro”, priorize o mais seguro
+- Onde houver risco de erro operacional, endureça a regra
+- Onde houver risco de concorrência, implemente proteção explícita
+- Onde houver risco de atualização tardia, proteja contra stale state
+- Onde houver risco de reprocessamento, torne a ação idempotente
+- Onde houver risco de estado residual, limpe agressivamente o contexto
+- Onde houver regra de negócio crítica, valide no backend
+- Não confie no frontend para segurança
+- Não aceite implicitamente dados do client
+- Não mantenha lógica crítica espalhada
+- Não deixe brechas para comportamento inconsistente
+
+ENTREGA OBRIGATÓRIA
+Quero ao final:
+
+1. RELATÓRIO TÉCNICO COMPLETO
+Com:
+- resumo executivo
+- arquitetura observada
+- fluxos críticos identificados
+- riscos principais
+- ranking dos maiores problemas
+
+2. LISTA PRIORIZADA DE PROBLEMAS
+Separada por severidade:
+- CRÍTICOS
+- ALTOS
+- MÉDIOS
+- BAIXOS
+
+3. CORREÇÕES APLICADAS
+Para cada correção:
+- o que foi alterado
+- por que foi alterado
+- qual risco eliminou
+- por que a solução escolhida é segura
+
+4. TESTES CRIADOS OU AJUSTADOS
+- quais testes foram adicionados
+- o que protegem
+- contra qual regressão defendem
+
+5. RISCOS RESIDUAIS
+- o que ainda precisa de decisão arquitetural
+- o que não pode ser garantido apenas com código
+- o que deve ser monitorado em produção
+
+6. LISTA DO QUE UM PROGRAMADOR SÊNIOR EXPERT JAMAIS DEIXARIA PASSAR
+Quero uma seção explícita com os erros encontrados que demonstram fragilidade de engenharia, como por exemplo:
+- ausência de validação crítica
+- falta de transação
+- concorrência insegura
+- lógica duplicada e divergente
+- autorização fraca
+- código frágil a regressão
+- fluxo perigoso dependente do frontend
+- estado residual
+- endpoint permissivo
+- performance ruim em fluxo central
+- design inconsistente em áreas críticas
+
+OBJETIVO FINAL
+Deixe a aplicação mais:
+- segura
+- rápida
+- estável
+- previsível
+- auditável
+- robusta
+- resistente a falhas
+- resistente a concorrência
+- resistente a regressões
+- adequada para operação séria
+
+Considere que Separação, Conferência e Balcão são módulos de missão crítica.
+A análise e as correções devem ser executadas com o mesmo rigor que seria aplicado antes de colocar um sistema operacional crítico em produção real.
+
+Não entregue resposta superficial.
+Não pare na primeira melhoria óbvia.
+Vá até o nível que um arquiteto sênior realmente iria em uma revisão séria.

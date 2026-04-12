@@ -1,0 +1,48 @@
+Perfeito. Esse é o próximo passo certo.
+
+A TASK-S1-01 existe para matar o risco de divergência entre pendingDelta e o banco: hoje, quando o servidor retrocede, a UI ainda pode continuar exibindo progresso local e induzir o operador a acreditar que concluiu algo que o banco já não tem. O backlog já define a correção esperada: marcar o item como conflicted, zerar delta local, exibir badge “Rebipar” e bloquear o botão Concluir até a reconciliação via nova bipagem.
+
+Eu começaria com estes 5 cenários de teste, antes de codar:
+
+1. Retrocesso externo simples
+
+Pré-condição: item com separated_qty = 5, UI com baseline confirmado em 5.
+Ação: supervisor executa reset do item por API.
+Esperado: no próximo reconcile, item vira conflicted, delta local do item zera, badge “Rebipar” aparece e Concluir fica bloqueado.
+Esse é o cenário-base do critério de aceite.
+
+2. Retrocesso externo com delta pendente local
+
+Pré-condição: banco em 5, operador bipa +2, UI mostra 7 por pendingDelta, mas ACK ainda não consolidou.
+Ação: antes do ACK/refetch estabilizar, supervisor reseta o item.
+Esperado: o sistema não preserva os +2 como verdade visual; item entra em conflicted, delta local zera, e a tela não continua exibindo 7.
+Esse é o caso mais importante, porque é onde nasce o “erro fantasma”.
+
+3. Rebipagem limpa o conflito
+
+Pré-condição: item já está conflicted.
+Ação: operador rebipa corretamente o produto e recebe ACK success.
+Esperado: clearConflict roda, badge some, item volta ao fluxo normal e Concluir só reabilita se não houver outro item conflitado.
+Esse é o segundo critério central do backlog.
+
+4. ACK success normal não cria regressão
+
+Pré-condição: item sem conflito, fluxo normal de bipagem.
+Ação: operador bipa e recebe ACK success.
+Esperado: comportamento atual continua íntegro, sem badge indevido, sem bloqueio indevido de Concluir, sem limpar estado normal.
+Esse é o terceiro critério de aceite e evita corrigir uma ponta quebrando o fluxo feliz.
+
+5. Múltiplos itens, conflito parcial
+
+Pré-condição: pedido com 3 itens; 2 completos, 1 sofre retrocesso externo.
+Ação: reconcile após reset de apenas um item.
+Esperado: só o item afetado fica conflicted; os demais mantêm estado normal; mesmo assim, Concluir permanece bloqueado por anyConflicted = true.
+Esse teste garante que o bloqueio é global, mas a sinalização é granular por item.
+
+Eu transformaria isso em 3 camadas de teste:
+
+unitário do store: validar reconcile(), transição para conflicted, limpeza de delta e clearConflict.
+integração da página: validar badge, tooltip e botão Concluir.
+E2E controlado: operador em picking + ação externa de supervisor + refetch/reconcile.
+
+A armadilha mais comum aqui é testar só o caso “supervisor resetou e pronto”. O caso que realmente pega operação é o reset concorrendo com delta pendente local. Esse precisa existir desde o primeiro dia, porque é ele que prova que a correção matou a divergência e não só mudou a cor de um card.

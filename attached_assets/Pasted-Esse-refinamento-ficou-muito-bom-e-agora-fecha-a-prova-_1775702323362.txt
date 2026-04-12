@@ -1,0 +1,41 @@
+Esse refinamento ficou muito bom — e agora fecha a prova forense de verdade.
+
+O ponto central é este: resolvedAt e syncGeneration não são enfeite de log; eles viram evidência causal. Sem eles, um sync_blocked só prova que o contexto congelado morreu antes do dispatch. Com eles, você consegue provar quando o contexto foi resolvido e se atravessou um ciclo de sync entre o freeze e o envio. Isso muda a natureza do incidente de “suspeita de corrida” para “corrida comprovada”. Pela arquitetura atual, isso faz total sentido, porque hoje o QtyModal já cria msgId, guarda contexto em pendingScanContextRef e dispara sendScan(...) na confirmação; logo, o ponto de congelamento existe de fato e só estava incompleto como evidência.
+
+Também está certa a sua leitura de investigação real: a pergunta operacional nunca é só “falhou?”, e sim “o operador bipou antes ou depois do sync começar?”. O módulo atual já admite que o sync Python pode fazer work units desaparecerem temporariamente e que as proteções existentes são reativas, como safety redirect, suspensão de polling durante bipagem e atraso de invalidação SSE. Então, se você quer fechar o caso depois, precisa mesmo dos dois eixos: tempo (resolvedAt) e geração (syncGeneration).
+
+No desenho do pacote congelado, eu considero que agora ele fica praticamente no ponto certo se carregar pelo menos:
+
+msgId
+workUnitId
+orderItemId
+itemEpoch
+barcode
+multiplier
+quantity
+resolvedAt
+syncGeneration
+
+Com isso, o worker não “pensa de novo”; ele só despacha ou rejeita. Esse é o comportamento certo para um módulo de operação. A própria fila atual já é serializada e a lógica de resolução do alvo acontece antes da confirmação do modal; então transformar essa resolução em pacote imutável é a continuação natural da arquitetura.
+
+O refinamento no validation_result também ficou cirúrgico. Padronizar reason === ack_status e exigir payload estruturado em todos os casos evita o pior erro de observabilidade: metade dos eventos com JSON consultável e metade escondida em message livre. Isso é especialmente importante porque hoje o módulo já trabalha com múltiplos ack.status (success, already_complete, not_found, over_quantity, error etc.) e a infraestrutura de scan ainda mostra uma transição entre mecanismos mais frágeis, como deduplicação em memória, e mecanismos persistentes propostos no backlog. Se o schema do log não for uniforme, a investigação quebra exatamente nos casos raros.
+
+Minha conclusão técnica:
+
+Sim, resolvedAt + syncGeneration fecham o quadro.
+Eles completam o que faltava para:
+
+provar ordem temporal,
+provar travessia de ciclo de sync,
+separar erro de operador de corrida sistêmica,
+sustentar análise forense sem depender de memória humana.
+
+A única observação fina que eu faria é esta: no validation_result.sync_blocked, além de resolved_at, sync_generation_at_freeze e sync_generation_current, eu colocaria também lock_expires_at_at_dispatch ou ao menos um booleano lock_valid_at_dispatch. O motivo é simples: hoje a barreira de segurança do módulo também depende do lock e da expiração dele. Então, quando um scan congelado for rejeitado, você quer distinguir claramente:
+
+“foi bloqueado porque atravessou sync”
+de
+“atravessou sync e, além disso, o lock já tinha morrido”.
+
+Tem um detalhe importante de honestidade técnica: nos arquivos indexados que eu consigo ver aqui, esses dois campos novos ainda não aparecem refletidos nas versões carregadas do backlog/doc — o material pesquisável ainda mostra a versão anterior, com proteções de sync reativas e payloads mais curtos. Então eu estou validando o desenho da mudança, não confirmando a propagação textual final dentro dos arquivos já indexados nesta conversa.
+
+Meu veredito final: essa rodada foi a que transformou o RISK-11/RISK-12 de “bom desenho” em desenho auditável. Isso é coisa de sistema que quer sobreviver a incidente real, não só passar em review.

@@ -1,0 +1,56 @@
+
+===================================================================
+  STOKER SYNC  |  2026-04-07 09:41:51  |  modo=serve · SO=Windows
+===================================================================
+
+
+------------------------------------------------------
+  VERIFICANDO SCHEMA DO BANCO
+------------------------------------------------------
+[09:41:51] -   Todas as 33 tabelas já existem
+[09:41:52] -   Todas as colunas verificadas — nada a adicionar
+[09:41:52] -   Índices verificados
+[09:41:52] + Schema verificado com sucesso
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[09:41:52] > DB2 — conectando...
+[09:41:52] + DB2 — conectado em 0.13s
+[09:41:52] + PostgreSQL local — conectado
+[09:41:52] > Orçamentos — buscando últimos 31 dias...
+[09:42:12] + Orçamentos — 26362 obtidos · 26361 removidos (>=2026-03-06) · 26362 inseridos · 0 erros · 20.4s
+[09:42:15] + Transformação — 4950 pedidos · 0 produtos novos · 2 itens novos · 3.0s
+[09:42:15] > Estoque — sincronizando do ERP...
+[09:42:18] + Estoque — 22001 obtidos · 7097 atualizados · 0 erros · 2.8s
+[09:42:18] > Box Barcodes — sincronizando...
+[09:42:18] + Box Barcodes — 332 produtos atualizados · 0.4s
+[09:42:18] > Endereços WMS — sincronizando...
+[09:42:19] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[09:42:19] > NFs Recebimento — sincronizando...
+[09:42:21] + NFs Recebimento — 464 NFs · 0 novas · 464 atualizadas · 4157 itens · 2.6s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=29.6s
+------------------------------------------------------
+
+[09:42:21] + Loop de sync em background (300s)
+
+------------------------------------------------------
+  INICIANDO SERVIDOR WEB
+------------------------------------------------------
+[09:42:22] + Servidor disponível em → http://localhost:411
+Seeding database...
+Checking for existing users...
+Existing users count: 14
+Database already seeded
+9:42:24 AM [express] [Routes] Registering routes...
+9:42:24 AM [print] [agent] WebSocket server iniciado em /ws/print-agent
+9:42:24 AM [express] [scanning-ws] WebSocket scanning server iniciado em /ws/scanning
+9:42:24 AM [print] 7 impressora(s) carregada(s) | padrão: "CutePDF Writer (1 redirecionada)"
+9:42:24 AM [express] Servidor iniciado na porta 411
+9:42:29 AM [express] [Auto-Sync] Triggering DB sync...
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+9:42:54 AM [express] [Sync] Sincronização concluída.
+9:42:54 AM [print] 7 impressora(s) carregada(s) | padrão: "CutePDF Writer (1 redirecionada)"

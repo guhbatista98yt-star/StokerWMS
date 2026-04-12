@@ -1,0 +1,41 @@
+Boa evolução. Mas sendo bem sênior e bem sincero: Sprint 1 ainda não está 100% fechada no nível de causa raiz. Duas tasks ficaram muito boas ou quase boas; duas ainda estão só parcialmente resolvidas. O backlog foi explícito que Sprint 1 só conta como pronta quando mata os caminhos de divergência silenciosa, não quando só melhora a UX do erro.
+
+S1-01 — ficou bem encaminhada e, em essência, correta.
+O que você descreveu bate quase exatamente com o desenho exigido: zerar delta local quando o servidor retrocede, marcar conflito, limpar com clearConflict() após ACK success, mostrar badge “Rebipar” e bloquear “Concluir” enquanto existir item conflitado. Isso é exatamente o antídoto para o erro fantasma de pendingDelta vs banco.
+
+Meu único cuidado aqui é fino, mas importante: a regra original era comparar serverValue < lastConfirmedBaseline. Você descreveu como advanced < 0. Pode ser equivalente, mas só se o cálculo de advanced estiver 100% ancorado na baseline confirmada, e não em algum valor já contaminado por delta local ou refetch fora de ordem. Se isso estiver correto, eu considero S1-01 tecnicamente boa. Se não estiver, existe o risco de conflito falso ou de um retrocesso real passar batido. O CT-02 é o teste que separa “parece certo” de “está certo”: reset externo concorrendo com delta pendente local. Sem esse cenário passar, eu não homologaria.
+
+S1-02 — para mim, ainda não está resolvida de verdade.
+Aqui está a principal divergência entre o que foi pedido e o que foi implementado. O backlog não pediu “parar de engolir erro no front”; ele pediu uma de duas coisas: ou dedução dentro da mesma transação de finalizeWorkUnits, ou fila persistida de compensação visível para supervisor. O problema descrito é estrutural: conclusão e dedução podem divergir no banco. Mover o deductAddress para o main try/catch no separacao/index.tsx melhora a visibilidade para o operador, mas não garante atomicidade. Se finalizeWorkUnits já concluiu e depois deductAddress falha, o pedido pode já ter ido para conferência com endereço ainda intacto. Você bloqueou a continuação da tela, mas pode não ter bloqueado a inconsistência no banco.
+
+Em outras palavras: esse fix é uma mitigação de UX, não a correção estrutural pedida. O risco deixa de ser silencioso para o operador, mas continua podendo existir no servidor. Para eu considerar S1-02 resolvida, a dedução precisa entrar na transação do finalizeWorkUnits ou ir para uma fila persistida com reprocesso e visibilidade. Do jeito que você descreveu, eu marcaria como parcial.
+
+S1-03 — melhorou bastante, mas ainda está incompleta.
+Separar expiredScanQueue da fila normal é o passo correto. Isso elimina o descarte silencioso puro, que era o coração do RISK-03. Só que o backlog exigia mais: banner obrigatório, lista dos scans, decisão por scan, botão “Rebipar manualmente”, botão “Ignorar” com confirmação, log de auditoria e bloqueio do picking até revisar tudo. Pelo que você descreveu, hoje existe um banner âmbar com contagem e um botão “Dispensar”. Isso ainda é perigoso, porque “Dispensar” pode virar um descarte em massa com nome diferente.
+
+Aqui o ponto não é estético; é operacional. O backlog diz explicitamente que, com scan expirado, o picking deve ficar bloqueado até revisão completa, e que o caso crítico é justamente impedir que scan expirado passe reto ou suma sem revisão. Se existe um botão único de dispensa sem revisão por item, sem confirmação individual e sem log, então o risco crítico foi atenuado, mas não encerrado. Eu chamaria de 50–60% concluído.
+
+S1-04 — conceitualmente está forte, mas tem uma condição obrigatória.
+Criar scan_log, usar INSERT ... ON CONFLICT DO NOTHING, manter cleanup periódico e preservar também um fast path em memória é uma boa arquitetura. O Map em memória pode continuar existindo como otimização; o banco é que passa a ser a fonte real de idempotência. Isso está alinhado com o espírito da task.
+
+Mas aqui tem um detalhe decisivo: o backlog foi claro que a persistência do msgId precisa acontecer na mesma transação do UPDATE separated_qty. Se o seu insertScanLogDedup() estiver fora da mesma transação, ainda restam dois bugs feios:
+se gravar o scan_log e cair antes do UPDATE, você perde uma bipagem legítima para sempre;
+se fizer o UPDATE e cair antes de gravar o scan_log, você volta a aceitar replay após restart.
+Então, S1-04 só está realmente pronta se o INSERT ON CONFLICT DO NOTHING e o UPDATE do item forem atômicos juntos. O CT-02 da task — replay após restart de servidor — é o teste que prova isso.
+
+Tem mais um ponto: o backlog original definia uma janela explícita de 24h para idempotência, com testes de cleanup para <24h e >24h. Você implementou 7 dias. Isso não é errado por si só, mas é uma mudança de contrato, não um detalhe. Precisa estar documentado porque altera comportamento operacional e debug. Um msgId reciclado por bug de cliente, relógio torto ou reinstalação vai ficar bloqueado por mais tempo do que o originalmente previsto.
+
+Meu veredito final de Sprint 1:
+S1-01: aprovável, se CT-02 e CT-05 passaram.
+S1-02: não homologada ainda; ficou visível, mas não transacional.
+S1-03: parcial; removeu descarte silencioso bruto, mas não criou reconciliação obrigatória por item.
+S1-04: potencialmente aprovada, mas só se scan_log e UPDATE estiverem na mesma transação e o teste de restart tiver passado.
+
+Se eu estivesse assinando isso como programador sênior responsável pela operação, eu diria: você reduziu bem o risco da Sprint 1, mas ainda não pode declarar “4 bugs fixed” no sentido estrito. A formulação mais honesta seria:
+“S1-01 concluído; S1-04 quase concluído/depende de atomicidade validada; S1-02 e S1-03 mitigados, porém ainda não encerrados conforme backlog original.”
+
+O que eu faria agora, sem desviar para Sprint 2:
+
+mover S1-02 para o servidor e fechar atomicidade de verdade;
+transformar S1-03 em reconciliação obrigatória por item, sem ‘dispensar tudo’;
+rodar e guardar prova dos CT-02 de S1-01 e S1-04, porque são eles que separam correção real de correção aparente.

@@ -1,0 +1,8 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5000/C:\\Users\\Micro\\Desktop\\StokerWMS\\GLA_WMS_Test",
+  "loginUser": "admin",
+  "loginPassword": "1234"
+}

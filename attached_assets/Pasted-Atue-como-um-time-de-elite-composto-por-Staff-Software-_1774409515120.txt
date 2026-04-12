@@ -1,0 +1,325 @@
+Atue como um time de elite composto por:
+- Staff Software Engineer
+- Software Architect
+- Senior QA Engineer
+- Security Engineer
+- Performance Engineer
+- DevOps/SRE
+- Product-minded Reviewer
+
+Sua missão é executar uma auditoria técnica completa, profunda e implacável em toda a minha aplicação, corrigindo tudo o que impediria esse produto de ser considerado limpo, robusto, rápido, seguro, preciso, estável e pronto para produção.
+
+Contexto:
+- A aplicação já passou pela etapa de design/UI/UX
+- Agora quero uma fase final de validação técnica total
+- Seu papel não é apenas encontrar problemas, mas corrigir, fortalecer e polir a aplicação até um padrão que um engenheiro sênior realmente aprovaria
+- Quero o máximo de rigor técnico possível
+
+Objetivo principal:
+Revisar toda a aplicação ponta a ponta, identificar qualquer falha funcional, técnica, estrutural, visual, lógica, de performance, segurança, confiabilidade, escalabilidade, testabilidade e manutenção, e corrigir tudo o que for possível para deixar o sistema em nível de produção real.
+
+Mentalidade obrigatória:
+Trate esta aplicação como se ela fosse ser lançada para clientes pagantes, investidores, auditoria técnica e alta escala.
+Pense como alguém responsável por aprovar ou bloquear o deploy em produção.
+Se existir qualquer ponto fraco que possa virar bug, falha de segurança, lentidão, inconsistência, fragilidade ou rejeição em code review, você deve encontrar e corrigir.
+
+Escopo da auditoria:
+
+1. Correção funcional completa
+Analise toda a lógica da aplicação e encontre:
+- bugs explícitos e ocultos
+- fluxos quebrados
+- condições incorretas
+- edge cases ignorados
+- validações incompletas
+- comportamentos inconsistentes
+- estados inválidos
+- regressões visuais ou funcionais
+- falhas de integração entre telas, componentes, APIs e banco
+
+Verifique especialmente:
+- criação, leitura, edição e exclusão de dados
+- autenticação
+- autorização
+- navegação
+- filtros
+- busca
+- formulários
+- persistência
+- sessões
+- tratamento de erro
+- feedbacks ao usuário
+- estados vazios, loading e falha
+
+2. Revisão total de qualidade de código
+Encontre e corrija:
+- código duplicado
+- funções grandes demais
+- componentes confusos
+- baixa coesão
+- alto acoplamento
+- nomes ruins
+- estrutura desorganizada
+- lógica espalhada
+- más práticas do framework
+- código frágil
+- trechos difíceis de manter
+- tipagem ruim ou ausente
+- abstrações erradas
+- dependências desnecessárias
+- complexidade acidental
+
+Aplique princípios de:
+- clean code
+- legibilidade
+- separação de responsabilidades
+- modularidade
+- previsibilidade
+- manutenção simples
+- escalabilidade sustentável
+
+3. Performance e eficiência
+Investigue e corrija:
+- renderizações desnecessárias
+- consultas ineficientes
+- loops pesados
+- reprocessamentos evitáveis
+- N+1 queries
+- gargalos de rede
+- gargalos de banco
+- gargalos de I/O
+- uso excessivo de memória
+- chamadas redundantes
+- cache ausente ou mal aplicado
+- debounce/throttle ausentes quando necessários
+- operações síncronas bloqueantes
+- carregamento excessivo de assets
+- componentes pesados
+- lentidão percebida no uso
+
+Otimize tanto:
+- performance real
+- quanto performance percebida pelo usuário
+
+4. Segurança completa
+Faça uma revisão de segurança séria e corrija:
+- SQL Injection
+- XSS
+- CSRF
+- SSRF
+- command injection
+- path traversal
+- broken access control
+- autenticação fraca
+- autorização inadequada
+- exposição de segredos
+- tokens inseguros
+- validação insuficiente de entrada
+- sanitização ausente
+- upload inseguro
+- serialização insegura
+- dependências vulneráveis
+- configuração insegura
+- headers de segurança ausentes
+- rate limiting ausente quando necessário
+- falhas de sessão
+- armazenamento inseguro de dados sensíveis
+
+Assuma que qualquer input do usuário pode ser malicioso.
+
+5. Estabilidade, confiabilidade e resiliência
+Analise e fortaleça:
+- tratamento de erros
+- retries inadequados
+- falhas silenciosas
+- estados inconsistentes
+- race conditions
+- concorrência insegura
+- deadlocks
+- timeouts ausentes
+- fallback inexistente
+- fluxos frágeis
+- dependência excessiva de ordem de execução
+- falhas sob uso inesperado
+- falta de idempotência onde necessário
+
+Garanta comportamento previsível mesmo em cenários ruins.
+
+6. Banco de dados e integridade de dados
+Revise:
+- modelagem
+- queries
+- índices
+- constraints
+- relacionamentos
+- consistência dos dados
+- transações
+- paginação
+- ordenação
+- deduplicação
+- migrações
+- rollback
+- integridade referencial
+- regras de negócio persistidas incorretamente
+
+Corrija qualquer risco de:
+- perda de dados
+- corrupção
+- inconsistência
+- baixa performance
+- duplicidade
+- leitura incorreta
+
+7. Frontend, UX funcional e acabamento de produção
+Mesmo após o redesign, valide:
+- consistência entre telas
+- responsividade real
+- comportamento mobile
+- navegação fluida
+- inputs e formulários
+- mensagens de erro
+- feedback visual
+- estados vazios
+- estados de loading
+- acessibilidade básica real
+- clareza dos CTAs
+- prevenção de erro do usuário
+- travamentos visuais
+- glitches
+- desalinhamentos
+- problemas de layout
+- comportamento em diferentes tamanhos de tela
+
+Encontre tudo o que pareça amador, frágil ou inacabado.
+
+8. APIs, integrações e contratos
+Valide:
+- contratos entre frontend e backend
+- payloads
+- status codes
+- mensagens de erro
+- validação de entrada e saída
+- tratamento de exceções
+- consistência de schema
+- compatibilidade entre camadas
+- integração com serviços externos
+- tratamento de indisponibilidade
+- retries e timeouts
+- logs de falhas
+- parsing seguro
+
+9. Testes e garantia de qualidade
+Não apenas analise: fortaleça a cobertura.
+Crie, ajuste ou recomende testes para:
+- fluxos críticos
+- regras de negócio
+- edge cases
+- regressões
+- validações
+- APIs
+- autenticação
+- permissões
+- componentes importantes
+- integrações principais
+
+Priorize:
+- testes unitários
+- testes de integração
+- testes end-to-end dos fluxos críticos
+
+Se existirem testes frágeis, corrija.
+
+10. Observabilidade e prontidão para produção
+Verifique e melhore:
+- logs úteis e limpos
+- rastreamento de erros
+- mensagens de debug vazando em produção
+- monitoramento
+- métricas
+- diagnósticos
+- configuração por ambiente
+- variáveis sensíveis
+- build
+- deploy
+- CI/CD
+- scripts
+- health checks
+- readiness/liveness quando fizer sentido
+- documentação mínima operacional
+
+11. Dependências, configuração e higiene técnica
+Revise:
+- dependências obsoletas
+- bibliotecas desnecessárias
+- versões inseguras
+- conflitos
+- configuração de ambiente
+- arquivos sensíveis
+- scripts quebrados
+- inconsistências entre dev/staging/prod
+- problemas de lint
+- problemas de build
+- warnings importantes
+- debt técnico crítico
+
+12. Critério de reprovação sênior
+Quero que você procure tudo o que faria um desenvolvedor sênior reprovar este projeto, incluindo:
+- decisões técnicas ruins
+- arquitetura frágil
+- código difícil de manter
+- inconsistência estrutural
+- segurança negligenciada
+- baixa confiabilidade
+- baixa escalabilidade
+- má experiência de uso
+- baixa clareza
+- baixa robustez
+- baixo padrão de produção
+
+Regras de execução:
+- Não se limite a listar problemas: corrija o máximo possível
+- Trabalhe sobre a base inteira, não apenas trechos isolados
+- Priorize por severidade: crítica, alta, média e baixa
+- Explique de forma objetiva o motivo de cada correção
+- Preserve a regra de negócio
+- Evite mudanças cosméticas sem impacto real
+- Quando houver mais de uma abordagem, escolha a mais robusta, segura e sustentável
+- Quando faltar contexto, declare a suposição e siga com a melhor decisão técnica
+- Elimine o que estiver frágil, redundante, inseguro, lento ou mal estruturado
+- Deixe o código mais limpo, mais simples e mais confiável
+- Pense em produção, manutenção e escala
+
+Modo de atuação obrigatório:
+1. Auditar
+2. Encontrar falhas
+3. Priorizar falhas
+4. Corrigir
+5. Refatorar com critério
+6. Validar impacto das mudanças
+7. Fortalecer testes
+8. Preparar para produção
+
+Formato da resposta:
+1. Resumo executivo da saúde atual da aplicação
+2. Problemas encontrados por severidade
+3. Correções aplicadas
+4. Arquivos afetados e o que mudou em cada um
+5. Riscos eliminados
+6. Melhorias de performance aplicadas
+7. Correções de segurança aplicadas
+8. Testes criados, ajustados ou recomendados
+9. Pendências que ainda exigem decisão humana
+10. Checklist final de prontidão para produção
+
+Critério final:
+Só considere a aplicação aprovada quando ela estiver:
+- funcionalmente consistente
+- visualmente acabada
+- tecnicamente limpa
+- rápida
+- segura
+- previsível
+- estável
+- bem estruturada
+- com baixo risco de regressão
+- com padrão de qualidade que um engenheiro sênior aceitaria colocar em produção

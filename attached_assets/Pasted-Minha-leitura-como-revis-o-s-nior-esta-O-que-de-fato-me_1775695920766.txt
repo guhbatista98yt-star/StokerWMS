@@ -1,0 +1,115 @@
+Minha leitura, como revisão sênior, é esta:
+
+O que de fato melhora muito
+
+1) Não zerar separated_qty automaticamente
+Essa era uma falha grave mesmo. Se agora o servidor rejeita o excesso sem apagar progresso válido, essa correção é grande e reduz muito o risco de “perdi tudo do nada”.
+
+2) Não restaurar todos os locks antigos automaticamente
+Também era uma correção central. O novo comportamento de ficar em seleção e pedir que o operador escolha o que retomar é muito mais seguro e previsível.
+
+Então, sim: os dois riscos mais perigosos que eu tinha apontado parecem ter sido atacados corretamente.
+
+Onde eu concordo parcialmente com o Replit
+
+Dupla captura de scan
+Se o useBarcodeScanner realmente intercepta em capture e faz stopPropagation() antes do React bubble do ScanInput, então esse risco cai bastante. Nesse caso, eu rebaixaria mesmo.
+
+Cache local vs banco na escolha do item
+Aqui eu faria um ajuste no texto deles:
+isso pode até não gerar perda de dados, porque o servidor valida atomicamente, mas ainda pode gerar confusão operacional temporária. Então eu classificaria assim:
+
+não é mais risco de integridade
+continua sendo risco de UX/fluidez, porém aceitável
+
+Ou seja: eu não chamaria de “invalidação total”, e sim de risco residual aceitável.
+
+O que ainda falta e continua importante
+
+Tem 3 pontos do veredito deles, mas tem mais 2 que eu não deixaria passar:
+
+1) Abandonar coleta sem confirmação
+
+Esse, para mim, continua alto e não apareceu na resposta deles.
+Se ainda existe botão destrutivo que abandona/reseta na hora, isso pode sim ser confundido com bug e gerar perda operacional por clique acidental.
+
+Esse ponto precisa de:
+
+modal de confirmação forte;
+texto explícito do impacto;
+idealmente separar “Sair da tela” de “Abandonar coleta”.
+2) Deduplicação só em memória
+
+No MD original, a deduplicação de msgId fica em Map com TTL de 5 min no processo WebSocket. Se o servidor reiniciar, essa proteção some.
+
+Isso não é bloqueio absoluto para rodar, mas eu classificaria como:
+
+médio em produção;
+alto se houver instabilidade de servidor/redeploy frequente.
+3) Fila offline descarta scans > 5 min sem surfacear
+
+Concordo com eles: continua válido.
+Mas eu subiria de “detalhe futuro” para médio, porque não depende só de internet ruim — aba travada, coletor dormindo, navegador minimizado ou reconexão ruim podem ativar isso.
+
+4) Conflito do pendingDeltaStore invisível
+
+Correto também. Não é necessariamente bug de banco, mas é um problema de confiança operacional. Operador precisa saber quando a tela entrou em estado reconciliado/conflitante.
+
+5) Redirect / recuperação de sessão
+
+Se agora existe banner amarelo e não entra mais sozinho em picking, melhorou bastante. Eu deixaria esse como melhoria importante, não mais bloqueante.
+
+Meu parecer objetivo
+Pode lançar agora?
+
+Talvez, mas só se 3 condições forem verdadeiras:
+
+essas duas correções realmente estão no código e não só descritas;
+“abandonar coleta” já estiver corrigido com confirmação forte;
+vocês fizerem uma bateria mínima de homologação antes do go-live.
+
+Se o botão de abandono ainda fecha/reseta sem confirmar, eu não lançaria.
+
+O que eu pediria ao Replit agora
+
+Não pediria apenas “outro MD explicando funcionamento”.
+
+Eu pediria um MD de homologação com prova, contendo:
+
+lista das correções aplicadas;
+arquivo e função alterados;
+comportamento antes/depois;
+cenários de teste executados;
+resultado esperado vs resultado real;
+evidência de que não perde coleta nem mistura pedidos.
+Cenários mínimos que eu exigiria testar
+
+Antes de liberar, eu testaria estes 8:
+
+iniciar coleta, dar refresh na página, retomar sessão;
+fechar aba no meio da coleta e reabrir;
+cair conexão por alguns minutos e voltar;
+bipar muito rápido o mesmo item várias vezes;
+bipar acima da quantidade;
+deixar locks antigos no banco e abrir o módulo;
+clicar sem querer em abandonar coleta;
+dois operadores atuando próximos no mesmo conjunto de pedidos/seções.
+
+Se esses 8 passarem bem, aí sim eu começo a confiar para produção.
+
+Conclusão curta
+
+O quadro agora mudou de:
+
+“não lançar”
+
+para
+
+“lançar só após homologação dirigida e com abandono corrigido”.
+
+As duas correções principais foram muito boas.
+Mas eu ainda não daria go-live cego sem:
+
+corrigir/validar o abandono;
+validar deduplicação/reconexão;
+pedir um MD de homologação com evidência real.

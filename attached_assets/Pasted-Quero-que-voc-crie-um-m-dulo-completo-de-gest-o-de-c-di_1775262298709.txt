@@ -1,0 +1,365 @@
+Quero que você crie um módulo completo de gestão de códigos de barras para minha aplicação WMS, pensado para uso real em operação, com foco em cadastro, alteração, coleta rápida e vínculo entre código unitário e código de embalagem.
+
+CONTEXTO
+Eu quero usar meu próprio banco e meus próprios dados para agilizar:
+- cadastro de códigos de barras
+- alteração de códigos existentes
+- coleta operacional
+- conferência
+- separação
+
+O módulo deve permitir trabalhar com:
+1. código de barras unitário
+2. código de barras de embalagem fechada
+3. múltiplos códigos de embalagem para o mesmo produto, variando conforme a quantidade da embalagem
+
+EXEMPLOS DO QUE PRECISO
+Um mesmo produto pode ter:
+- 1 código unitário
+- 1 código de caixa com 6 unidades
+- 1 código de fardo com 12 unidades
+- 1 código de embalagem com 24 unidades
+
+Ou seja:
+o sistema precisa permitir cadastrar vários códigos por produto, cada um com sua quantidade de unidades correspondente.
+
+OBJETIVO DO MÓDULO
+Quero um módulo funcional, rápido, seguro e prático para:
+- cadastrar código unitário
+- cadastrar código de embalagem
+- alterar código unitário
+- alterar código de embalagem
+- vincular quantidade da embalagem
+- permitir coleta operacional por leitura ou digitação
+- substituir o código ativo atual ao salvar, sem deixar o sistema inconsistente
+- manter histórico da alteração para auditoria e segurança operacional
+
+IMPORTANTE
+Não quero uma solução simplista onde um produto tenha apenas um código.
+Quero uma estrutura correta, porque um produto pode ter:
+- mais de um código válido
+- embalagem com quantidades diferentes
+- troca de código ao longo do tempo
+- necessidade de correção operacional rápida
+
+REGRAS FUNCIONAIS DO MÓDULO
+
+1) CADASTRO DE CÓDIGO UNITÁRIO
+O módulo deve permitir cadastrar ou alterar o código de barras unitário do produto.
+
+Campos mínimos:
+- empresa, se aplicável
+- produto
+- descrição do produto
+- código interno do produto
+- código de barras unitário
+- status do código (ativo/inativo)
+- observação opcional
+- usuário responsável
+- data/hora do cadastro ou alteração
+
+2) CADASTRO DE CÓDIGO DE EMBALAGEM
+O módulo deve permitir cadastrar um ou mais códigos de embalagem para o mesmo produto.
+
+Campos mínimos:
+- empresa, se aplicável
+- produto
+- descrição do produto
+- código interno do produto
+- código de barras da embalagem
+- quantidade de unidades contidas naquela embalagem
+- tipo da embalagem, se fizer sentido (caixa, pacote, fardo, display, master etc.)
+- status do código (ativo/inativo)
+- observação opcional
+- usuário responsável
+- data/hora do cadastro ou alteração
+
+3) MÚLTIPLOS CÓDIGOS POR QUANTIDADE DIFERENTE
+Quero possibilidade de cadastrar diferentes códigos de embalagem para diferentes quantidades do mesmo produto.
+
+Exemplo:
+Produto X:
+- unitário: 789000000001
+- embalagem 6 unidades: 789000000002
+- embalagem 12 unidades: 789000000003
+- embalagem 24 unidades: 789000000004
+
+Isso deve ser tratado nativamente pelo módulo, sem gambiarra.
+
+4) ALTERAÇÃO / SUBSTITUIÇÃO DE CÓDIGO
+Quero possibilidade de alterar código unitário ou de embalagem.
+
+Mas atenção:
+- não quero exclusão cega
+- não quero perder rastreabilidade
+- não quero apagar histórico importante
+
+REGRA CORRETA:
+Ao salvar uma alteração:
+- o código novo passa a ser o ativo
+- o código anterior deve ser desativado ou versionado
+- deve ficar registrado histórico da mudança
+- deve registrar quem alterou
+- deve registrar quando alterou
+- deve registrar qual era o valor anterior e qual passou a ser o novo
+
+Se existir hoje lógica que simplesmente sobrescreve o valor antigo sem histórico, corrija isso.
+
+5) MODO DE COLETA OPERACIONAL / CADASTRO RÁPIDO
+Quero uma tela operacional rápida para separador ou conferente fazer o vínculo dos códigos de forma ágil.
+
+Fluxo desejado:
+1. bipar ou informar o código unitário
+2. em seguida bipar ou informar o código da embalagem
+3. informar a quantidade daquela embalagem
+4. salvar
+5. ao salvar, o vínculo ativo existente daquela combinação deve ser substituído corretamente, sem duplicidade inconsistente
+
+IMPORTANTE:
+Esse fluxo precisa ser rápido e pensado para operação real, com:
+- foco automático nos campos
+- suporte a leitor que funciona como teclado
+- avanço rápido entre campos
+- possibilidade de digitar manualmente
+- validação imediata
+- feedback claro de sucesso ou erro
+- sem telas pesadas
+
+6) COMPORTAMENTO AO SALVAR
+Ao salvar no modo operacional:
+- se não existir vínculo anterior, criar
+- se já existir vínculo equivalente, atualizar corretamente
+- se houver outro código ativo conflitante para a mesma regra, substituir/desativar conforme regra definida
+- nunca deixar duplicidade incoerente
+- nunca deixar o produto sem consistência
+
+7) REGRAS DE VALIDAÇÃO
+Implementar validações obrigatórias:
+
+VALIDAÇÕES GERAIS
+- código de barras não pode ser vazio
+- quantidade da embalagem deve ser inteira e maior que zero
+- produto deve existir
+- empresa deve ser respeitada, se houver segregação por empresa
+- campos obrigatórios devem ser validados no backend e frontend
+
+VALIDAÇÕES DE CONSISTÊNCIA
+- o mesmo código de barras não pode ficar ativo para produtos diferentes, salvo se existir uma regra explícita permitindo isso
+- não permitir duplicidade ativa do mesmo código para o mesmo produto
+- não permitir embalagem com quantidade zero ou negativa
+- não permitir cadastrar embalagem igual ao unitário sem confirmação e validação de regra
+- validar tamanho e formato do código conforme necessário, mas sem bloquear códigos válidos atípicos se a operação realmente usar
+
+VALIDAÇÕES OPERACIONAIS
+- impedir salvar duas vezes por clique duplo
+- impedir conflito de atualização
+- impedir estado inconsistente entre frontend e backend
+- mostrar mensagem clara quando houver duplicidade ou conflito
+
+8) HISTÓRICO / AUDITORIA
+Quero histórico completo das alterações.
+
+Registrar no mínimo:
+- produto
+- código antigo
+- código novo
+- tipo do código (unitário ou embalagem)
+- quantidade da embalagem, quando aplicável
+- usuário que alterou
+- data/hora
+- motivo/observação, se informado
+- operação realizada (criação, substituição, edição, desativação)
+
+Quero poder rastrear depois qualquer alteração.
+
+9) CONSULTA E MANUTENÇÃO
+Criar tela de consulta com filtros, para manutenção dos códigos cadastrados.
+
+Filtros desejados:
+- produto
+- descrição
+- código interno
+- código de barras
+- tipo do código
+- quantidade da embalagem
+- status
+- empresa, se aplicável
+- período
+- usuário que alterou
+
+Na consulta, quero ver:
+- produto
+- descrição
+- código
+- tipo (unitário/embalagem)
+- quantidade da embalagem
+- status
+- data da última alteração
+- usuário da última alteração
+- ações para editar, substituir, desativar e visualizar histórico
+
+10) TELA OPERACIONAL
+Criar uma tela operacional rápida, com visual simples e eficiente para uso por separador e conferente.
+
+Características:
+- campos grandes
+- foco automático
+- navegação rápida
+- sem excesso de informação
+- compatível com leitor de código de barras
+- teclado numérico amigável para quantidade
+- confirmação visual forte ao salvar
+- mensagem clara em caso de erro
+- suporte a desktop e mobile/tablet
+
+11) IMPACTO NA OPERAÇÃO
+Quero que esse módulo seja preparado para uso futuro em:
+- separação
+- conferência
+- recebimento
+- conferência cega, se houver
+- consultas internas de produto
+
+Por isso, modele corretamente a estrutura desde agora.
+
+MODELAGEM DE DADOS
+Quero que você analise minha aplicação atual e crie a estrutura mais adequada.
+
+Sugestão de modelagem funcional:
+- tabela de produtos (já existente)
+- tabela de códigos de barras do produto
+- tabela de histórico de alterações
+
+Na tabela de códigos de barras, a estrutura deve suportar algo como:
+- id
+- empresa_id, se aplicável
+- produto_id
+- barcode
+- tipo_codigo (UNITARIO / EMBALAGEM)
+- quantidade_embalagem
+- tipo_embalagem opcional
+- ativo
+- principal/default, se fizer sentido
+- criado_em
+- criado_por
+- atualizado_em
+- atualizado_por
+- inativado_em
+- inativado_por
+
+Na tabela de histórico:
+- id
+- barcode_id ou referência equivalente
+- produto_id
+- tipo_operacao
+- valor_anterior
+- valor_novo
+- quantidade_anterior
+- quantidade_nova
+- usuario
+- data_hora
+- observacao
+
+Se houver modelagem melhor na stack atual, pode adaptar, mas mantendo a rastreabilidade.
+
+LÓGICA DE NEGÓCIO
+Quero que você revise e implemente a lógica corretamente.
+
+Pontos obrigatórios:
+- separar claramente código unitário de código de embalagem
+- permitir múltiplas embalagens para o mesmo produto
+- manter apenas o registro correto como ativo quando houver substituição
+- não gerar duplicidade ativa incoerente
+- não perder histórico
+- validar conflitos
+- permitir manutenção fácil no futuro
+
+BACKEND
+Quero que você implemente:
+- endpoints ou rotas necessários
+- validações robustas
+- tratamento de erro claro
+- proteção contra duplicidade
+- proteção contra cliques duplicados
+- respostas consistentes
+- logs úteis
+- consistência transacional ao salvar alteração/substituição
+
+FRONTEND
+Quero que você implemente:
+- tela de manutenção/cadastro
+- tela de consulta
+- tela operacional rápida
+- feedback visual de loading, sucesso e erro
+- prevenção de submit duplicado
+- layout coerente com o restante da aplicação
+- responsividade
+
+LOGS
+Quero logs úteis nesse módulo, principalmente para:
+- criação
+- edição
+- substituição
+- conflito de código
+- tentativa de duplicidade
+- erro de persistência
+- falha de validação
+
+Os logs devem registrar contexto suficiente para diagnóstico sem expor dados sensíveis indevidos.
+
+REGRAS DE SEGURANÇA E PERMISSÃO
+Quero que você respeite permissões por perfil.
+Exemplo:
+- alguns usuários podem apenas consultar
+- alguns podem cadastrar/alterar
+- operadores podem usar a tela operacional
+- administradores podem ver histórico completo
+
+Se a aplicação já tiver controle de acesso, integrar corretamente.
+
+CUIDADOS IMPORTANTES
+- Não criar solução frágil
+- Não sobrescrever dados sem histórico
+- Não deixar códigos órfãos
+- Não deixar o mesmo código ativo em produto errado
+- Não deixar o frontend parecer salvo se o backend falhou
+- Não depender apenas de validação visual
+- Não deixar inconsistência entre tela e banco
+
+MELHORIAS QUE VOCÊ DEVE CONSIDERAR AUTOMATICAMENTE
+Se estiver faltando algo importante para tornar o módulo melhor e mais seguro operacionalmente, implemente também, por exemplo:
+- confirmação antes de substituir código ativo
+- opção de desativar sem excluir
+- indicador visual de código ativo
+- histórico por produto
+- busca rápida por barcode
+- importação futura preparada, se fizer sentido
+- tratamento de concorrência
+- trava contra duplicidade em múltiplos usuários ao mesmo tempo
+- mensagens operacionais claras
+
+ENTREGÁVEIS
+Quero que você me entregue:
+1. análise da estrutura atual da aplicação
+2. modelagem implementada
+3. backend implementado
+4. frontend implementado
+5. regras de validação
+6. lógica de substituição ativa + histórico
+7. tela operacional rápida
+8. consulta e manutenção
+9. logs do módulo
+10. explicação de como ficou a regra de cadastro e substituição
+
+CRITÉRIOS DE ACEITAÇÃO
+Só considerar concluído se:
+- for possível cadastrar código unitário
+- for possível cadastrar vários códigos de embalagem com quantidades diferentes para o mesmo produto
+- for possível alterar código unitário
+- for possível alterar código de embalagem
+- for possível fazer o fluxo rápido: bipar unitário -> bipar embalagem -> informar quantidade -> salvar
+- a gravação substituir corretamente o código ativo quando necessário
+- o histórico ficar preservado
+- não existir duplicidade incoerente
+- o módulo ficar rápido e funcional para operação
+- a solução ficar preparada para uso real no WMS

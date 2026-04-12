@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "secure login authentication",
+    "description": "Test the login endpoint to ensure users can authenticate successfully with valid credentials and receive a session-based cookie for subsequent requests."
+  },
+  {
+    "id": "TC002",
+    "title": "role based access control enforcement",
+    "description": "Verify that the system restricts or grants access to endpoints based on user roles such as supervisor, picker, verifier, and counter attendant."
+  },
+  {
+    "id": "TC003",
+    "title": "order status workflow transitions",
+    "description": "Validate that order status transitions follow the defined workflow states from pending to finalized without skipping any steps."
+  },
+  {
+    "id": "TC004",
+    "title": "work unit locking and concurrency control",
+    "description": "Test that work units are locked when assigned to a user and that concurrent access by multiple users is prevented."
+  },
+  {
+    "id": "TC005",
+    "title": "audit log creation for critical actions",
+    "description": "Ensure that all critical actions such as user logins, order updates, and unlocks are logged with user identity, timestamps, and details of changes."
+  },
+  {
+    "id": "TC006",
+    "title": "barcode scanning product validation",
+    "description": "Verify that barcode scanning integration correctly validates product items during picking and verification processes."
+  },
+  {
+    "id": "TC007",
+    "title": "exception recording for damaged or missing items",
+    "description": "Test the recording of exceptions such as damaged, missing, or expired items during order processing and ensure they are associated with the correct orders."
+  },
+  {
+    "id": "TC008",
+    "title": "supervisor user management crud",
+    "description": "Validate that supervisors can create, update, and delete users through the user management endpoints."
+  },
+  {
+    "id": "TC009",
+    "title": "supervisor forced unlock functionality",
+    "description": "Test that supervisors can perform forced unlocks on locked work units to resolve conflicts or errors."
+  },
+  {
+    "id": "TC010",
+    "title": "session based logout and session check",
+    "description": "Verify that users can logout successfully and that session checks correctly identify active or expired sessions."
+  }
+]

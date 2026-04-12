@@ -1,0 +1,54 @@
+Meu veredito sincero: o módulo está bem mais maduro do que um picking comum improvisado, e as correções de 09/04 eliminaram dois riscos gravíssimos de perda de progresso. Mas ele ainda não está blindado contra alguns erros de operação reais. O problema agora não está no “fluxo feliz”; está nas bordas: concorrência, reconciliação otimista, perda de conexão, replay de scans e consistência entre UI, lock e banco.
+
+Os riscos mais perigosos que eu vejo hoje são estes:
+
+Risco crítico: divergência entre UI otimista e banco.
+O frontend soma separated_qty + pendingDelta para decidir progresso e até bloqueio/liberação de conclusão. Ao mesmo tempo, o pendingDeltaStore.reconcile() foi desenhado para preservar delta local quando o servidor retroage, “para proteger o trabalho do operador”. Isso é perigoso: se houve reset de supervisor, unlock remoto, rollback por erro ou qualquer correção no servidor, a UI pode continuar acreditando em uma quantidade que o banco já não aceita mais. Em WMS, isso vira o pior tipo de bug: a tela parece certa e o banco está diferente.
+Impacto real: operador acha que completou, outro operador pega saldo diferente, conferência encontra divergência, e você cria erro operacional “fantasma” difícil de reproduzir.
+Correção sênior: quando houver retrocesso do servidor, não preserve delta como estado “normal”. Marque o item como conflicted, bloqueie conclusão e force re-sync visual explícito por item.
+Risco crítico: dedução de endereço é “best-effort”.
+O documento diz que POST /api/picking/deduct-address falha sem impedir a conclusão. Isso é aceitável em app administrativo; em WMS de operação, isso é grave. Você pode concluir a separação e mandar para conferência, mas o saldo por endereço ficar sem dedução. Resultado: pedido fisicamente saiu do endereço, mas o endereço continua “com saldo” no sistema.
+Impacto real: endereçamento mentiroso, reabastecimento errado, operador indo em endereço vazio, ruptura artificial ou saldo fantasma.
+Correção sênior: a dedução de endereço precisa ser transacional com a conclusão, ou entrar numa fila persistente de compensação com status visível e reprocessamento garantido. “Best-effort” aqui é uma dívida operacional séria.
+Risco alto: fila offline pode perder bipagens silenciosamente.
+O WebSocket salva scans offline em localStorage, mas mensagens com mais de 5 minutos são descartadas ao reconectar. Isso resolve fila suja antiga, mas cria um buraco operacional: se a rede cair num turno corrido, o operador pode ter bipado e seguido o fluxo, e depois parte desses scans simplesmente evaporar.
+Impacto real: perda silenciosa de produtividade e divergência entre o que o operador “jura que bipou” e o que entrou no banco.
+Correção sênior: nunca descarte scan operacional sem evidência visível ao usuário. Scans expirados devem virar uma fila de reconciliação obrigatória, com tela “X scans não confirmados”, exigindo revisão.
+Risco alto: deduplicação só em memória é fraca para produção.
+O servidor deduplica msgId com processedMsgIds em memória e TTL de 5 minutos. Isso funciona em processo único estável. Se o servidor reiniciar, se houver mais de uma instância, ou se o processo cair após gravar no banco e antes de responder o ACK, o mesmo scan pode ser reaplicado porque a memória foi perdida.
+Impacto real: duplicidade rara, intermitente e quase impossível de provar depois — exatamente o tipo de bug que destrói confiança na operação.
+Correção sênior: msgId precisa virar chave idempotente persistida no banco, idealmente na mesma transação do incremento do item.
+Risco alto: roteamento do scan depende de cache local para decidir o alvo.
+O processScanQueue() procura no queryClient os work units e escolhe o targetUnit com base no estado local, inclusive preferindo unidade “que ainda tem quantidade”. Isso é eficiente, mas perigoso quando o mesmo produto aparece em múltiplos pedidos/work units, quando há sync em andamento, SSE atrasado ou outro operador mexendo no contexto. A decisão do destino do scan está parcialmente no cliente, usando visão potencialmente velha.
+Impacto real: scan entrar no pedido/unidade errada, especialmente em produtos repetidos entre múltiplos pedidos. É um bug operacional severo, porque a bipagem parece correta para o operador.
+Correção sênior: o cliente pode sugerir, mas o servidor precisa validar o alvo de forma autoritativa com contexto completo, ou o scan precisa carregar orderItemId/workUnitId já “fixado” pela UI atual, com validação rígida de consistência.
+Risco alto: dois canais de captura de scanner podem gerar duplicidade.
+O módulo usa useBarcodeScanner global por keydown e também ScanInput como canal redundante. Em tese é backup. Na prática, se o foco, o Enter e o evento forem capturados pelos dois caminhos em certos dispositivos/browser/webview, você tem a mesma leitura entrando duas vezes no handleScanItem. O documento mostra a redundância, mas não mostra uma trava inequívoca de exclusão entre os dois canais.
+Impacto real: duplicidade esporádica de bipagem, especialmente difícil de reproduzir em coletor/webview.
+Correção sênior: um único pipeline de entrada. Se mantiver os dois, cada scan físico precisa ganhar um carimbo temporal/nonce local e passar por dedupe no cliente antes de entrar na fila.
+Risco alto: reset/recontagem pode competir com scans em voo.
+Hoje o servidor não zera mais automaticamente em over_quantity, o que foi uma ótima correção. Mas continua existindo um caminho explícito de reset por reset-item-picking ao escolher “Recontar”. Se existir scan já enviado, ACK atrasado, reconexão ou replay offline, você pode resetar e depois receber confirmação antiga que volta a somar quantidade em cima do item recém-recontado. A documentação não mostra um mecanismo de versão/epoch do item para invalidar ACKs antigos após reset.
+Impacto real: item recontado “volta” com quantidade antiga, gerando comportamento aparentemente sobrenatural para o operador.
+Correção sênior: cada reset deve incrementar uma version/epoch do item; todo scan e ACK precisa carregar essa versão. ACK antigo vira inválido.
+Risco médio-alto: polling suspenso + modal + fila = tela potencialmente congelada.
+O polling é suspenso durante processamento da fila, SSE pode ficar apenas marcando pendingInvalidateRef, e o worker para quando overQtyModalOpen está aberto. Esse desenho é bom para evitar corrida, mas qualquer descompasso de estado — fila não drenada, modal preso, ref não sincronizada, flag não descarregada — pode deixar a tela “viva”, mas operando com dados velhos. O documento menciona as flags, mas não evidencia a garantia de flush em todos os caminhos.
+Impacto real: operador continua bipando olhando um contexto vencido.
+Correção sênior: watchdog explícito de fila/worker, com timeout e telemetria. Se scanWorkerRunning ficar ativo demais, o módulo deve forçar re-sync e exibir alerta.
+Risco médio-alto: lock baseado em timestamp texto é frágil demais para algo crítico.
+O documento assume ISO 8601 em TEXT para lock_expires_at e demais datas. Isso pode funcionar, mas fica extremamente sensível a timezone, milissegundos inconsistentes, strings sem Z, formatação diferente entre Node/Python e comparações lexicográficas acidentais. Como lock, heartbeat e expiração são pilares do módulo, eu trataria isso como fragilidade estrutural.
+Impacto real: lock vencendo antes/depois do esperado, unlock indevido, reprocessamento com sessão “expirada” ou conflito falso.
+Correção sênior: se não puder migrar agora para tipo temporal real, padronize 100% UTC com serialização única de backend, valide formato na borda e proíba qualquer gravação fora do helper central.
+Risco médio: restauração de sessão ainda depende de um modelo incompleto.
+Foi correto remover o fallback que puxava todos os locks do usuário. Mas o sistema ainda restaura por workUnitIds em localStorage, sem um conceito forte de “sessão de picking” persistida no servidor. Isso melhora muito o bug anterior, só que ainda deixa brecha para retomadas incompletas, seleção manual errada e diferença entre dispositivo atual e contexto anterior.
+Impacto real: retomada confusa, mistura de contexto, operador achar que “voltou certo” mas estar num subconjunto incorreto.
+Correção sênior: criar picking_session real no backend, com sessionId, deviceId, heartbeat e work units vinculadas; o cliente só restaura sessões válidas do servidor.
+
+O que eu considero mais perigoso de todos:
+Se eu tivesse que escolher os 3 que mais podem te dar transtorno operacional sério, seriam:
+
+divergência entre pendingDelta e banco;
+dedução de endereço como best-effort;
+deduplicação/filas offline não persistidas de forma transacional.
+
+Resumo brutalmente honesto:
+O módulo já saiu da zona de “vai apagar progresso do nada”, o que é excelente. Mas ele ainda está muito apoiado em estado otimista local e em garantias fracas de transporte para uma operação crítica de armazém. Isso costuma funcionar bem até o dia em que coincide: rede ruim + sync rodando + item repetido em vários pedidos + operador bipando rápido. Aí nascem os bugs que ninguém consegue reproduzir depois. Pela documentação, eu diria que o sistema está operável, mas ainda vulnerável a inconsistências raras e caras.

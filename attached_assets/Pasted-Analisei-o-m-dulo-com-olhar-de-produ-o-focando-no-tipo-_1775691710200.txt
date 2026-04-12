@@ -1,0 +1,32 @@
+Analisei o módulo com olhar de produção, focando no tipo de falha que derruba operação: perda de contexto, salto entre pedidos, divergência entre tela e banco, e eventos duplicados. Pelo desenho, houve melhora real para o problema que você relatou: eles passaram a limitar a sessão atual pelos selectedWorkUnits, justamente para evitar que locks antigos contaminem a lista e façam “pular para outros pedidos”, e também colocaram um safety redirect com 15 segundos para tentar não voltar à tela inicial por oscilações transitórias do sync.
+
+Mesmo assim, eu ainda não consideraria esse módulo blindado para produção só com base no que está descrito. O principal motivo é que existe um ponto que pode reabrir exatamente o bug antigo: se não houver sessão salva no localStorage, o fallback restaura todos os locks do usuário no banco, não apenas os da sessão válida atual. Na prática, isso pode trazer locks velhos, mistura de pedidos e sensação de que o sistema “entrou em outra coleta sozinho”. Esse, para mim, é hoje o risco mais próximo do problema que você descreveu.
+
+Os pontos mais perigosos que eu vejo são estes:
+
+Risco alto: restauração contaminada por locks antigos.
+O sistema tenta corrigir o contexto filtrando allMyUnits pela sessão atual, mas o fallback volta com myIds = workUnits.filter(wu => wu.lockedBy === user.id) quando não encontra sessão salva. Isso reintroduz justamente os locks órfãos que o filtro queria evitar. Em operação real, basta navegador fechar, aba recarregar, limpeza de storage ou algum restore falhar para esse caminho ser usado.
+Risco altíssimo: bipagem excedida zera a separação do item no servidor.
+A documentação diz que, se exceder a quantidade, o backend pode zerar separated_qty, e o frontend abre o modal de recontagem. Isso é muito agressivo para chão de operação, porque um bip duplicado, replay, scanner com trigger repetido ou mensagem reenviada pode apagar progresso já válido e dar a sensação de “perdi tudo”. Esse comportamento é funcionalmente perigoso mesmo que “esteja correto” pela regra.
+Risco alto: fila offline pode descartar scans.
+Os scans offline ficam em localStorage e mensagens com mais de 5 minutos são descartadas ao reconectar. Então, se houver oscilação de rede, aba congelada, operador continuar bipando e a reconexão demorar, existe cenário real de bipagem feita no coletor e não consolidada no sistema. Isso não é só “delay”; é potencial perda operacional percebida.
+Risco médio/alto: a UI pode mostrar quantidade que o banco já não tem mais.
+O pendingDeltaStore foi feito para deixar a tela rápida, o que é bom. Mas a própria documentação diz que, se o servidor “retroagir”, ele preserva o delta local para proteger o trabalho do operador. Isso evita susto visual, mas também cria uma janela perigosa onde a tela e o banco podem divergir. O resultado típico é confusão na conclusão, exceções estranhas e operador jurando que separou algo que o backend não reconhece.
+Risco médio: escolha do item a bipar depende do cache local, mas a validação final é feita no banco fresco.
+O worker escolhe a targetUnit olhando o cache do React Query, enquanto o servidor revalida no banco. Esse desenho funciona, mas abre espaço para comportamento inconsistente quando há SSE, sync, outro operador concluindo, exceção ou liberação de lock no meio do processo. A consequência costuma ser not_found, over_quantity, mudança de aba inesperada ou sensação de que o produto “foi para o pedido errado”.
+Risco médio: existem dois canais de captura de scan ao mesmo tempo.
+Há o useBarcodeScanner global por keydown e também um ScanInput redundante. A intenção é boa, mas esse tipo de redundância é clássico ponto de duplicidade em scanner HID, especialmente com foco mudando, modais e inputs especiais. A documentação mostra que eles tomaram cuidado, mas isso continua sendo área sensível para “bipou uma vez e contou duas”.
+Risco médio: o redirect automático ainda pode mascarar a causa em vez de tratar a origem.
+Se allMyUnits ficar vazio por 15 segundos, ele volta para select e limpa selectedWorkUnits. Isso reduz tela morta, mas não resolve a raiz. Se o esvaziamento vier de inconsistência de sessão, lock, sync ou refetch intermediário mais longo, o operador continua sendo jogado para a tela inicial. Em vez de só redirecionar, o ideal seria entrar em um estado explícito de recuperação com diagnóstico e opção de retomar a sessão.
+
+Meu veredito prático é este: o módulo parece melhor do que antes, mas ainda tem pontos de desenho que podem gerar exatamente o tipo de confusão e perda percebida que você teme. O problema antigo provavelmente foi mitigado, não eliminado. O maior sinal disso é que a solução boa (allMyUnits restrito à sessão) convive com um fallback ruim (restaurar todos os locks do usuário).
+
+Antes de rodar oficialmente, eu exigiria estas correções como prioridade:
+
+remover o fallback que restaura “todos os locks do usuário” e restaurar apenas uma sessão identificada por sessionId real, com validade e confirmação no servidor;
+parar de zerar separated_qty em excesso de quantidade; o correto é rejeitar o excedente e manter o progresso válido já gravado;
+mover a idempotência de scan para o banco, não só memória do processo WebSocket; do jeito descrito, restart do servidor enfraquece a proteção contra replay;
+não descartar scan offline após 5 minutos sem antes mostrar recuperação explícita para o operador ou supervisor;
+trocar o redirect automático por uma tela de “sessão inconsistente / recuperar coleta” com diagnóstico, para não voltar silenciosamente à lista de pedidos.
+
+Analise minha intenção e veja se é correta ou solucional.

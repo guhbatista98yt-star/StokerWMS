@@ -1,0 +1,371 @@
+[
+  {
+    "id": "TC001",
+    "title": "Successful login with role-based access",
+    "description": "Verify that a user can log in successfully with correct credentials and is granted access according to their assigned role.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the login page"
+      },
+      {
+        "type": "action",
+        "description": "Input valid username and password"
+      },
+      {
+        "type": "action",
+        "description": "Click the login button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify login is successful and session cookie is set"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user interface features are accessible according to the user's role (e.g., supervisor sees dashboard, picker sees picking page)"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Login failure with incorrect credentials",
+    "description": "Verify that the login fails when an incorrect username or password is entered.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the login page"
+      },
+      {
+        "type": "action",
+        "description": "Input invalid username or password"
+      },
+      {
+        "type": "action",
+        "description": "Click the login button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the login fails and appropriate error message is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no session cookies are set"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Role-based access control enforcement",
+    "description": "Ensure that users can access only the features and pages allowed by their assigned roles (supervisors, pickers, verifiers, counter attendants).",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as a picker"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to access the supervisor dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access is denied or restricted"
+      },
+      {
+        "type": "action",
+        "description": "Log in as a supervisor"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to access user management features"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access is allowed"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Order status workflow from pending to finalized",
+    "description": "Verify order status transitions correctly following the workflow from pending to finalized without skipping steps.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Create a new order in pending state"
+      },
+      {
+        "type": "action",
+        "description": "Simulate picking process; update order status to 'picking in progress' and then 'picked'"
+      },
+      {
+        "type": "action",
+        "description": "Verify picked items and update status to 'verification in progress'"
+      },
+      {
+        "type": "action",
+        "description": "Finalize verification and update order status to 'finalized'"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm order status changes sequentially without skipping any states"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Work unit locking prevents concurrent processing",
+    "description": "Verify that once a work unit is locked by one user, another user cannot access or process the same work unit until it is unlocked or lock expires.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as picker A and lock a specific work unit"
+      },
+      {
+        "type": "action",
+        "description": "Log in as picker B and attempt to lock or access the same work unit"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that picker B is prevented from locking or accessing the locked work unit"
+      },
+      {
+        "type": "action",
+        "description": "Allow picker A's lock to expire or manually unlock the work unit as supervisor"
+      },
+      {
+        "type": "action",
+        "description": "Picker B attempts to lock the work unit again"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that picker B can now lock and process the work unit"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Supervisor can unlock tasks forcibly",
+    "description": "Verify that supervisors have the capability to forcibly unlock work units that are locked by other users.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as picker and lock a work unit"
+      },
+      {
+        "type": "action",
+        "description": "Log in as supervisor and navigate to the locked tasks list"
+      },
+      {
+        "type": "action",
+        "description": "Select the locked work unit and perform forced unlock"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the work unit is unlocked and available for reassignment"
+      },
+      {
+        "type": "action",
+        "description": "Log back in as picker and confirm ability to lock and process the work unit"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Audit logs capture critical user actions",
+    "description": "Ensure that all critical actions such as login, order updates, work unit locking/unlocking, and exception recording are captured in audit logs with correct user identity and timestamps.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Perform a series of critical actions including login, order picking, verification, locking and unlocking work units, and exception recording"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify audit logs contain entries for each action with correct user ID and accurate timestamp"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm audit logs reflect the nature of the action taken and changes made"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Barcode scanning validation during picking",
+    "description": "Test that the barcode scanning integration correctly validates product items during the picking process, rejecting invalid or mismatched barcodes.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Start picking a work unit with assigned items"
+      },
+      {
+        "type": "action",
+        "description": "Scan a valid barcode corresponding to an item in the order"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify item is accepted and marked as picked"
+      },
+      {
+        "type": "action",
+        "description": "Scan an invalid barcode not matching order items"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify system rejects the barcode and displays an error"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Exception recording for damaged or missing items",
+    "description": "Verify that users can record exceptions like damaged, missing, or expired items during picking and verification, and these exceptions are properly logged and associated with the relevant order.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Pick or verify an order item"
+      },
+      {
+        "type": "action",
+        "description": "Record an exception with a reason such as damaged, missing, or expired"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the exception is saved and associated with the order item"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure the exception details are visible in order history and audit logs"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Supervisor CRUD operations on users",
+    "description": "Verify that supervisors can create, update, and delete users with appropriate validation and role assignments.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as supervisor"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to user management interface"
+      },
+      {
+        "type": "action",
+        "description": "Create a new user with valid details and role assignment"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user is added successfully and visible in the users list"
+      },
+      {
+        "type": "action",
+        "description": "Update an existing user’s details and role"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user details are updated correctly"
+      },
+      {
+        "type": "action",
+        "description": "Delete a user from the system"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user is removed and cannot log in"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Concurrent locking race condition prevention",
+    "description": "Test the system behavior under simultaneous lock requests for the same work unit to confirm race conditions are prevented and proper locking is enforced.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Simultaneously issue locking requests on the same work unit from two different users"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify only one user successfully locks the work unit"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the other user receives an appropriate message indicating the work unit is locked"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Mobile interface performance responsiveness",
+    "description": "Verify that the mobile-optimized interface is responsive and performant during essential workflows like picking, verification, and exception recording.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Access the picking interface from a mobile device"
+      },
+      {
+        "type": "action",
+        "description": "Navigate through picking, scanning barcode, and recording exception steps"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify UI elements load promptly and user interactions respond within acceptable time thresholds"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Desktop interface task management function validation",
+    "description": "Verify that the desktop interface for supervisors and other roles correctly supports order management, user management, and unlocking functionalities.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in to the desktop interface as a supervisor"
+      },
+      {
+        "type": "action",
+        "description": "Create and assign new orders"
+      },
+      {
+        "type": "action",
+        "description": "Unlock locked tasks as needed"
+      },
+      {
+        "type": "action",
+        "description": "Manage users via CRUD operations"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all features operate correctly and UI updates reflect changes instantly"
+      }
+    ]
+  }
+]

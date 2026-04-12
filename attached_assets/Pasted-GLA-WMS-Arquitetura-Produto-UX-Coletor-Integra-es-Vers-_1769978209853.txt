@@ -1,0 +1,209 @@
+GLA WMS (Arquitetura + Produto + UX Coletor + Integrações)
+Versão: 1.0 | Idioma: PT-BR | Objetivo: especificação completa e implementável (não genérica)
+
+VOCÊ É
+Aja como um Arquiteto de Software sênior especializado em WMS/Logística, um Analista de Requisitos (Produto), um UX Designer para coletores Android com scanner (modo bipagem), e um DBA/Arquiteto de Integrações. Você vai projetar e especificar um sistema web chamado “GLA WMS”, com painéis para computador (Supervisor/Faturista) e para coletores (Separação, Conferência e modo Balcão).
+
+O QUE EU QUERO QUE VOCÊ ENTREGUE
+Transforme os requisitos abaixo em um projeto pronto para implementação, entregando:
+1) Especificação funcional (requisitos + regras + fluxos)
+2) Arquitetura (sincronização local, bancos, consistência, auditoria)
+3) Modelo de dados (tabelas/relacionamentos + dicionário + índices)
+4) Máquina de estados (Pedido, Unidade de Trabalho, Item)
+5) APIs (endpoints, payloads, validações, erros, idempotência)
+6) UX/Telas (componentes, filtros, botões, mensagens, cores, “modo bipagem”)
+7) Concorrência e locks (TTL, heartbeat, recuperação, force unlock)
+8) Relatórios PDF A4 (pré-carga) + relatório de exceções por período
+9) Critérios de aceite e cenários de teste (incluindo bordas e falhas de rede)
+10) Roadmap MVP + melhorias futuras
+
+MODO DE TRABALHO (OBRIGATÓRIO)
+- Faça no máximo 10 perguntas objetivas APENAS se forem indispensáveis para evitar falhas graves (ex.: WMS devolve status para o ERP? TTL de lock? regra de alteração de pedido vindo do ERP?).
+- Se eu não responder, prossiga mesmo assim: crie uma seção “SUPOSIÇÕES” clara e siga com um projeto coerente.
+- Você SERÁ penalizado se devolver algo genérico: quero decisões específicas, justificadas e prontas para virar implementação.
+- Não omita nenhuma regra descrita. Se encontrar conflito, sinalize e proponha regra de desempate.
+
+PADRÃO ARQUITETURAL OBRIGATÓRIO (SIGA ESTE PADRÃO)
+Quero que o projeto siga o mesmo “padrão de app web” abaixo (organização e camadas), adaptado ao WMS:
+
+Frontend (padrão):
+- React 18 + TypeScript
+- Roteamento leve (ex.: Wouter)
+- Server-state com TanStack React Query (com cache controlado por sessão)
+- UI com shadcn/ui (Radix) + Tailwind (tokens CSS para tema)
+- Validações com Zod
+- Data-fns para datas
+
+Backend (padrão):
+- Node.js + Express (ESM) + TypeScript
+- Rotas em /api/* (routes.ts)
+- Camada de dados via storage.ts com interface IStorage (separa regras e acesso a dados)
+- ORM/queries: Drizzle (ou queries preparadas) com validação de payload com Zod
+- Auth com JWT + bcrypt (ou cookie HttpOnly se você justificar)
+- Middleware de auth e RBAC (isAuthenticated, isSupervisor, isAdmin)
+
+Bancos (camada dupla OBRIGATÓRIA):
+- STAGING (SQLite local): espelho do ERP, atualizado a cada 5 minutos. READ-ONLY pro WMS.
+- OPERACIONAL WMS (banco principal): locks, contagens, exceções, auditoria, status, filas, histórico, etc. REAL-TIME.
+  -> Você DEVE escolher a tecnologia (recomendação padrão: SQLite local no servidor da API com WAL + índices + API única evitando compartilhamento de arquivo; opcional: Postgres para escala) e justificar para rede local.
+
+Sincronização STAGING -> OPERACIONAL (OBRIGATÓRIO):
+- Estratégia de upsert/delta
+- Idempotência
+- Detecção de mudanças (updated_at/versão/hash/snapshot)
+- Resolução de conflitos quando pedido muda no ERP enquanto está em separação/conferência
+
+BUG DE LOGIN (OBRIGATÓRIO RESOLVER NA ARQUITETURA)
+O sistema anterior tinha bug: token expira e ao logar em outro usuário ainda aparecem dados/cache do usuário anterior.
+Você DEVE especificar no projeto do GLA WMS:
+- “sessionKey” por sessão (ex.: userId:loginAt)
+- React Query: todas as queryKeys incluem sessionKey
+- Ao login/logout/401: queryClient.clear() (limpa cache antigo)
+- localStorage namespaced por sessionKey (ex.: wms:<sessionKey>:filters)
+- Interceptor 401 no apiClient: dispara logout + limpeza total + redirect para /login
+- Bloqueio de renderização: enquanto auth.status = "checking", não renderizar telas com dados (evita “flash” de dados antigos)
+
+UI/UX “FEELING” (OBRIGATÓRIO — SEM COPIAR MÓDULOS)
+As telas de referência têm um estilo: header com gradiente roxo/azulado, cards brancos com radius alto e sombra suave, botões teal largos, accordions, modal de sucesso em card central, tipografia espaçada em CTA.
+Você deve aplicar esse “feeling” no design system do GLA WMS:
+- Tokens: brand gradient, accent teal, radius alto, sombras suaves, fundo cinza claro
+- Componentes kit obrigatórios: GradientHeader, SummaryPill, SectionCard/Accordion, ActionTiles, PrimaryCTAButton, ResultDialog, ScanInput (modo bipagem)
+- Mobile-first nos coletores; desktop com grid/side/topbar no supervisor
+
+REGRAS FIXAS DO AMBIENTE (NÃO MUDE)
+- ERP: Ciss Poder.
+- Entrada do ERP: existe uma API que envia dados para um banco temporário SQLite local (STAGING), atualizado a cada 5 minutos.
+- Operação WMS: em tempo real na rede local (separação/conferência/locks/status/exceções/auditoria).
+- Cadastro de produtos, pedidos e estoque já existe no ERP; endereçamento será futuro (prever no modelo sem exigir agora).
+- “Seção” é uma categoria atribuída ao produto no ERP.
+- Coletores: Android com navegador; leitura via scanner.
+- QRCode: iniciar/validar carrinho/cesta e pallet/local.
+- Ponto de retirada: número atribuído por produto; pedido pode ter vários pontos; ao selecionar um ponto, listar somente itens daquele ponto.
+- Rotas: fixas e cadastradas uma única vez; supervisor seleciona vários pedidos e atribui rota em lote.
+- Código de separação: único e não muda em reprocessos.
+- Exceções permitidas: Não encontrado, Avariado, Vencido. Observação opcional.
+- Bipagem a mais: DEVE obrigar recontagem/reconferência (não pode continuar).
+- Quantidade manual: somente Supervisor (não operadores).
+- Auditoria: registrar quem fez o quê, quando e contexto (pedido/item/UT, operador, dispositivo, IP/local, ação, antes/depois).
+- Operador Entrega: vê e separa somente a(s) seção(ões) atribuídas.
+- Operador Conferência: confere por pedido (não por seção).
+- Operador Balcão: separação direta para cliente em loja; pode separar todas as seções; fluxo semelhante ao conferente (um pedido por vez), NÃO tem segunda conferência; temporizador de separação para ao finalizar.
+
+CONFLITO CRÍTICO (VOCÊ DEVE RESOLVER)
+O texto diz que a conferência lista “pedidos separados e com exceções”. Você deve:
+- sinalizar a ambiguidade
+- propor a regra de desempate (ex.: confere todos os pedidos de entrega; exceções só destacam) OU outra, mas justifique
+- refletir isso em queries, telas e estados
+
+UNIDADE DE TRABALHO (VOCÊ DEVE MODELAR ASSIM)
+- Separação opera por UT = (Pedido + Ponto de Retirada + Seção)
+- Conferência opera por UT = (Pedido + Ponto de Retirada) (ou inclua Seção se justificar)
+Máquina de estados, locks, APIs e telas devem refletir isso.
+
+CÓDIGO DE SEPARAÇÃO (VOCÊ DEVE DEFINIR)
+Apesar de “único e imutável”, você deve:
+- propor e justificar a granularidade (por Pedido ou por Pedido+Ponto)
+- definir quando nasce (lançar romaneio? iniciar separação? primeiro lock?)
+- garantir que conferência e relatórios referenciem sempre o mesmo código
+
+LOCKS E RECUPERAÇÃO (OBRIGATÓRIO)
+- Separação: lock ao clicar “Separar pedidos selecionados”, antes de bipar carrinho.
+- Conferência: lock ao clicar “Conferir”, antes de bipar pallet/local.
+Você deve especificar:
+- TTL padrão (assuma se não houver; sugira 15 min com heartbeat a cada 30s, e renovação automática)
+- heartbeat
+- recuperação quando coletor fecha/perde rede
+- force unlock por Supervisor com auditoria completa
+- visibilidade: “em aberto some para outros”
+- prevenção de deadlock e lock órfão
+
+RECONTAGEM / RECONFERÊNCIA (OBRIGATÓRIO)
+Quando bipar a mais:
+- não pode continuar
+- entra em modo recontagem/reconferência
+Você deve definir:
+- estados por item (ex.: EM_RECONTAGEM)
+- se recontagem zera contagem do item e recomeça (defina)
+- UX: entradas/saídas, mensagens e bloqueios
+
+CARRINHO/CESTA E PALLET/LOCAL (OBRIGATÓRIO)
+- QR valida antes de iniciar
+Defina claramente:
+- vínculo do carrinho (recomendação: por UT = pedido+ponto+seção)
+- se um lote de pedidos compartilha carrinho ou não (decida e justifique)
+- validar QR já usado e como liberar ao cancelar/finalizar
+
+SEGURANÇA / PERMISSÕES (OBRIGATÓRIO)
+Entregue matriz RBAC completa:
+Perfil (Supervisor, Entrega, Conferência, Balcão) x Menu x Ação x Restrições
+Inclua: criar/editar usuários, atribuições, rota/prioridade, reprocesso, force unlock, quantidade manual, relatórios, etc.
+
+RELATÓRIOS (OBRIGATÓRIO)
+1) Pré-carga PDF A4:
+- ordem: Rota -> Pedido -> Itens (ou melhor, mas justifique)
+- cabeçalho: rota, data/hora, gerado por, período e ponto(s)
+- por pedido: cliente, valor, observação, código de separação
+- seção “Exceções” por pedido com itens e tipo
+- rodapé: paginação e trilha de auditoria do relatório
+
+2) “Produtos com exceção por período”:
+- filtros: período, rota, ponto, fornecedor, seção
+- agregações: ocorrências por produto/exceção
+- exportável: PDF e/ou CSV (decida)
+
+FONTE PRIMÁRIA — REQUISITOS (INCORPORE TUDO)
+[Use exatamente os requisitos fornecidos pelo usuário na conversa: Supervisor/Faturista, Separação, Conferência, Balcão, filtros, lock, cancelamento, reprocesso, etc. Não omita.]
+
+FORMATO OBRIGATÓRIO DA SUA RESPOSTA (SAÍDA)
+Você deve responder com as seções, nesta ordem exata:
+
+1) PERGUNTAS INDISPENSÁVEIS (até 10) — se não houver, escreva “Sem perguntas”.
+2) SUPOSIÇÕES (bullets numeradas)
+3) GLOSSÁRIO
+4) ARQUITETURA
+   - Componentes
+   - Bancos (STAGING vs OPERACIONAL)
+   - Sincronização, filas, idempotência
+   - Estratégia de conflito de atualização do ERP (snapshot/versão)
+   - Auth/sessão (incluindo correção do bug do usuário anterior)
+   - Estratégia realtime (polling vs websocket) e justificativa
+5) UNIDADE DE TRABALHO (modelagem e exemplos)
+6) REQUISITOS FUNCIONAIS por módulo (Supervisor, Separação, Conferência, Balcão)
+7) RBAC (tabela completa)
+8) REGRAS DE NEGÓCIO e VALIDAÇÕES
+   - bloqueios de salvar
+   - recontagem/reconferência
+   - exceções e permissões
+9) MÁQUINA DE ESTADOS
+   - Pedido, UT, Item
+   - tabela de transições (de/para/evento/ação/guard)
+10) MODELO DE DADOS
+   - tabelas, PK/FK, índices, auditoria, locks, QR, ponto, rota, prioridade, exceções
+   - preparar endereçamento futuro (sem exigir agora)
+11) APIs
+   - endpoints REST
+   - exemplos curtos request/response
+   - erros padronizados
+   - idempotência (Idempotency-Key e dedupe)
+12) UX/TELAS
+   - design system (tokens + componentes kit)
+   - telas desktop vs coletor
+   - “modo bipagem” (ScanInput, feedback rápido, estados de cor)
+13) CONCORRÊNCIA E LOCKS
+   - TTL, heartbeat, force unlock, recuperação, prevenção de lock órfão
+14) RELATÓRIOS
+   - layout A4 + campos
+   - relatório de exceções + filtros/agregações
+15) CRITÉRIOS DE ACEITE + CENÁRIOS DE TESTE
+   - muitos casos de borda, falha de rede, token expira, troca de usuário, lock órfão, QR reutilizado, etc.
+16) MVP + melhorias futuras
+   - MVP em fases (curtas) + itens de evolução
+
+PADRÕES DE QUALIDADE (NÃO QUEBRE)
+- Tudo deve ser específico: valores default (TTL, intervalos, status), nomes de tabelas, nomes de endpoints, nomes de campos.
+- Sempre explique o “porquê” das decisões (curto e direto).
+- Consistência: nomes e estados iguais em banco, API e tela.
+- Evite “depende”; quando depender, escolha um padrão e documente como suposição.
+
+INÍCIO
+Agora gere o projeto do “GLA WMS” seguindo TODAS as regras acima.

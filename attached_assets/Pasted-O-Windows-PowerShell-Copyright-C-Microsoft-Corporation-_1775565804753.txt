@@ -1,0 +1,63 @@
+O Windows PowerShell
+Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+
+Instale o PowerShell mais recente para obter novos recursos e aprimoramentos! https://aka.ms/PSWindows
+
+PS C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test> npm install
+npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+npm warn deprecated source-map@0.8.0-beta.0: The work that was done in this beta branch won't be included in future versions
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated glob@11.1.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 887 packages, and audited 888 packages in 22s
+
+165 packages are looking for funding
+  run `npm fund` for details
+
+14 vulnerabilities (1 low, 1 moderate, 12 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
+
+Some issues need review, and may require choosing
+a different dependency.
+
+Run `npm audit` for details.
+PS C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test> npm run build
+
+> rest-express@1.0.0 build
+> tsx script/build.ts
+
+building client...
+vite v7.3.1 building client environment for production...
+transforming (5) ..\vite\preload-helper.js
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 3501 modules transformed.
+../dist/public/manifest.webmanifest                            0.85 kB
+../dist/public/index.html                                      3.61 kB │ gzip:   1.38 kB
+../dist/public/assets/index-_gJ1hLzd.css                     133.55 kB │ gzip:  21.16 kB
+../dist/public/assets/workbox-window.prod.es5-BIl4cyR9.js      5.76 kB │ gzip:   2.37 kB
+../dist/public/assets/JsBarcode-MgWuNlEw.js                   68.47 kB │ gzip:  14.75 kB
+../dist/public/assets/index-BKxfa1As.js                    2,169.20 kB │ gzip: 610.00 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 14.64s
+
+PWA v1.2.0
+mode      generateSW
+precache  25 entries (4424.60 KiB)
+files generated
+  ../dist/public/sw.js
+  ../dist/public/workbox-1d305bb8.js
+building server...
+
+  dist\index.cjs  1.4mb
+
+Done in 1150ms
+PS C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test>

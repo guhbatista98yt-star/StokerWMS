@@ -1,0 +1,377 @@
+Atue como um engenheiro de software principal, arquiteto de sistemas, especialista em segurança, concorrência, integridade transacional, QA, hardening de produção e auditoria corretiva.
+
+Sua missão NÃO é apenas revisar. Sua missão é executar uma auditoria corretiva total, ponta a ponta, em toda a aplicação contida na pasta abaixo, identificando, validando, corrigindo e comprovando tecnicamente cada falha encontrada:
+
+```ticketmonitor.ai```
+
+Considere que esta aplicação será colocada em produção oficial e precisa operar com estabilidade, segurança, consistência lógica, integridade de dados, tolerância a falhas, previsibilidade operacional e baixo risco de incidente.
+
+A análise e correção devem abranger TUDO que existir no projeto, sem exceções:
+- frontend
+- backend
+- componentes
+- módulos
+- páginas
+- hooks
+- services
+- utils
+- rotas
+- middlewares
+- APIs
+- autenticação
+- autorização
+- banco de dados
+- migrations
+- WebSocket
+- filas offline
+- estados locais
+- IndexedDB
+- localStorage
+- logs
+- tratamento de erro
+- scripts
+- arquivos de configuração
+- build/deploy
+- variáveis de ambiente
+- qualquer botão, ação, fluxo, evento, listener, submit, exclusão, atualização, sincronização, reconexão e comportamento automático
+
+Não faça análise superficial.
+Não responda genericamente.
+Não elogie sem evidência técnica.
+Seja crítico, objetivo, rigoroso e cirúrgico.
+Se houver risco real de produção, trate como bloqueador.
+
+==================================================
+OBJETIVO PRINCIPAL
+==================================================
+
+Você deve tratar a aplicação como candidata a produção imediata e executar uma revisão corretiva completa para:
+
+1. identificar falhas
+2. localizar a causa raiz
+3. corrigir o código
+4. reforçar backend, frontend e banco
+5. evitar regressões
+6. validar os fluxos reais da operação
+7. entregar um veredito honesto sobre prontidão para produção
+
+A prioridade máxima é confiabilidade operacional.
+
+==================================================
+BLOQUEIOS DE PRODUÇÃO QUE DEVEM SER TRATADOS PRIMEIRO
+==================================================
+
+Você deve procurar, validar no código e corrigir com prioridade absoluta, se confirmados:
+
+1. Escalonamento de privilégio
+- qualquer possibilidade de supervisor, usuário comum ou outro perfil obter privilégios administrativos por falha de backend, validação incompleta ou confiança indevida no frontend
+- o backend deve ser a autoridade final de RBAC
+
+2. CSRF e proteção de sessão
+- qualquer rota autenticada por cookie sem proteção adequada contra requisições forjadas
+- revisar cookies, SameSite, Secure, HttpOnly, validação de origem, estratégia anti-CSRF e comportamento em produção
+
+3. Operações críticas sem transação
+- principalmente submit de picking, conferência, atualizações em lote e qualquer fluxo que altere múltiplos registros
+- nenhuma operação crítica pode deixar estado parcial após erro, timeout, exceção ou queda de conexão
+
+4. Replay e duplicação de scans
+- reenvio indevido de scans já enviados
+- dupla baixa por fila offline mal projetada
+- deduplicação insuficiente
+- reprocessamento em reconexão
+- colisão de msgId
+- inconsistência entre ACK visual e persistência real
+
+5. Contaminação entre sessões, usuários, empresa ou work unit
+- qualquer fila, cache, localStorage, IndexedDB ou estado persistente que possa reaparecer em novo login, troca de empresa, troca de pedido, troca de aba ou novo operador no mesmo dispositivo
+
+6. Race conditions e concorrência
+- check-then-insert
+- gravações concorrentes
+- múltiplos operadores atuando no mesmo pedido, item, endereço ou recurso
+- múltiplas abas abertas
+- mensagens assíncronas chegando fora de ordem
+- sync concorrente entre instâncias
+
+7. Fragilidade de modelagem do banco
+- colunas text usadas como enum sem restrição real
+- foreign keys ausentes
+- dados órfãos
+- tipos incorretos
+- timestamps errados
+- constraints de unicidade ausentes
+- defaults inseguros
+- permissões modeladas em JSON sem integridade referencial quando deveriam estar em tabelas relacionais
+
+8. Offline/sync mentiroso
+- qualquer ponto em que a UI indique “sincronizado”, “salvo” ou “confirmado” sem confirmação real do backend
+- qualquer fluxo que esconda falha e deixe o operador acreditar que deu certo quando não deu
+
+==================================================
+ESCOPO DE ANÁLISE OBRIGATÓRIA
+==================================================
+
+Analise e corrija, se necessário, os seguintes eixos:
+
+A) Arquitetura
+- separação de responsabilidades
+- acoplamento
+- duplicação de lógica
+- camadas misturadas
+- dependências circulares
+- padrões inconsistentes
+- fragilidade de expansão e manutenção
+
+B) Qualidade de código
+- clareza
+- legibilidade
+- nomes
+- organização
+- complexidade
+- funções grandes
+- comentários inúteis ou ausência de comentários onde importa
+- trechos mortos
+- código legado inseguro
+- uso excessivo de any
+- ausência de tipagem forte
+
+C) Lógica de negócio
+- se cada módulo realmente faz o que deveria
+- se botões executam exatamente a ação esperada
+- se formulários validam corretamente
+- se filtros, busca, ordenação, paginação e navegação preservam coerência
+- se exclusão, cancelamento, conclusão, sincronização, salvamento e atualização têm comportamento correto
+- se existe risco de ressuscitar estados antigos
+- se estados de separação, conferência e balcão podem vazar de um fluxo para outro
+
+D) Segurança
+- autenticação
+- autorização
+- RBAC
+- CSRF
+- XSS
+- IDOR
+- injeção
+- validação ausente no backend
+- vazamento de token
+- exposição de dados sensíveis em logs
+- permissões excessivas
+- upload inseguro
+- rotas críticas desprotegidas
+- confiança indevida no cliente
+
+E) Banco de dados e persistência
+- integridade referencial
+- transações
+- unique constraints
+- foreign keys
+- enums reais
+- locks
+- consistência entre schema e código
+- risco de dados órfãos
+- defaults incorretos
+- timestamps
+- índices
+- desempenho de queries
+- paginação obrigatória
+- comportamento sob concorrência
+
+F) WebSocket e scanner
+- ACK confiável
+- idempotência
+- deduplicação por contexto correto
+- fila offline
+- reconnect
+- limpeza de fila
+- troca de usuário
+- troca de empresa
+- troca de work unit
+- mensagens silenciosamente perdidas
+- feedback operacional claro em falha
+
+G) UX operacional
+- mensagens claras
+- botões com efeito previsível
+- feedback visual real
+- prevenção de ação duplicada
+- confirmação em ações destrutivas
+- bloqueio de ações perigosas
+- timeout visível
+- falha de rede compreensível
+- prevenção de erro humano
+- consistência entre módulos críticos
+
+H) Produção e escalabilidade
+- session store
+- deploy com múltiplas instâncias
+- lock distribuído
+- rate limiting
+- seed em startup
+- observabilidade
+- logs úteis
+- rastreabilidade
+- recuperação de falha
+- ausência de gargalos óbvios
+
+==================================================
+COMO VOCÊ DEVE TRABALHAR
+==================================================
+
+1. Percorra o projeto inteiro de forma recursiva.
+2. Não ignore arquivos pequenos, hooks, helpers ou configs.
+3. Não assuma que algo está seguro só porque o frontend oculta.
+4. Sempre valide backend + banco + fluxo real.
+5. Sempre busque causa raiz, não apenas sintoma.
+6. Não aplique correções cosméticas.
+7. Não aceite correções parciais como concluídas.
+8. Se corrigir algo, valide impacto colateral.
+9. Se detectar novos riscos durante a correção, inclua e resolva também.
+10. Pense como se a aplicação fosse usada por operadores simultâneos, sob pressão, em rede instável e em dispositivo compartilhado.
+
+==================================================
+PROIBIÇÕES
+==================================================
+
+Não:
+- faça análise vaga
+- entregue apenas recomendações genéricas
+- esconda incerteza
+- trate hipótese como fato sem validar no código
+- confie apenas em proteção de frontend
+- responda só com teoria
+- diga que “aparenta estar correto” sem evidência
+- corrija superficialmente
+- deixe problema crítico para depois
+- ignore concorrência, múltiplas abas, reconexão ou falha parcial
+
+==================================================
+FORMATO OBRIGATÓRIO DA RESPOSTA
+==================================================
+
+A. RESUMO EXECUTIVO
+Informe:
+- nível de risco geral
+- se a aplicação está apta ou não para produção
+- principais bloqueadores
+- visão geral da estabilidade real da aplicação
+
+B. MATRIZ DE PROBLEMAS ENCONTRADOS
+Para cada problema encontrado, informe obrigatoriamente:
+1. ID do problema
+2. Severidade: crítica / alta / média / baixa
+3. Categoria: segurança / concorrência / integridade / lógica / banco / UX / performance / arquitetura / manutenção / outro
+4. Local exato: arquivo, função, método, rota, componente, hook ou trecho
+5. Descrição objetiva do problema
+6. Cenário real em que ele acontece
+7. Impacto operacional real
+8. Causa raiz
+9. Correção recomendada
+10. Correção aplicada
+11. Por que a correção resolve de verdade
+12. Risco de regressão
+13. Como validar manualmente
+14. Se precisa migration, flag, refactor ou ajuste de infraestrutura
+
+C. PATCHES E ALTERAÇÕES
+Mostre as alterações relevantes em código.
+Sempre que possível, entregue:
+- trecho anterior
+- trecho corrigido
+- justificativa
+- observações de compatibilidade
+
+D. MIGRAÇÕES E AJUSTES DE BANCO
+Liste exatamente:
+- enums reais a criar
+- foreign keys a adicionar
+- índices a criar
+- unique constraints
+- mudanças de tipo
+- colunas que precisam virar timestamptz
+- tabelas relacionais que precisam substituir JSON frágil
+- estratégia segura para migrar dados existentes sem corromper ambiente
+
+E. VALIDAÇÃO DE SEGURANÇA
+Mostre explicitamente:
+- quais rotas precisaram endurecimento
+- como ficou o RBAC
+- como ficou a proteção contra CSRF
+- como foram tratadas permissões críticas
+- se existe algum risco residual
+
+F. VALIDAÇÃO DE CONCORRÊNCIA E SCANNER
+Mostre explicitamente:
+- como ficou a deduplicação
+- como ficou a fila offline
+- como ficou a limpeza de sessão
+- como ficou a proteção contra replay
+- como ficou a idempotência
+- como ficou a reconexão
+- como evitar scans duplicados entre usuários, abas, work units e empresas
+
+G. CHECKLIST DE HOMOLOGAÇÃO MANUAL
+Monte um checklist completo, objetivo e operacional, cobrindo:
+- login
+- logout
+- troca de empresa
+- troca de usuário no mesmo dispositivo
+- criação e edição de usuários
+- permissões
+- picking online
+- picking offline
+- reconexão WebSocket
+- timeout de rede
+- separação simultânea
+- conferência simultânea
+- exclusão de rota
+- criação de endereço WMS
+- filtros
+- paginação
+- sync parcial
+- queda de backend
+- deploy com múltiplas instâncias
+- sessão expirada
+- tentativa de ação sem permissão
+- reabertura de abas antigas
+- uso em rede instável
+
+H. TESTES AUTOMATIZADOS RECOMENDADOS
+Separe em:
+- unitários
+- integração
+- ponta a ponta
+Diga quais são obrigatórios antes de produção.
+
+I. PENDÊNCIAS RESTANTES
+Liste somente aquilo que realmente não pôde ser resolvido sem:
+- decisão de negócio
+- mudança arquitetural grande
+- alteração externa
+- definição operacional
+
+J. VEREDITO FINAL
+Diga de forma objetiva:
+- pronta para produção: SIM ou NÃO
+- o que ainda bloqueia produção
+- quais são os 10 maiores riscos residuais
+- qual a ordem correta de implantação das correções
+
+==================================================
+CRITÉRIOS DE QUALIDADE DA SUA ENTREGA
+==================================================
+
+Sua resposta só será considerada válida se:
+- cobrir a aplicação inteira
+- for específica
+- apontar arquivos e causas reais
+- corrigir, e não apenas sugerir
+- tratar segurança, concorrência e integridade como prioridades máximas
+- considerar uso real com múltiplos operadores
+- considerar falha de rede, reconexão e persistência local
+- considerar regressão
+- entregar checklist de homologação final
+
+Se durante a auditoria você encontrar pontos ainda mais perigosos que os já suspeitos, promova esses pontos para prioridade máxima e trate-os como bloqueadores de produção.
+
+Se houver qualquer dúvida entre “solução rápida” e “solução robusta”, escolha a solução robusta.

@@ -1,0 +1,291 @@
+Quero que você analise minha aplicação atual e melhore/crie o módulo de KPI de produtividade operacional do meu WMS, entendendo primeiro como meu processo funciona hoje antes de implementar qualquer regra.
+
+CONTEXTO DO NEGÓCIO E DA OPERAÇÃO
+- Meu WMS possui operação de separação e conferência.
+- A separação atualmente é feita por SEÇÃO, e não por pedido.
+- Isso significa que um operador pode trabalhar apenas em uma ou mais seções específicas, separando linhas de múltiplos pedidos ao mesmo tempo dentro da sua área.
+- Portanto, NÃO é correto medir produtividade apenas por quantidade bruta de itens ou por número de pedidos, porque isso gera comparação injusta entre operadores de seções diferentes.
+- Algumas seções podem ser naturalmente mais fáceis ou mais difíceis, com diferenças de:
+  - distância e deslocamento
+  - peso/volume dos produtos
+  - quantidade por linha
+  - quantidade de endereços visitados
+  - necessidade de escada/equipamento
+  - fracionamento
+  - risco de erro
+  - esforço físico e operacional
+- A conferência é uma etapa separada e precisa ter seus próprios indicadores, com foco maior em qualidade.
+
+OBJETIVO
+Quero um módulo de KPI realmente útil para gestão e acompanhamento de produtividade dos operadores, respeitando meu cenário atual e sem criar métricas distorcidas.
+
+ANTES DE IMPLEMENTAR
+1. Analise a estrutura atual da aplicação, telas, endpoints, banco e eventos existentes.
+2. Entenda como hoje são registrados:
+   - início e fim de separação
+   - coleta por item/linha/endereço
+   - conclusão da separação
+   - início e fim da conferência
+   - divergências
+   - cancelamentos
+   - reaberturas
+   - exceções
+3. Identifique quais dados já existem e quais precisam ser criados.
+4. Não assuma nada sem validar no código.
+5. Se algum evento necessário não existir, implemente da forma mais segura e rastreável possível.
+6. Preserve compatibilidade com a aplicação atual, sem quebrar fluxos de produção.
+
+REGRA PRINCIPAL DE MEDIÇÃO
+A produtividade da separação NÃO deve ser baseada apenas em:
+- itens brutos
+- pedidos concluídos
+- volume bruto sem contexto
+
+A medição precisa considerar a realidade da separação por seção.
+
+Quero que o módulo trate isso corretamente com uma abordagem profissional, por exemplo:
+- comparação do operador com a média da própria seção
+- fator de dificuldade por seção
+- ou, preferencialmente, produtividade ponderada por complexidade
+
+Se for possível, implementar um modelo de PONTOS DE PRODUTIVIDADE, onde cada linha separada receba peso conforme dificuldade operacional.
+
+EXEMPLO DE PONDERAÇÃO DE COMPLEXIDADE
+Criar estrutura configurável para pontuação por linha/tarefa, considerando fatores como:
+- quantidade solicitada
+- quantidade coletada
+- número de endereços visitados
+- peso/volume do produto
+- necessidade de fracionamento
+- dificuldade da seção
+- distância estimada
+- necessidade de equipamento
+- ocorrência de exceções
+
+Exemplo conceitual:
+- tarefa simples = 1 ponto
+- tarefa média = 2 pontos
+- tarefa difícil = 3 pontos
+- tarefa muito difícil = 4+ pontos
+
+IMPORTANTE:
+- Não quero regra fixa “hardcoded” sem possibilidade de ajuste.
+- Quero parâmetros configuráveis.
+- Se ainda não existir base suficiente para pontuar tudo automaticamente, implemente estrutura preparada para evolução futura e use uma primeira versão coerente com os dados disponíveis.
+
+KPIs PRINCIPAIS QUE QUERO NO MÓDULO
+
+1) KPIs DE SEPARAÇÃO
+Criar no mínimo os seguintes indicadores:
+
+1. Linhas separadas por hora
+Fórmula:
+- total de linhas separadas / horas produtivas
+
+2. Itens separados por hora
+Fórmula:
+- total de unidades separadas / horas produtivas
+
+3. Endereços visitados por hora
+Fórmula:
+- total de endereços efetivamente coletados / horas produtivas
+
+4. Tempo médio por linha
+Fórmula:
+- tempo produtivo total / total de linhas
+
+5. Produtividade ponderada por complexidade
+Fórmula:
+- pontos produzidos / horas produtivas
+
+6. Taxa de erro da separação
+Considerar:
+- produto errado
+- quantidade errada
+- falta de item
+- divergência detectada depois
+- erro de endereço quando aplicável
+
+7. Taxa de retrabalho
+Fórmula:
+- linhas/pedidos devolvidos para correção / total processado
+
+8. Tempo ocioso ou tempo sem coleta
+Separar em categorias, se possível:
+- aguardando sistema
+- aguardando reposição
+- aguardando liberação
+- pausa operacional
+- sem atividade registrada
+
+9. Aderência ao processo
+Medir comportamentos como:
+- abandono de tarefa
+- reabertura excessiva
+- uso excessivo de exceção
+- fluxo incompleto
+- não conclusão adequada
+
+2) KPIs DE CONFERÊNCIA
+Criar no mínimo os seguintes indicadores:
+
+1. Linhas conferidas por hora
+2. Pedidos conferidos por hora
+3. Tempo médio por pedido conferido
+4. Taxa de divergência encontrada
+5. Taxa de erro liberado
+   - pedidos que passaram pela conferência mas seguiram com erro
+6. Tempo médio para resolver divergência
+7. Taxa de reconferência
+8. Aderência ao processo da conferência
+
+REGRAS IMPORTANTES DE JUSTIÇA NA MEDIÇÃO
+Implementar a lógica de forma que:
+- operadores de seções diferentes não sejam comparados de forma bruta
+- o ranking geral considere contexto
+- o dashboard permita ver:
+  - desempenho absoluto
+  - desempenho relativo à própria seção
+  - produtividade ajustada
+- sempre que possível, mostrar o operador comparado com:
+  - média da seção
+  - meta da seção
+  - média geral ajustada
+
+PAINÉIS QUE QUERO
+
+1) PAINEL GERENCIAL
+Criar uma tela de gestão com visão consolidada contendo:
+- produtividade por operador
+- produtividade por seção
+- produtividade por turno/período
+- ranking ajustado
+- qualidade por operador
+- retrabalho por operador
+- divergências por conferente
+- tempo ocioso por motivo
+- backlog operacional
+- gargalos por faixa horária
+- comparação entre períodos
+- filtros por empresa, unidade, seção, operador, turno e período
+
+2) PAINEL INDIVIDUAL DO OPERADOR
+Criar visão simples e objetiva contendo:
+- tempo produtivo
+- linhas/hora
+- itens/hora
+- endereços/hora
+- pontos/hora
+- taxa de erro
+- retrabalho
+- aderência ao processo
+- comparação com média da seção
+- evolução diária/semanal
+
+3) PAINEL DE CONFERÊNCIA
+Criar visão específica da conferência contendo:
+- pedidos conferidos
+- linhas conferidas
+- divergências encontradas
+- erros liberados
+- reconferência
+- tempo médio por pedido
+- tempo médio para resolver divergência
+
+DASHBOARD / UX / UI
+Quero uma interface profissional, limpa, clara e útil para operação e gestão.
+Prioridades:
+- leitura rápida
+- filtros inteligentes
+- tabelas bem organizadas
+- cards objetivos
+- gráficos úteis, sem poluição visual
+- boa experiência em desktop
+- se possível, layout adaptado para tablet
+- destacar alertas com cores coerentes
+- permitir drill-down do consolidado até o detalhe
+
+SUGESTÃO DE ORGANIZAÇÃO DA TELA
+- topo com filtros globais
+- cards de KPI principais
+- gráficos comparativos
+- ranking de operadores
+- tabela detalhada
+- visão por seção
+- visão por período
+- alertas automáticos
+
+FILTROS IMPORTANTES
+Implementar filtros por:
+- período
+- dia
+- semana
+- mês
+- turno
+- operador
+- seção
+- empresa
+- status operacional
+- tipo de indicador
+- separação ou conferência
+
+REGRAS TÉCNICAS IMPORTANTES
+- Revisar o banco atual e reaproveitar ao máximo a estrutura existente
+- Se faltar estrutura, criar tabelas/eventos de apoio da forma mais segura e clara possível
+- Garantir que os cálculos não gerem inconsistências
+- Evitar consultas pesadas desnecessárias
+- Se necessário, criar agregações, visões materializadas, cache ou tabelas de resumo
+- Garantir performance para uso real em produção
+- Implementar logs claros
+- Validar timezone, períodos e fechamento diário corretamente
+- Garantir que o cálculo não duplique eventos
+- Tratar corretamente cancelamentos, reaberturas, exceções e tarefas abandonadas
+- Não considerar tempo ocioso como tempo produtivo
+- Se houver gaps de rastreabilidade, sinalizar claramente no código e corrigir
+
+ENTREGÁVEIS QUE QUERO
+Quero que você me entregue a implementação completa e organizada, incluindo:
+
+1. Diagnóstico do que existe hoje
+2. Quais eventos/dados estão disponíveis
+3. Quais ajustes foram necessários
+4. Modelo de cálculo de cada KPI
+5. Backend dos indicadores
+6. Estrutura de banco, se precisar
+7. Endpoints necessários
+8. Tela(s) do módulo KPI
+9. Filtros e gráficos
+10. Ranking ajustado por contexto
+11. Comparação por seção
+12. Tratamento de produtividade ponderada
+13. Validação de performance
+14. Testes funcionais e testes de consistência
+
+CRITÉRIOS DE ACEITAÇÃO
+Só considerar concluído se:
+- os KPIs refletirem meu cenário real de separação por seção
+- não houver comparação injusta entre operadores
+- a produtividade estiver separada de qualidade
+- o módulo mostrar claramente quem produz bem e quem gera retrabalho
+- eu conseguir visualizar operadores, seções, períodos e conferência
+- os indicadores forem confiáveis
+- o sistema não ficar pesado
+- a interface estiver profissional e clara
+- o código estiver organizado, comentado e fácil de manter
+
+IMPORTANTE
+Não quero solução genérica de dashboard.
+Quero solução pensada para o meu processo atual de WMS.
+
+Antes de implementar, estude o fluxo real da aplicação e adapte a modelagem dos KPI a ele.
+
+Se identificar algum erro conceitual no que existe hoje, corrija da melhor forma possível.
+
+Se existir mais de uma abordagem possível para medir justiça entre operadores, implemente a mais robusta e mantenha a estrutura preparada para evolução futura.
+
+Ao final, me mostre:
+- o que foi criado
+- como cada KPI é calculado
+- quais dados alimentam cada indicador
+- como garantir que a leitura não fique distorcida
+- quais pontos ainda podem evoluir depois

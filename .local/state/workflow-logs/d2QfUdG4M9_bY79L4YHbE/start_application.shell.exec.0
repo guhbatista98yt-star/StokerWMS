@@ -1,0 +1,297 @@
+[1G[0K⠙[1G[0KSeeding database...
+Checking for existing users...
+Existing users count: [33m14[39m
+Database already seeded
+3:55:59 AM [express] [Routes] Registering routes...
+3:55:59 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:55:59 AM [print] [agent] WebSocket server iniciado em /ws/print-agent
+3:55:59 AM [express] [scanning-ws] WebSocket scanning server iniciado em /ws/scanning
+3:56:00 AM [express] Servidor iniciado na porta 5000
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+3:56:04 AM [express] [Auto-Sync] Triggering DB sync...
+3:56:04 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:56:04 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:56:56 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/permissoes.tsx, /src/index.css[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:00:33 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/separacao/index.tsx, /src/index.css[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:00:38 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/separacao/index.tsx, /src/index.css[22m [33m(x2)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:00:50 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/separacao/index.tsx, /src/index.css[22m [33m(x3)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:00:59 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/separacao/index.tsx, /src/index.css[22m [33m(x4)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:01:13 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/separacao/index.tsx, /src/index.css[22m [33m(x5)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:01:24 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/separacao/index.tsx, /src/index.css[22m [33m(x6)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:01:30 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/separacao/index.tsx, /src/index.css[22m [33m(x7)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:02:05 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/wms/retirada.tsx, /src/index.css[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:04:06 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/wms/retirada.tsx, /src/index.css[22m [33m(x2)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:04:13 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/wms/retirada.tsx, /src/index.css[22m [33m(x3)[39m
+4:05:59 AM [express] [Auto-Sync] Triggering DB sync...
+4:05:59 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:05:59 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:15:59 AM [express] [Auto-Sync] Triggering DB sync...
+4:15:59 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:15:59 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:25:59 AM [express] [Auto-Sync] Triggering DB sync...
+4:25:59 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:25:59 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:35:59 AM [express] [Auto-Sync] Triggering DB sync...
+4:35:59 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:35:59 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:45:59 AM [express] [Auto-Sync] Triggering DB sync...
+4:45:59 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:45:59 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:55:59 AM [express] [Auto-Sync] Triggering DB sync...
+4:55:59 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:55:59 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:55:59 AM [express] [session-gc] Erro ao limpar sessões: storage is not defined

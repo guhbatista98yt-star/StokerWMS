@@ -1,0 +1,31 @@
+Ficou melhor de forma objetiva. Essas quatro mudanças corrigem exatamente as duas brechas que eu ainda tinha visto: prioridade errada da idempotência e ausência de defesa proativa contra o sync.
+
+Meu parecer, ponto a ponto:
+
+1. RISK-04 em Sprint 1: decisão correta.
+Nos arquivos atuais, a deduplicação ainda depende de processedMsgIds em memória no ws-scanning, e o backlog antigo ainda deixava a persistência do msgId só para a Sprint 2. Isso realmente é fraco para produção, porque basta reiniciar o processo para perder a proteção de idempotência. Promover isso para Sprint 1 é a decisão certa.
+
+2. Ajuste do RISK-05: também correto.
+A formulação antiga do backlog dizia para mandar o orderItemId “do que está em foco na UI”, enquanto a documentação técnica já mostra que a tela pode trocar de aba automaticamente, autoavançar produto e tomar decisões de scan com base na fila/cache local. Nessa arquitetura, “foco visual” não é confiável como verdade de negócio. Capturar targetUnit e targetItem no momento exato do processScanQueue é muito mais sólido.
+
+3. RISK-11 novo para sync Python: excelente adição.
+A documentação atual confirma que o sync pode fazer work units desaparecerem temporariamente da query e que as proteções existentes são reativas: safety redirect com 15s, guard de isFetching, suspensão de polling durante bipagem e atraso de invalidação SSE. Ou seja: hoje o módulo se protege depois que já entrou em estado transitório. O que você propôs é melhor: anunciar sync_started antes e congelar fila/polling/safety redirect proativamente. Isso fecha uma fragilidade estrutural real.
+
+4. RISK-12 de observabilidade forense: muito bom.
+Hoje a documentação mostra deduplicação em memória e fala em audit log assíncrono no scan, mas isso ainda é insuficiente para investigar incidente raro com precisão. Estender o scan_log com contexto de canal, epoch, enqueue do cliente e status final do ACK é exatamente o que transforma “achismo” em prova técnica. Isso é o tipo de coisa que não muda a operação no dia 1, mas muda completamente sua capacidade de fechar incidente no dia 30.
+
+Meu veredito final: a nova versão do backlog fica tecnicamente mais madura que a anterior. Ela passa a atacar, na ordem certa:
+
+integridade do estado local vs banco,
+integridade de idempotência,
+integridade de roteamento,
+integridade durante sync,
+capacidade de investigação posterior.
+
+As duas observações que eu ainda faria, para deixar isso ainda mais afiado:
+
+A. RISK-11 precisa pausar também a confirmação de QtyModal e flush de fila offline.
+Não basta suspender só fila, polling e safety redirect. Se o operador estiver com QtyModal aberto ou se houver replay de scans pendentes na reconexão, esse caminho também precisa respeitar o estado de sync; senão você continua com uma janela lateral de corrida. A própria documentação mostra que o fluxo de scan passa por modal, pendingDelta, ACK e invalidação.
+
+B. O scan_log do RISK-12 deve guardar também o resultado de validação de alvo.
+Quando o target_mismatch do RISK-05 acontecer, isso precisa entrar no log forense. Senão você terá log de scan, mas não log da razão exata pela qual o scan foi rejeitado. Isso é vital para provar se foi corrida de UI/cache ou erro operacional.

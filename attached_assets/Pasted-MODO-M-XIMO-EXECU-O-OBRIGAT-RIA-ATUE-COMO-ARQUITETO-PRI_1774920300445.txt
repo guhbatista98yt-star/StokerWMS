@@ -1,0 +1,408 @@
+MODO MÁXIMO. EXECUÇÃO OBRIGATÓRIA.
+
+ATUE COMO ARQUITETO PRINCIPAL, AUDITOR TÉCNICO DE PRODUÇÃO, ENGENHEIRO SÊNIOR DE CONFIABILIDADE, ESPECIALISTA EM WMS, SEGURANÇA, CONCORRÊNCIA, PERFORMANCE, INTEGRIDADE TRANSACIONAL, QA E PREVENÇÃO DE REGRESSÃO.
+
+VOCÊ DEVE EXECUTAR UMA AUDITORIA TOTAL, PROFUNDA, CRÍTICA E CIRÚRGICA EM TODA A APLICAÇÃO.
+
+NÃO QUERO ANÁLISE SUPERFICIAL.
+NÃO QUERO RESPOSTA GENÉRICA.
+NÃO QUERO “boas práticas” soltas.
+NÃO QUERO OPINIÕES VAGAS.
+NÃO QUERO REFATORAÇÃO COSMÉTICA.
+NÃO QUERO COMPLACÊNCIA COM CÓDIGO FRÁGIL.
+NÃO QUERO PRESERVAÇÃO DE LÓGICA RUIM POR COMODIDADE.
+NÃO QUERO QUE VOCÊ ASSUMA QUE ESTÁ CORRETO SÓ PORQUE FUNCIONA EM CENÁRIOS NORMAIS.
+
+QUERO DIAGNÓSTICO REAL.
+QUERO CAUSA RAIZ.
+QUERO CENÁRIO REAL DE FALHA.
+QUERO CORREÇÃO REAL.
+QUERO TESTE.
+QUERO PROTEÇÃO CONTRA REGRESSÃO.
+QUERO ENDURECIMENTO ARQUITETURAL.
+QUERO O NÍVEL DE RIGOR DE QUEM VAI ASSINAR TECNICAMENTE A ENTRADA DISSO EM PRODUÇÃO.
+
+PRIORIDADE MÁXIMA E ABSOLUTA NOS MÓDULOS:
+- SEPARAÇÃO
+- CONFERÊNCIA
+- BALCÃO
+
+TRATE ESSES MÓDULOS COMO MISSÃO CRÍTICA.
+
+QUALQUER RISCO NESTAS ÁREAS DEVE SER TRATADO COMO FALHA GRAVE:
+- separação errada
+- conferência errada
+- atendimento no pedido errado
+- mistura de pedidos
+- item de um pedido aparecer em outro
+- operador atuar no pedido errado
+- stale state
+- stale response
+- sessão antiga contaminando sessão nova
+- múltiplas abas causando inconsistência
+- múltiplas sessões causando inconsistência
+- lock mal implementado
+- lock não liberado
+- lock órfão
+- lock burlado
+- dois operadores no mesmo pedido
+- pedido ressuscitando após concluir
+- conclusão automática implícita
+- reabertura indevida de fluxo já concluído
+- divergência entre frontend, backend e banco
+- quantidade excedente aceita incorretamente
+- diferença de regra entre bipagem e digitação manual
+- clique duplo gerando duplicidade
+- requisição repetida com efeito duplo
+- persistência parcial
+- ausência de rollback
+- falha silenciosa
+- lentidão em fluxo central
+- regressão futura por arquitetura fraca
+
+REGRA PRINCIPAL:
+ASSUMA QUE O SISTEMA SÓ ESTÁ SEGURO E ESTÁVEL QUANDO VOCÊ CONSEGUIR PROVAR ISSO POR CÓDIGO, VALIDAÇÃO, TRANSAÇÃO, LOCK, TESTE E FLUXO CONSISTENTE.
+NÃO CONFIE NO FRONTEND COMO AUTORIDADE.
+USE O BACKEND COMO FONTE FINAL DA VERDADE.
+QUALQUER REGRA CRÍTICA PRECISA SER GARANTIDA NO BACKEND E, QUANDO NECESSÁRIO, NO BANCO.
+
+ESCOPO OBRIGATÓRIO DE AUDITORIA
+
+1. SEGURANÇA
+AUDITE E CORRIJA:
+- autenticação
+- autorização
+- segregação por empresa
+- segregação por perfil
+- segregação por usuário
+- segregação por módulo
+- broken access control
+- IDOR
+- privilege escalation
+- SQL injection
+- XSS
+- CSRF
+- SSRF
+- command injection
+- path traversal
+- mass assignment
+- endpoints permissivos
+- parâmetros confiados sem validação
+- segredos hardcoded
+- tokens inseguros
+- sessão insegura
+- localStorage/sessionStorage usado indevidamente para fluxo crítico
+- dados sensíveis expostos no frontend
+- logs expondo informação sensível
+- tratamento de erro entregando detalhe demais ao cliente
+- CORS incorreto
+- headers de segurança ausentes
+- dependências vulneráveis
+- bibliotecas obsoletas ou perigosas
+- ausência de proteção básica contra brute force/rate abuse em pontos sensíveis
+
+2. CONCORRÊNCIA, CONSISTÊNCIA E INTEGRIDADE OPERACIONAL
+AUDITE E CORRIJA:
+- race conditions
+- stale state
+- stale promises
+- stale responses
+- updates fora de ordem
+- sessão anterior afetando sessão atual
+- troca rápida de pedido contaminando estado
+- selectedWorkUnits antigo afetando pedido novo
+- step/checkingTab/sessionVersion/token de sessão ou stores equivalentes vazando entre fluxos
+- falta de cleanup agressivo ao trocar, concluir ou cancelar
+- lock por operador mal implementado
+- lock liberado de forma incompleta
+- lock sem garantia persistida
+- lock dependente demais do estado local
+- ausência de idempotência
+- clique duplo
+- double submit
+- requisição duplicada
+- rollback incompleto
+- transação ausente
+- escrita parcial
+- pedido concluído reaparecendo
+- pedido cancelado reaparecendo
+- item de conferência reaparecendo em outro pedido
+- backend aceitando operação sem validar operador, empresa, status, pedido, lock e contexto atual
+
+3. PERFORMANCE
+AUDITE E CORRIJA:
+- endpoints lentos
+- queries pesadas
+- N+1
+- índices ausentes
+- overfetching
+- consultas desnecessárias
+- cálculos repetidos sem necessidade
+- re-renderizações excessivas
+- hooks pesados
+- stores reativos em excesso
+- polling agressivo ou errado
+- debounce/throttle ausente onde deveria existir
+- gargalos nos fluxos de Separação, Conferência e Balcão
+- degradação sob múltiplos operadores
+- risco de lentidão perceptível em operação real
+
+4. ARQUITETURA E QUALIDADE DE CÓDIGO
+AUDITE E CORRIJA:
+- regra de negócio espalhada
+- lógica crítica duplicada
+- divergência de validação entre frontend e backend
+- controller fazendo regra demais
+- frontend decidindo regra crítica
+- funções longas e frágeis
+- acoplamento alto
+- nomes ruins
+- comportamento implícito
+- dependência de ordem acidental
+- código difícil de testar
+- código fácil de quebrar em futuras alterações
+- tratamento de erro inconsistente
+- ausência de contratos fortes
+- estruturas que um sênior experiente reprovaria imediatamente
+
+5. BANCO, PERSISTÊNCIA E TRANSAÇÕES
+AUDITE E CORRIJA:
+- ausência de transação em fluxo crítico
+- constraints ausentes
+- índices ausentes
+- integridade referencial fraca
+- concorrência na escrita
+- atualização fora de ordem
+- inconsistência de status
+- duplicidade sem proteção
+- falta de auditoria de alteração
+- lock apenas em memória sem respaldo seguro
+- persistência parcial perigosa
+- ausência de garantias mínimas contra corrupção lógica dos fluxos
+
+6. UX OPERACIONAL CRÍTICA
+AUDITE E CORRIJA:
+- pedido ativo pouco claro
+- operador podendo agir no pedido errado
+- ação crítica repetível sem bloqueio
+- loading ruim
+- erro mal sinalizado
+- rede lenta mal tratada
+- interface permitindo ilusão de sucesso sem persistência real
+- confusão visual entre item, pedido, quantidade e etapa
+- botão ou fluxo que induza erro humano
+- conclusão fácil demais sem proteção adequada
+- falta de feedback inequívoco de status real
+
+FOCOS ESPECIAIS OBRIGATÓRIOS
+
+INVESTIGUE COM MÁXIMA RIGIDEZ:
+
+A) PEDIDO RESSUSCITANDO
+- qualquer caminho em que pedido concluído volte a aparecer
+- qualquer caminho em que pedido antigo retorne após navegação
+- qualquer caminho em que estado antigo reapareça na lista ou tela ativa
+
+B) LOCK POR OPERADOR
+- limpeza correta de lockedBy ao concluir/cancelar
+- lock órfão
+- lock não persistido corretamente
+- lock burlável
+- lock garantido só no frontend
+- dois operadores atuando no mesmo pedido
+
+C) STALE STATE E CONTAMINAÇÃO DE CONTEXTO
+- respostas atrasadas sobrescrevendo estado atual
+- stores que sobrevivem além do que deveriam
+- dados antigos contaminando pedido novo
+- múltiplas abas
+- múltiplas sessões
+- troca rápida entre pedidos
+- cancelamento/conclusão sem cleanup total
+
+D) CONCLUSÃO AUTOMÁTICA INDEVIDA
+- qualquer finalização sem ação explícita do operador
+- qualquer transição de status por efeito colateral
+- qualquer mistura indevida entre regra de separação e conferência
+
+E) EXCESSO / QUANTIDADE / ITEM
+- diferença entre bipagem e digitação manual
+- perda de quantidade válida após tentativa excedente
+- reset indevido
+- corrida de requisição permitindo excesso
+- feedback visual inconsistente
+- checkedQty inconsistente com o persistido
+
+F) SEGREGAÇÃO
+- empresa A vendo empresa B
+- usuário acessando pedido que não deveria
+- permissão validada só na interface
+- módulo acessível sem autorização real no backend
+
+EXECUÇÃO OBRIGATÓRIA
+
+ETAPA 1 — MAPEAMENTO TOTAL
+MAPEIE:
+- arquitetura geral
+- frontend
+- backend
+- banco
+- stores
+- hooks
+- serviços
+- endpoints
+- tabelas críticas
+- transições de status
+- regras críticas
+- pontos de lock
+- pontos de concorrência
+- fluxos completos de Separação, Conferência e Balcão
+
+ETAPA 2 — REVISÃO CIRÚRGICA
+REVISE:
+- arquivo por arquivo
+- endpoint por endpoint
+- fluxo por fluxo
+- regra por regra
+- persistência por persistência
+- sincronização entre tela, API e banco
+NÃO PARE NO PRIMEIRO PROBLEMA ENCONTRADO.
+
+ETAPA 3 — CLASSIFICAÇÃO
+CLASSIFIQUE CADA PROBLEMA EM:
+- CRÍTICO
+- ALTO
+- MÉDIO
+- BAIXO
+
+PARA CADA PROBLEMA, INFORME OBRIGATORIAMENTE:
+- título
+- severidade
+- local exato
+- causa raiz
+- cenário real de falha
+- impacto operacional
+- impacto de segurança
+- impacto de performance
+- impacto de manutenção
+- correção aplicada ou recomendada
+- prioridade
+- risco de regressão
+- teste necessário
+
+ETAPA 4 — CORREÇÃO
+CORRIJA COM PRECISÃO.
+REGRAS:
+- não faça refatoração cosmética
+- não altere comportamento válido sem necessidade
+- elimine comportamento implícito perigoso
+- fortaleça backend
+- centralize regra crítica
+- adicione validações
+- adicione transações
+- adicione locks corretos
+- adicione idempotência
+- bloqueie respostas antigas
+- limpe estado agressivamente
+- proteja contra reentrada
+- proteja contra duplicidade
+- endureça fluxos de missão crítica
+- adicione observabilidade mínima útil
+
+ETAPA 5 — TESTES E BLINDAGEM
+CRIE OU AJUSTE TESTES OBRIGATORIAMENTE PARA:
+- fluxo feliz
+- usuário sem permissão
+- segregação por empresa
+- segregação por perfil
+- segregação por módulo
+- lock por operador
+- dois operadores no mesmo pedido
+- múltiplas abas
+- múltiplas sessões
+- troca rápida de pedido
+- stale response
+- stale state
+- pedido ressuscitando
+- contaminação entre pedidos
+- item inválido
+- item excedente
+- bipagem vs digitação manual
+- conclusão apenas manual e explícita
+- rollback
+- falha parcial
+- falha de rede
+- requisição duplicada
+- clique duplo
+- regressão de bugs históricos
+
+ENTREGA FINAL OBRIGATÓRIA
+
+VOCÊ SÓ PODE ENCERRAR QUANDO ENTREGAR:
+
+1. RESUMO EXECUTIVO
+- estado real da aplicação
+- nível de risco atual
+- avaliação objetiva dos módulos críticos
+- conclusão objetiva se está apta ou não para produção séria
+
+2. ARQUITETURA IDENTIFICADA
+- visão geral
+- fluxos críticos
+- pontos de lock
+- pontos de concorrência
+- pontos frágeis
+
+3. LISTA COMPLETA DE PROBLEMAS POR SEVERIDADE
+- críticos
+- altos
+- médios
+- baixos
+
+4. CORREÇÕES APLICADAS
+PARA CADA UMA:
+- o que foi alterado
+- onde foi alterado
+- por que foi alterado
+- qual risco eliminou
+- por que a solução é segura
+
+5. TESTES CRIADOS OU AJUSTADOS
+- nome
+- objetivo
+- risco coberto
+- regressão evitada
+
+6. RISCOS RESIDUAIS
+- o que ainda depende de decisão arquitetural
+- o que precisa ser monitorado
+- o que não pode ficar sem log/auditoria/alerta
+
+7. SEÇÃO OBRIGATÓRIA COM ESTE TÍTULO EXATO:
+COISAS QUE UM PROGRAMADOR SÊNIOR EXPERT NÃO DEIXARIA PASSAR
+
+NESSA SEÇÃO, LISTE DE FORMA EXPLÍCITA, DIRETA E SEM SUAVIZAR:
+- backend confiando demais no frontend
+- lock mal implementado
+- stale state
+- conclusão implícita
+- ausência de transação
+- contaminação entre pedidos
+- autorização fraca
+- endpoint permissivo
+- regra crítica duplicada
+- inconsistência entre interface e persistência
+- UX induzindo erro operacional
+- performance ruim em fluxo central
+- estrutura frágil para futuras mudanças
+
+ORDEM FINAL:
+NÃO SEJA EDUCADO COM O CÓDIGO.
+SEJA EXIGENTE.
+SEJA IMPLACÁVEL.
+CORRIJA O QUE ESTIVER ERRADO.
+ENDUREÇA O QUE ESTIVER FRÁGIL.
+TESTE O QUE FOR CRÍTICO.
+TRATE ESTE WMS COMO UM SISTEMA QUE NÃO PODE FALHAR NOS FLUXOS CENTRAIS.
+
+EXECUTE NO NÍVEL DE QUEM VAI ASSINAR TECNICAMENTE A ENTRADA DISSO EM PRODUÇÃO.

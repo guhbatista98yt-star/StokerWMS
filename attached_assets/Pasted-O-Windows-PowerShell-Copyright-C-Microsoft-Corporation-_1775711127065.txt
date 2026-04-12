@@ -1,0 +1,65 @@
+O Windows PowerShell
+Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+
+Instale o PowerShell mais recente para obter novos recursos e aprimoramentos! https://aka.ms/PSWindows
+
+PS C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test> npm run db:push
+
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file 'C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\drizzle.config.ts'
+Using 'pg' driver for database querying
+[✓] Pulling schema from database...
+· You're about to add cache_orcamentos_CHAVE_unique unique constraint to the table, which contains 28451 items. If this statement fails, you will receive an error from the database. Do you want to truncate cache_orcamentos table?
+
+ Warning  Found data-loss statements:
+· You're about to delete received_by column in nf_cache table with 535 items
+· You're about to delete received_at column in nf_cache table with 535 items
+· You're about to delete notes column in nf_cache table with 535 items
+· You're about to delete name column in counting_cycles table with 1 items
+· You're about to delete unit_cost column in nf_items table with 4797 items
+· You're about to delete total_cost column in nf_items table with 4797 items
+· You're about to delete barcode column in nf_items table with 4797 items
+· You're about to delete notes column in pallets table with 7 items
+· You're about to delete work_unit_id column in pallets table with 7 items
+· You're about to delete nf_id column in pallets table with 7 items
+· You're about to delete unit column in pallet_items table with 57 items
+· You're about to delete nf_item_id column in pallet_items table with 57 items
+· You're about to delete nf_id column in pallet_items table with 57 items
+· You're about to delete palletized_stock column in product_company_stock table with 21987 items
+· You're about to delete picking_stock column in product_company_stock table with 21987 items
+· You're about to delete unit column in product_company_stock table with 21987 items
+· You're about to delete capacity column in wms_addresses table with 693 items
+· You're about to delete description column in wms_addresses table with 693 items
+
+THIS ACTION WILL CAUSE DATA LOSS AND CANNOT BE REVERTED
+
+Do you still want to push changes?
+error: coluna "id" não pode ser convertida automaticamente para tipo integer
+    at C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Object.query (C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\node_modules\drizzle-kit\bin.cjs:80622:26)
+    at async pgPush (C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\node_modules\drizzle-kit\bin.cjs:84432:13)
+    at async Object.handler (C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\node_modules\drizzle-kit\bin.cjs:93871:9)
+    at async run (C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\node_modules\drizzle-kit\bin.cjs:93117:7) {
+  length: 198,
+  severity: 'ERRO',
+  code: '42804',
+  detail: undefined,
+  hint: 'Talvez seja necessário especificar "USING id::integer".',
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'tablecmds.c',
+  line: '14517',
+  routine: 'ATPrepAlterColumnType'
+}
+PS C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test>

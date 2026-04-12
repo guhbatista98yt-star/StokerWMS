@@ -1,0 +1,264 @@
+Após concluir a auditoria técnica, correções estruturais, ajustes de lógica, revisão de módulos, revisão de botões, revisão de logs e hardening de produção da aplicação, quero que você execute também uma ETAPA FINAL DE HOMOLOGAÇÃO E PREPARAÇÃO DE GO-LIVE.
+
+O objetivo desta etapa é garantir que a aplicação esteja realmente pronta para entrar em operação oficial com o menor risco operacional possível.
+
+IMPORTANTE:
+Não trate essa etapa como mera conferência superficial.
+Quero uma validação final profissional, crítica e orientada a produção real.
+
+OBJETIVO DA ETAPA FINAL
+Quero que você:
+1. valide que as correções realmente resolveram os problemas
+2. confirme que não houve regressão
+3. execute um checklist de homologação funcional e técnica
+4. valide estabilidade operacional
+5. valide comportamento dos módulos
+6. valide botões, ações, estados e feedbacks
+7. valide logs, erros e rastreabilidade
+8. valide performance mínima aceitável
+9. entregue um checklist final de go-live
+10. informe riscos remanescentes reais, se existirem
+
+ESCOPO DA HOMOLOGAÇÃO FINAL
+
+1) HOMOLOGAÇÃO FUNCIONAL COMPLETA
+Revisar todos os módulos e validar:
+- acesso ao módulo
+- carregamento inicial
+- listagem
+- filtros
+- ordenação
+- pesquisa
+- detalhamento
+- criação
+- edição
+- exclusão/cancelamento quando existir
+- confirmação
+- retorno ao estado anterior
+- atualização visual após ação
+- navegação entre telas
+- mensagens de sucesso
+- mensagens de erro
+- estados vazios
+- estados de loading
+- estados de falha
+
+Para cada módulo, confirmar:
+- se funciona corretamente do início ao fim
+- se a regra de negócio está coerente
+- se não existem ações mudas
+- se não existem telas quebradas
+- se não existem botões sem efeito
+- se não existem fluxos incompletos
+- se não existem retornos inesperados
+
+2) HOMOLOGAÇÃO DE BOTÕES E AÇÕES
+Quero checklist final de todos os botões, ações e eventos interativos do sistema.
+
+Validar:
+- clique simples
+- clique repetido
+- clique duplo
+- submit duplicado
+- loading state
+- disabled state
+- confirmação quando necessária
+- feedback de sucesso
+- feedback de erro
+- atualização visual após ação
+- sincronização com backend
+- consistência após refresh
+- consistência após falha
+
+Confirmar que:
+- nenhum botão principal está quebrado
+- nenhuma ação crítica executa duas vezes sem controle
+- nenhum botão aparenta funcionar sem realmente funcionar
+- nenhuma ação deixa a tela inconsistente
+- nenhum submit duplica registros indevidamente
+- nenhum fluxo depende de refresh manual para parecer correto
+
+3) HOMOLOGAÇÃO DE FLUXOS CRÍTICOS
+Quero execução real e validação dos fluxos mais importantes ponta a ponta.
+
+Validar especialmente fluxos operacionais e sensíveis do WMS:
+- fluxos de separação
+- fluxos de conferência
+- fluxos de estoque
+- fluxos de inventário
+- fluxos de endereçamento
+- fluxos de recebimento
+- fluxos de movimentação
+- fluxos de pedidos
+- fluxos de romaneio
+- fluxos de autenticação, permissões e troca de usuário
+
+Em cada fluxo, testar:
+- caminho feliz
+- erro de validação
+- erro de backend
+- timeout/resposta lenta
+- falha parcial
+- cancelamento
+- retorno
+- reabertura quando aplicável
+- concorrência quando aplicável
+- repetição de ação
+- refresh de página
+- saída e retorno ao módulo
+- sessão expirada
+- usuário sem permissão
+
+4) HOMOLOGAÇÃO DE ESTADOS E TRANSIÇÕES
+Validar:
+- transições corretas de status
+- impossibilidade de transição inválida
+- atualização visual correta do status
+- persistência correta em banco
+- rollback ou proteção em caso de falha
+- ausência de estado “fantasma”
+- ausência de contagem duplicada
+- ausência de dados órfãos gerados por ação incompleta
+
+5) HOMOLOGAÇÃO DE LOGS E DIAGNÓSTICO
+Quero validação dos logs finais da aplicação.
+
+Confirmar:
+- erros reais estão sendo logados
+- logs possuem contexto suficiente
+- logs possuem padrão consistente
+- logs de ação crítica estão úteis
+- logs não estão genéricos demais
+- logs não expõem dados sensíveis
+- logs de falha ajudam a diagnosticar o problema
+- logs de sucesso não geram ruído excessivo
+- logs críticos possuem rastreabilidade adequada
+
+Validar especialmente:
+- falha de endpoint
+- falha de banco
+- falha de validação
+- falha de integração
+- falha de autenticação/autorização
+- exceção inesperada
+- transição de status inválida
+- ação duplicada bloqueada
+- timeout ou erro de rede
+
+6) HOMOLOGAÇÃO DE PERFORMANCE
+Quero uma validação prática mínima de desempenho operacional.
+
+Verificar:
+- tempo de carregamento das principais telas
+- tempo de resposta das ações principais
+- comportamento de tabelas maiores
+- comportamento de filtros
+- comportamento de busca
+- comportamento de ações em sequência
+- ausência de travamentos desnecessários
+- ausência de loading exagerado
+- ausência de consultas redundantes críticas
+- ausência de gargalo óbvio antes do go-live
+
+Se identificar gargalo relevante:
+- corrigir se possível
+- ou registrar claramente como risco remanescente
+
+7) HOMOLOGAÇÃO DE PERMISSÕES E SEGREGAÇÃO
+Validar:
+- usuário vê apenas o que deve ver
+- usuário não acessa módulo sem permissão
+- usuário não executa ação sem permissão
+- troca de usuário não herda estado do anterior
+- logout realmente limpa acesso
+- login redireciona corretamente
+- URL direta não burla controle de acesso
+- perfis operacionais e gerenciais estão coerentes
+
+8) HOMOLOGAÇÃO DE ERROS E RESILIÊNCIA
+Quero validar maturidade do sistema diante de falhas.
+
+Testar:
+- erro de rede
+- resposta 400
+- resposta 401/403
+- resposta 404
+- resposta 409
+- resposta 500
+- timeout
+- payload inválido
+- item inexistente
+- entidade já alterada por outro usuário
+- concorrência
+- retorno parcial
+- backend indisponível temporariamente
+
+Confirmar que:
+- a UI reage bem
+- o usuário entende o problema
+- a tela não entra em estado corrompido
+- não ocorre sucesso falso
+- não ocorre spinner infinito
+- a ação não fica “meio executada” sem controle
+- o log fica útil para análise
+
+9) CHECKLIST FINAL DE GO-LIVE
+Quero que você gere um checklist final objetivo com status:
+- OK
+- PENDENTE
+- RISCO
+
+Esse checklist deve cobrir no mínimo:
+- arquitetura revisada
+- módulos revisados
+- botões revisados
+- logs revisados
+- fluxos críticos testados
+- permissões revisadas
+- performance mínima validada
+- regressão validada
+- tratamento de erro validado
+- banco consistente
+- endpoints consistentes
+- UI estável
+- responsividade mínima aceitável
+- riscos remanescentes documentados
+- pronto para go-live ou não
+
+10) RELATÓRIO FINAL DE PUBLICAÇÃO
+Quero relatório final contendo:
+1. o que foi auditado
+2. o que foi corrigido
+3. o que foi validado
+4. quais testes foram executados
+5. quais problemas foram encontrados durante homologação
+6. quais foram corrigidos
+7. quais riscos restaram, se houver
+8. recomendação final:
+   - pronto para produção
+   - pronto com ressalvas
+   - não pronto para produção
+
+11) CRITÉRIO DE APROVAÇÃO
+Só considerar a aplicação apta para go-live se:
+- os fluxos críticos estiverem estáveis
+- os módulos principais estiverem consistentes
+- os botões estiverem confiáveis
+- os logs estiverem úteis
+- não houver falha crítica em aberto
+- não houver risco alto sem mitigação
+- o sistema reagir bem a erros
+- o comportamento estiver previsível
+- a operação estiver utilizável sem transtornos relevantes
+
+12) IMPORTANTE FINAL
+Não quero “parece que está bom”.
+Quero validação objetiva.
+Se houver risco sério, deixe explícito.
+Se não estiver pronto, diga claramente que não está.
+Se estiver pronto com ressalvas, detalhe as ressalvas.
+Se estiver pronto para go-live, deixe claro com base no que foi validado.
+
+Quero postura de homologação real de produção.
+Não marque como concluído apenas porque o sistema “abre” e “parece funcionar”.
+Considere concluído somente quando os fluxos críticos, botões, estados, logs e regras estiverem validados com seriedade.

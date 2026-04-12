@@ -1,0 +1,216 @@
+Quero que você atue como um engenheiro de software sênior especialista em WMS, backend, concorrência, integridade transacional, regras de separação, banco de dados, logs de produção e diagnóstico de bugs críticos em operação real.
+
+Tenho problemas graves no módulo de Separação e preciso que você faça uma análise completa, profunda e cirúrgica, identificando a causa raiz de cada erro, corrigindo de forma definitiva e evitando que esses problemas voltem a acontecer com outros pedidos.
+
+IMPORTANTE:
+- Analise cuidadosamente TODOS os logs do servidor que estou enviando.
+- Analise TODAS as imagens anexadas, pois elas mostram exemplos reais dos erros.
+- Copie os dados de banco de dados que estou passando e substitua os que estiverem atualmente configurados no projeto, pois é com esses dados que você deve investigar os casos reais.
+- Não quero solução paliativa.
+- Não quero ajuste superficial.
+- Quero causa raiz, correção correta, proteção contra recorrência e mensagens de erro mais claras.
+- A operação não pode travar. Qualquer correção precisa priorizar estabilidade, concorrência segura, agilidade e previsibilidade operacional.
+
+CENÁRIO GERAL
+Estou com problemas críticos no módulo de Separação. Em alguns casos:
+- o operador coleta várias vezes seguidas e ocorre erro ao incrementar;
+- quando muitos operadores coletam praticamente ao mesmo tempo, também ocorre erro;
+- isso atrasa a operação;
+- muitas vezes o operador precisa abandonar a coleta e abrir novamente;
+- nem sempre isso funciona;
+- não posso depender desse tipo de contorno manual.
+
+Quero que você descubra exatamente o que está causando isso e resolva da melhor forma possível, sem comprometer a operação.
+
+PROBLEMAS QUE PRECISAM SER INVESTIGADOS E RESOLVIDOS
+
+1) ERRO AO INCREMENTAR NA SEPARAÇÃO
+Quando o operador coleta o produto várias vezes seguidas, ou quando muitos operadores fazem isso quase ao mesmo tempo, aparece erro ao incrementar.
+
+Preciso que você:
+- identifique a causa raiz;
+- analise concorrência, race condition, lock, stale state, requisição duplicada, dupla atualização, problema de transação, atualização fora de ordem, retry incorreto, inconsistência entre frontend/backend/banco;
+- verifique se existe clique duplo, múltiplas requisições paralelas, polling interferindo, ou atualização simultânea no mesmo item/unidade de trabalho;
+- revise se o backend está tratando corretamente idempotência e concorrência;
+- revise se o frontend está reenviando ações indevidamente;
+- revise se existem falhas de lock de unidade de trabalho;
+- revise se o incremento está sendo feito em memória e persistido de forma insegura;
+- corrija de forma definitiva.
+
+IMPORTANTE:
+Não quero travar a operação.
+Se existir disputa entre operadores ou múltiplas ações simultâneas, a solução precisa ser resiliente e segura, sem quebrar o fluxo operacional.
+
+2) PEDIDO 479225 SEM PRODUTOS NO ROMANEIO DE SEPARAÇÃO
+Tenho o pedido 479225 e ele não está aparecendo com nenhum produto no romaneio de separação.
+
+Preciso que você:
+- identifique exatamente por que esse pedido ficou sem produtos no romaneio;
+- verifique regras de geração de romaneio;
+- verifique filtros, joins, status, agrupamentos, unidades de trabalho, geração de itens, critérios de exclusão, inconsistências de banco, problemas na transformação dos dados e regras de separação;
+- confirme se o problema está na origem dos dados, no processamento, no backend, na persistência, no filtro do frontend ou em alguma regra de negócio;
+- corrija esse caso;
+- e principalmente impeça que isso volte a acontecer com outros pedidos.
+
+3) ERRO DE EXCESSÃO DE QUANTIDADE EM PEDIDOS AGRUPADOS / MESMO PRODUTO
+Estou com problema em pedidos que solicitam determinada quantidade, mas antes de completar a quantidade correta, o sistema mostra mensagem de excessão e ainda zera ou calcula errado.
+
+Exemplo:
+- Pedidos 479686 e 479625
+- Produto 4001
+- Total solicitado entre os pedidos: 70 unidades
+- Porém quando chega em 50, o sistema mostra mensagem de excessão informando que solicitou somente 49
+- Isso está errado, porque somando os pedidos realmente dá 70 unidades
+
+Preciso que você:
+- entenda exatamente por que o sistema está calculando a quantidade errada;
+- verifique se está somando por pedido, por item, por unidade de trabalho, por produto, por agrupamento ou por separação parcial de forma incorreta;
+- revise se existe conflito entre pedidos agrupados que possuem o mesmo produto;
+- revise se a validação de excesso está olhando o universo errado;
+- revise se a regra está usando quantidade parcial, quantidade já coletada, quantidade por WU, quantidade por item ou por pedido de maneira inconsistente;
+- revise se existe arredondamento, duplicidade de item, merge incorreto, split incorreto ou associação errada de linhas;
+- corrija definitivamente para todos os cenários semelhantes.
+
+4) MULTIPLICAÇÃO INCORRETA DE QUANTIDADE COLETADA
+Também existe comportamento gravíssimo onde, ao informar uma quantidade menor que a quantidade da excessão que está dando erro, o sistema “multiplica” ou distorce a quantidade coletada.
+
+Exemplo citado:
+- item 4817
+- solicitado 246
+- sistema mostra 472 unidades coletadas
+
+Isso está totalmente errado e nunca deveria acontecer.
+
+Preciso que você:
+- descubra exatamente como essa multiplicação indevida acontece;
+- revise se há soma duplicada;
+- revise se há reprocessamento da mesma ação;
+- revise se o frontend está aplicando incremento visual e o backend incrementando novamente;
+- revise se há stale response ou replay de requisição;
+- revise se a atualização está ocorrendo em mais de um lugar;
+- revise se existe bug de concorrência, optimistic update incorreto, loop de reenvio ou falha de deduplicação;
+- corrija de forma definitiva;
+- garanta que a quantidade exibida e a persistida sejam sempre consistentes.
+
+5) FALHA AO FINALIZAR SEPARAÇÃO
+Existem casos em que o sistema mostra:
+- “Falha ao finalizar separação”
+
+Preciso que você:
+- descubra todas as causas possíveis reais;
+- identifique o caso concreto nos exemplos e logs enviados;
+- verifique se o problema é lock, status inconsistente, validação incompleta, transação quebrando, item pendente, unidade de trabalho inválida, corrida de atualização, erro silencioso ou falha de persistência;
+- corrija a causa real;
+- melhore a mensagem de erro para algo claro e acionável.
+
+Não quero mensagem genérica.
+Quero mensagens que realmente ajudem a entender o motivo da falha.
+
+6) FALHA AO BLOQUEAR UNIDADES DE TRABALHO
+Também houve erro:
+- “Falha ao bloquear unidades de trabalho”
+
+Preciso que você:
+- entenda exatamente o motivo;
+- verifique lock concorrente, estado órfão, unidade de trabalho já bloqueada, lock não liberado, lock inválido, transação falhando, inconsistência no banco ou lógica incorreta de bloqueio;
+- identifique se esse erro é causa ou consequência de outro problema;
+- corrija a lógica;
+- torne a mensagem de erro clara;
+- garanta que o bloqueio seja seguro e previsível.
+
+O QUE ESPERO QUE VOCÊ FAÇA
+
+1. Substituir no projeto os dados de conexão do banco pelos dados que estou enviando, para analisar os casos reais.
+2. Ler cuidadosamente todos os logs enviados.
+3. Analisar todas as imagens enviadas.
+4. Investigar cada pedido citado e qualquer outro relacionado encontrado nos logs ou banco.
+5. Revisar o fluxo completo da separação:
+   - geração do romaneio
+   - criação das unidades de trabalho
+   - agrupamento de pedidos
+   - tratamento de produto repetido em pedidos diferentes
+   - incremento de quantidades
+   - validação de excesso
+   - bloqueio de unidades de trabalho
+   - finalização da separação
+   - persistência
+   - concorrência
+   - atualização de tela
+6. Identificar causa raiz de cada erro.
+7. Aplicar correções definitivas.
+8. Criar proteção para evitar recorrência.
+9. Melhorar mensagens de erro para ficarem claras e úteis.
+10. Garantir que a operação continue fluida, estável e segura.
+
+PONTOS TÉCNICOS QUE VOCÊ DEVE AUDITAR OBRIGATORIAMENTE
+
+- race conditions
+- concorrência entre operadores
+- múltiplas coletas em sequência
+- requisições duplicadas
+- double click
+- stale state
+- stale response
+- optimistic update incorreto
+- duplicidade de incremento
+- idempotência ausente
+- lock por unidade de trabalho
+- lock órfão
+- lock não liberado
+- transação ausente
+- rollback incompleto
+- atualização fora de ordem
+- inconsistência entre frontend e backend
+- inconsistência entre backend e banco
+- erro de agrupamento de pedidos
+- erro de agrupamento de itens iguais
+- soma errada de quantidades
+- validação de excesso olhando escopo errado
+- erro no cálculo do total solicitado
+- erro de persistência da quantidade coletada
+- erro de finalização
+- erro de geração de romaneio
+- erro de criação ou bloqueio de work units
+- mensagens de erro genéricas demais
+- qualquer ponto em que o código esteja frágil para operação real
+
+ENTREGA OBRIGATÓRIA
+
+Quero ao final:
+
+1. Resumo executivo dos problemas encontrados
+2. Explicação da causa raiz de cada problema
+3. Explicação específica do caso do pedido 479225
+4. Explicação específica dos casos 479686 e 479625 com o produto 4001
+5. Explicação específica do caso do item 4817 mostrando 472 coletadas quando o solicitado era 246
+6. Explicação dos erros “Falha ao finalizar separação” e “Falha ao bloquear unidades de trabalho”
+7. Lista exata dos arquivos, funções e regras alteradas
+8. Correções aplicadas
+9. Melhorias nas mensagens de erro
+10. Proteções adicionadas para evitar recorrência
+11. Testes criados ou ajustados para impedir regressão
+
+TESTES OBRIGATÓRIOS
+Crie ou ajuste testes para no mínimo:
+- múltiplos operadores coletando ao mesmo tempo
+- múltiplos incrementos em sequência
+- produto igual em pedidos agrupados
+- soma correta das quantidades entre pedidos
+- bloqueio correto de unidade de trabalho
+- liberação correta de lock
+- excesso de quantidade
+- item com mesma SKU em mais de um pedido
+- requisição duplicada
+- clique duplo
+- falha de finalização
+- romaneio sem itens
+- consistência entre quantidade exibida e persistida
+- regressão dos pedidos e casos enviados
+
+DIRETRIZ FINAL
+Não pare em sintomas.
+Vá até a causa raiz.
+Não entregue correção paliativa.
+Não entregue resposta genérica.
+Corrija da forma mais robusta possível, sem travar a operação.
+Considere a Separação como módulo crítico de missão operacional.

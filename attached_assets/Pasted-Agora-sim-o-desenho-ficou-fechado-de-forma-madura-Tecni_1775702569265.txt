@@ -1,0 +1,34 @@
+Agora sim, o desenho ficou fechado de forma madura.
+
+Tecnicamente, essas últimas adições resolvem as duas últimas dependências implícitas que ainda sobravam no pacote congelado:
+
+msgId torna o pacote compatível com a mesma idempotência do fluxo normal de scan. Isso conversa diretamente com a task que persiste msg_id em scan_log e usa ON CONFLICT DO NOTHING para impedir reprocessamento. Sem msgId no pacote congelado, o replay desse pacote ficaria conceitualmente mais fraco que o scan normal.
+quantity deixa o pacote realmente autossuficiente. Isso faz sentido porque o fluxo atual do QtyModal já confirma uma quantidade e em seguida monta o envio do scan; então, se o pacote congelado ainda dependesse de ler quantidade da UI depois, você reabriria acoplamento com estado visual.
+
+Os dois novos campos do sync_blocked também ficaram muito bem escolhidos:
+
+lock_expires_at_at_dispatch
+lock_valid_at_dispatch
+
+Isso fecha uma distinção causal importante. Os campos de sync mostram que o scan atravessou um ciclo; os campos de lock mostram se, além disso, o lock já tinha morrido quando o dispatch tentou acontecer. São causas diferentes e pedem ações corretivas diferentes. E isso está totalmente alinhado com a arquitetura atual, onde o lock e o lock_expires_at são barreiras explícitas de segurança para modificar dados da work unit.
+
+Então, olhando o desenho final que você descreveu, meu veredito é:
+
+sim, agora o pacote congelado e o sync_blocked estão completos do ponto de vista operacional e forense.
+
+Com esse estado final, um evento sync_blocked passa a responder, de forma objetiva:
+
+quando o scan foi resolvido (resolved_at);
+se ele atravessou um ciclo de sync (sync_generation_at_freeze vs sync_generation_current);
+se o lock ainda estava válido no momento do dispatch (lock_valid_at_dispatch).
+
+Isso é exatamente o tipo de evidência que evita discussão baseada em memória humana.
+
+Tem só um ponto importante de honestidade técnica: os arquivos pesquisáveis que estão indexados aqui ainda parecem ser snapshots anteriores, não essa versão final que você acabou de descrever. Nos trechos disponíveis, o backlog ainda mostra RISK-04 na Sprint 2 e o RISK-05 ainda fala em orderItemId “em foco na UI”, o que indica que o índice acessível nesta conversa não refletiu a última rodada textual.
+
+Então a avaliação correta é esta:
+
+Como arquitetura final: ficou muito boa.
+Como verificação textual nos arquivos indexados aqui: eu não consigo confirmar linha por linha essa última propagação, porque os snippets pesquisáveis ainda mostram uma versão anterior.
+
+Mesmo assim, no mérito técnico, eu bateria o martelo assim: essa estrutura final está em nível de produção séria, desde que a implementação siga exatamente esse contrato e que a homologação cubra os casos de replay, sync atravessado e expiração de lock.

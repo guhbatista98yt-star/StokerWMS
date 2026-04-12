@@ -1,0 +1,551 @@
+Quero que você faça um redesign técnico e funcional da interface da minha aplicação WMS, usando como referência visual os layouts que anexei, mas adaptando isso para um sistema operacional real, leve, rápido e consistente.
+
+IMPORTANTE:
+Não quero uma cópia literal das imagens.
+Quero traduzir a linguagem visual delas para um WMS utilizável em produção.
+
+OBJETIVO GERAL
+Modernizar a interface do sistema para uma identidade visual premium, limpa e consistente, com:
+- menu lateral elegante
+- dark mode e light mode coerentes
+- cards, tabelas e formulários padronizados
+- boa experiência para desktop, tablet e mobile
+- foco em módulos operacionais de WMS
+- layout bonito, mas principalmente funcional
+
+ANTES DE IMPLEMENTAR
+1. Analise a stack atual da aplicação.
+2. Identifique:
+   - framework frontend
+   - biblioteca de componentes, se existir
+   - sistema de estilos atual
+   - estrutura de layout
+   - padrões visuais atuais
+   - componentes reutilizáveis já existentes
+3. Preserve a regra de negócio atual.
+4. Não altere fluxos operacionais sem necessidade.
+5. Faça a refatoração visual de forma organizada, sem quebrar funcionalidades existentes.
+6. Se a aplicação já usar React/Tailwind/shadcn, siga esse padrão.
+7. Se usar outra stack, adapte a arquitetura equivalente, mantendo os mesmos princípios de design system e theming.
+
+DIREÇÃO VISUAL
+Usar como inspiração os layouts enviados:
+- azul profundo como cor primária
+- tema dark elegante com preto azulado
+- tema light com fundo off-white/cinza claro
+- bordas suaves
+- cards bem construídos
+- menu lateral visualmente forte
+- interface limpa e moderna
+
+PORÉM:
+- sem excesso de efeitos
+- sem visual de portfólio
+- sem grandes áreas vazias desnecessárias
+- sem composições inclinadas/diagonais no uso real
+- sem excesso de blur
+- sem transparências que prejudiquem leitura
+- sem animações pesadas
+
+O sistema precisa ter aparência premium, mas com foco operacional.
+
+ARQUITETURA DE DESIGN SYSTEM
+Quero que você crie ou refatore um design system interno para o projeto.
+
+1) TOKENS DE DESIGN
+Crie tokens reutilizáveis para:
+
+CORES
+- background
+- surface
+- surface-elevated
+- surface-muted
+- border
+- border-strong
+- text-primary
+- text-secondary
+- text-muted
+- primary
+- primary-hover
+- primary-active
+- success
+- warning
+- danger
+- info
+- badge/status colors
+- focus ring
+
+ESPACAMENTOS
+Sugestão de escala:
+- 4
+- 8
+- 12
+- 16
+- 20
+- 24
+- 32
+- 40
+- 48
+
+BORDER RADIUS
+Sugestão:
+- sm = 8px
+- md = 12px
+- lg = 16px
+- xl = 20px
+
+SOMBRAS
+Defina 3 ou 4 níveis no máximo:
+- subtle
+- medium
+- overlay
+- focus
+
+TIPOGRAFIA
+Defina tokens para:
+- page title
+- section title
+- card title
+- table header
+- body text
+- small text
+- badge text
+- KPI number
+- helper/error text
+
+ÍCONE
+Definir padrão consistente de:
+- 16px
+- 18px
+- 20px
+- 24px
+
+ALTURAS PADRÃO
+- input small / medium / large
+- button small / medium / large
+- row height para tabela
+- toolbar height
+- sidebar width expanded
+- sidebar width collapsed
+
+2) THEMING
+Implementar sistema real de temas:
+- dark mode
+- light mode
+
+Requisitos:
+- alternância de tema persistida
+- variáveis centralizadas
+- componentes respeitando o tema automaticamente
+- contraste adequado em ambos os temas
+- mesma linguagem visual nos dois modos
+
+PALETA SUGERIDA
+DARK MODE:
+- fundo principal: preto azulado / navy muito escuro
+- superfícies: tons escuros levemente diferentes entre si
+- azul primário vibrante porém controlado
+- textos com contraste alto
+- bordas discretas, mas perceptíveis
+
+LIGHT MODE:
+- fundo principal: off-white / cinza muito claro
+- superfícies: branco suave / cinza muito leve
+- azul primário semelhante à referência
+- evitar branco puro excessivo
+- manter contraste e elegância
+
+LAYOUT PRINCIPAL
+Quero uma arquitetura de layout consistente para o sistema inteiro.
+
+1) APP SHELL
+Criar/refatorar um shell principal com:
+- sidebar lateral
+- header/topbar
+- área de conteúdo principal
+- breadcrumbs quando fizer sentido
+- espaço para filtros e ações globais
+- suporte a desktop e mobile
+
+2) SIDEBAR
+Quero um menu lateral inspirado nas referências, mas funcional:
+- fixo no desktop
+- colapsável
+- com largura expandida e largura compacta
+- ícones consistentes
+- labels claros
+- item ativo muito bem definido
+- hover discreto
+- submenu elegante
+- versão mobile em drawer
+- boa legibilidade em dark e light mode
+
+Sugestão de medidas:
+- expanded: 260px a 280px
+- collapsed: 72px a 84px
+
+3) HEADER / TOPBAR
+Criar cabeçalho limpo com:
+- título da página
+- breadcrumb quando necessário
+- ações principais
+- busca, quando fizer sentido
+- toggle de tema
+- espaço para perfil/notificações se já existir no sistema
+
+RESPONSIVIDADE
+Defina breakpoints claros e aplique comportamento coerente.
+
+Sugestão:
+- xs: até 480
+- sm: 481–767
+- md: 768–1023
+- lg: 1024–1365
+- xl: 1366–1599
+- 2xl: 1600+
+
+REGRAS POR DISPOSITIVO
+
+DESKTOP
+- sidebar fixa
+- ótimo uso horizontal
+- tabelas amplas
+- cards em grid
+- filtros visíveis
+- pouca perda de espaço
+
+TABLET
+- sidebar recolhível
+- grids reduzidos
+- formulários reorganizados
+- cards empilháveis quando necessário
+
+MOBILE
+- drawer lateral
+- ações principais destacadas
+- componentes compactos
+- formulários em coluna única
+- listas no lugar de tabelas quando fizer sentido
+- sem excesso de elementos por tela
+- priorizar ação operacional principal
+
+COMPONENTES BASE
+Quero que você crie/refatore componentes reutilizáveis.
+
+1) BUTTON
+Variantes:
+- primary
+- secondary
+- outline
+- ghost
+- danger
+- success
+- icon button
+
+Estados:
+- default
+- hover
+- active
+- disabled
+- loading
+
+2) INPUTS
+- text input
+- search input
+- select
+- multiselect
+- textarea
+- date field
+- number field
+- barcode/manual code field
+
+Requisitos:
+- altura consistente
+- label clara
+- estado de foco forte
+- erro legível
+- helper text coerente
+
+3) CARD
+Criar famílias de card:
+- summary card
+- KPI card
+- operational card
+- product card
+- status card
+- compact mobile card
+
+4) TABLE
+Padronizar tabelas do sistema:
+- cabeçalho legível
+- row hover
+- row selected
+- row active
+- sticky header quando útil
+- paginação
+- ordenação
+- filtros
+- ações por linha
+- estados de loading, empty, error
+- densidade ajustável
+
+IMPORTANTE:
+Criar pelo menos dois modos de densidade para tabela:
+- confortável
+- compacta operacional
+
+5) BADGES / STATUS
+Padronizar visual e semântica para:
+- pendente
+- em andamento
+- concluído
+- divergência
+- bloqueado
+- cancelado
+- erro
+- sucesso
+- aguardando
+
+6) MODAL / DRAWER / POPOVER
+- leves
+- rápidos
+- sem excesso de efeito
+- foco em leitura
+- botões claros
+- fechar evidente
+
+7) ALERTAS / TOASTS
+- sucesso
+- aviso
+- erro
+- informação
+- visual discreto, porém claro
+
+8) TABS
+- tabs de módulos
+- tabs internas
+- estados ativo/inativo
+- leitura clara em dark/light
+
+MÓDULOS WMS – PRIORIDADE FUNCIONAL
+Quero atenção especial aos módulos operacionais:
+- separação
+- conferência
+- recebimento
+- estoque
+- inventário
+- endereçamento
+- movimentação
+- romaneio
+
+Nesses módulos, a UI deve priorizar:
+- velocidade
+- legibilidade
+- status claros
+- áreas de clique/toque adequadas
+- baixa fricção
+- leitura rápida de item atual
+- ação principal da tela evidente
+- menos decoração e mais eficiência
+
+PADRÃO VISUAL PARA MÓDULOS OPERACIONAIS
+Crie um padrão específico para telas operacionais, diferente do dashboard gerencial:
+- mais densidade de informação
+- menos área vazia
+- cards mais compactos
+- tabelas/listas mais objetivas
+- contraste forte
+- feedback visual rápido
+- indicadores visuais de status do item/pedido atual
+
+CÓDIGO DE BARRAS
+Quero um componente visual padronizado de código de barras, inspirado na referência, mas funcional.
+
+REQUISITOS:
+- estilo elegante
+- limpo
+- nítido
+- com boa proporção
+- compatível com dark e light mode
+- componente reutilizável
+- exibir, quando aplicável:
+  - barcode
+  - número do código
+  - produto
+  - SKU
+  - lote
+  - endereço
+  - status
+
+IMPORTANTE:
+O barcode precisa ser operacional, não decorativo.
+
+Se o projeto usar JS/TS, utilize uma biblioteca confiável de barcode.
+Sugestão:
+- JsBarcode ou equivalente confiável já compatível com a stack
+Mas primeiro verifique a stack e use a melhor opção compatível.
+
+DASHBOARD E KPI
+Nos módulos gerenciais/dashboards:
+- cards KPI elegantes, mas sóbrios
+- números grandes e legíveis
+- comparação entre períodos clara
+- gráficos leves e úteis
+- sem poluição visual
+- tabelas auxiliares bem organizadas
+- filtros no topo
+- boa separação entre visão executiva e visão operacional
+
+PADRÃO DE TELAS
+Quero uniformizar a estrutura das páginas:
+
+Estrutura sugerida:
+- Header da página
+- linha de contexto/breadcrumb
+- faixa de filtros e ações
+- conteúdo principal em grid
+- cards/resumos
+- tabela ou lista principal
+- detalhes laterais ou drawers, quando necessário
+
+PADRÃO DE FORMULÁRIOS
+Padronizar:
+- espaçamentos
+- labels
+- agrupamento de campos
+- ações primárias/secundárias
+- estados de validação
+- foco visual
+- versão desktop e mobile coerentes
+
+MICROINTERAÇÕES
+Quero microinterações discretas, apenas onde agregam:
+- hover suave
+- transições curtas
+- foco visível
+- loading states
+- skeletons simples
+
+NÃO quero:
+- animações chamativas
+- efeitos pesados
+- elementos flutuando
+- excesso de transição
+
+PERFORMANCE
+A UI final precisa continuar leve.
+
+Requisitos:
+- evitar componentes pesados desnecessários
+- evitar re-render desnecessário
+- evitar CSS desorganizado
+- evitar bibliotecas grandes só por estética
+- manter boa performance em telas com tabelas e listas operacionais
+
+MODO DE EXECUÇÃO
+Quero que você implemente em fases:
+
+FASE 1
+- analisar aplicação atual
+- mapear stack
+- mapear componentes e layouts existentes
+- definir tokens
+- definir temas dark/light
+- definir estrutura do app shell
+
+FASE 2
+- refatorar sidebar
+- refatorar header/topbar
+- refatorar componentes base
+- padronizar botões, inputs, cards, badges, tabelas
+
+FASE 3
+- aplicar visual nas telas mais importantes
+- dashboard
+- estoque
+- separação
+- conferência
+- endereçamento
+- recebimento
+
+FASE 4
+- padronizar componentes de barcode
+- revisar responsividade
+- ajustar densidade operacional
+- revisar contraste/acessibilidade
+- revisar performance
+
+SE ESTIVER USANDO REACT + TAILWIND + SHADCN
+Se a stack atual permitir, implemente seguindo esta linha:
+- CSS variables para theme tokens
+- Tailwind conectado às variáveis
+- componentes base reutilizáveis
+- estrutura clara de layout
+- consistência entre páginas
+- sem duplicação de estilos isolados
+
+SE NÃO FOR ESSA STACK
+Adapte a implementação de modo equivalente, mantendo:
+- design tokens
+- themes centralizados
+- componentes reutilizáveis
+- layout shell
+- responsividade real
+- padronização visual total
+
+O QUE NÃO FAZER
+- não copiar as imagens literalmente
+- não inclinar layouts
+- não usar composições cenográficas
+- não criar mockups visuais em vez de telas reais
+- não exagerar no border radius
+- não exagerar nas sombras
+- não usar azul neon em excesso
+- não deixar as telas operacionais “bonitas porém lentas”
+- não sacrificar densidade útil por estética
+
+O QUE EU ESPERO COMO ENTREGA
+Quero receber:
+
+1. diagnóstico da UI atual
+2. proposta de arquitetura visual
+3. design tokens definidos
+4. temas dark/light implementados
+5. app shell padronizado
+6. sidebar refatorada
+7. topbar refatorada
+8. componentes base refatorados
+9. tabelas padronizadas
+10. cards padronizados
+11. componentes de barcode padronizados
+12. telas principais adaptadas
+13. responsividade aplicada
+14. explicação clara do que foi alterado
+15. garantia de preservação da funcionalidade
+
+CRITÉRIOS DE ACEITAÇÃO
+Só considerar concluído se:
+- a aplicação estiver visualmente alinhada à identidade das referências
+- a UI estiver mais profissional
+- a navegação estiver mais clara
+- o menu lateral estiver melhor
+- dark e light mode estiverem consistentes
+- os módulos operacionais estiverem mais funcionais
+- as tabelas estiverem mais legíveis
+- o barcode estiver visualmente coerente e funcional
+- a aplicação continuar leve
+- a regra de negócio continuar preservada
+
+IMPORTANTE FINAL
+Se qualquer elemento visual da referência atrapalhar a operação real do WMS, adapte de forma equivalente em vez de copiar literalmente.
+A prioridade final é:
+- produtividade
+- legibilidade
+- consistência
+- velocidade
+- usabilidade operacional
+- aparência premium
+
+
+Observação importante:
+Nos módulos operacionais do WMS, priorize densidade útil, clareza e velocidade. Quero menos “layout de vitrine” e mais “layout de operação premium”. O sistema deve parecer moderno e sofisticado, mas continuar extremamente funcional para quem trabalha rápido no dia a dia.

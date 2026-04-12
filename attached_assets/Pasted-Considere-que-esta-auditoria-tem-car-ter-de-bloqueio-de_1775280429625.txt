@@ -1,0 +1,53 @@
+Considere que esta auditoria tem caráter de bloqueio de implantação. Não quero uma análise diplomática, superficial ou otimista. Quero que você atue como um revisor técnico severo, com mentalidade de prevenção de incidente real em produção. Sempre que houver dúvida, adote a interpretação mais conservadora e mais segura para a operação.
+
+Não relativize falhas em módulos críticos. Não trate inconsistência de estoque, divergência de quantidades, falha de bipagem, erro de coleta, falso sucesso visual, ausência de log útil, concorrência sem proteção, persistência parcial, ou fluxo sem rollback como detalhe técnico. Trate esses pontos como potenciais causadores de transtorno operacional real.
+
+Se encontrar qualquer indício de que a aplicação pode:
+duplicar movimentação,
+salvar quantidade errada,
+exibir produto incorreto,
+permitir conflito entre usuários,
+finalizar operação sem persistir corretamente,
+registrar parcialmente uma ação,
+ou mascarar erro com aparência de sucesso,
+destaque isso como risco grave de produção.
+
+Quero que você tente ativamente reprovar o sistema, e só deixe de reprovar quando houver evidência suficiente de segurança, consistência e rastreabilidade. Não parta da premissa de que o sistema está apto. Parta da premissa de que ele precisa provar que está apto.
+
+Ao avaliar qualquer fluxo, responda mentalmente a estas perguntas:
+isso pode quebrar a operação?
+isso pode gerar retrabalho?
+isso pode causar erro humano induzido?
+isso pode gerar divergência de estoque?
+isso pode gerar problema silencioso difícil de rastrear?
+isso pode acontecer sob uso simultâneo?
+isso pode passar despercebido em teste leve e falhar em produção?
+
+Se a resposta for sim, classifique com rigor e proponha correção objetiva.
+
+Quero que você seja especialmente agressivo na análise de:
+coleta,
+bipagem,
+separação,
+conferência,
+visualização de produtos,
+quantidades,
+romaneio,
+eventos de botão,
+sincronização entre tela e banco,
+e qualidade probatória dos logs.
+
+Ao final, além do checklist, diga de forma direta:
+o que me impediria de implantar com segurança hoje,
+qual erro teria maior chance de gerar crise operacional,
+e qual conjunto mínimo de correções é indispensável antes do go-live.
+
+Faça esta auditoria com postura de bloqueio de implantação. Tente encontrar motivos concretos para reprovar o sistema, e só considere aprovação se houver evidência suficiente de estabilidade, consistência, rastreabilidade e segurança operacional.
+
+Se houver qualquer risco de erro de quantidade, produto incorreto, falha de bipagem, duplicidade de movimentação, divergência entre tela e banco, falso sucesso, concorrência sem proteção ou log insuficiente em ação crítica, trate como risco grave de produção.
+
+Não suavize falhas, não assuma que ausência de erro visível significa segurança, e não aprove implicitamente por falta de evidência. Onde faltar prova, sinalize como risco ou ausência de validação.
+
+Quero foco máximo em coleta, separação, conferência, balcão, romaneio, botões, logs, quantidades, visualização de produtos e uso simultâneo por múltiplos usuários.
+
+No final, diga de forma objetiva: o que impede o go-live hoje, qual é o risco mais perigoso, e qual é o conjunto mínimo de correções indispensáveis antes da implantação.

@@ -1,0 +1,286 @@
+Atue como engenheiro de software sênior responsável por uma intervenção crítica em produção. Sua função não é apenas sugerir melhorias: é revisar, refatorar, endurecer, testar e corrigir integralmente minha aplicação antes da liberação final.
+
+Você deve assumir que esta alteração é crítica, que a aplicação já possui módulos em funcionamento e que a nova versão precisa sair operacional, estável, rápida, segura e sem mistura de dados entre empresas.
+
+==================================================
+OBJETIVO CENTRAL
+==================================================
+
+Refatorar a aplicação para operar em modelo multiempresa com segregação total de contexto, dados e processos por empresa selecionada, além de alterar a lógica do módulo de separação de pedidos, revisar regras antigas que podem ter se tornado obsoletas, endurecer concorrência, revisar segurança e testar tudo antes de finalizar.
+
+==================================================
+CONTEXTO OBRIGATÓRIO
+==================================================
+
+A aplicação já existe e hoje opera com lógica que precisa ser adaptada.
+
+A partir desta tarefa, a empresa selecionada no acesso do operador deve se tornar o contexto principal e obrigatório de toda a aplicação.
+
+Isso significa que a empresa ativa precisa controlar integralmente:
+- o que o usuário pode visualizar
+- o que o backend pode retornar
+- o que as queries podem consultar
+- o que os relatórios podem exibir
+- o que pode ser cacheado
+- o que pode permanecer em estado local
+- o que pode ser travado por operador
+- o que pode ser manipulado em qualquer módulo
+
+Não pode haver nenhuma hipótese de cruzamento de dados entre empresas.
+
+==================================================
+REGRA DE NEGÓCIO PRINCIPAL
+==================================================
+
+Se o operador acessar pela Empresa 1:
+- ele deve visualizar somente pedidos da Empresa 1
+- deve visualizar somente os pontos de retirada operacionais da Empresa 1 definidos para o módulo em questão
+- não pode ver nenhum dado de outra empresa em nenhuma tela, API, relatório, cache, rota, estado local ou consulta
+
+Exemplo obrigatório atual:
+- no fluxo operacional normal, ao acessar pela Empresa 1, o operador só pode visualizar pedidos da Empresa 1 vinculados aos pontos de retirada 58 e 4
+- nos relatórios de romaneio de separação da Empresa 1, devem ser exibidos todos os pontos de retirada configurados para esse relatório, sendo 58, 4, 1 e 2
+
+Essa regra não pode ficar espalhada de forma frágil. Ela deve ser centralizada, consistente e aplicada em toda a aplicação.
+
+==================================================
+ESCOPO FUNCIONAL OBRIGATÓRIO
+==================================================
+
+Você deve revisar e adaptar todos os módulos, sem exceção, para garantir segregação total por empresa, incluindo no mínimo:
+- pedidos
+- separação
+- conferência
+- pontos de retirada
+- romaneios
+- relatórios
+- notas fiscais
+- rotas
+- endereços
+- estoque
+- dashboards
+- filtros
+- APIs
+- serviços
+- logs
+- cache
+- persistência local
+- estados reativos
+- travamentos de pedido
+- qualquer agregação ou dado derivado
+
+Se algum módulo aparentemente “não depende disso”, valide tecnicamente antes de concluir. Não assuma. Verifique.
+
+==================================================
+ALTERAÇÃO OBRIGATÓRIA NO MÓDULO DE SEPARAÇÃO
+==================================================
+
+A lógica atual de separação por seção deve ser revisada, pois não será mais a regra principal de operação.
+
+Novo comportamento obrigatório:
+- o separador deve conseguir visualizar todas as seções do pedido
+- o separador deve conseguir separar o pedido completo
+- a base de filtro operacional deve passar a ser por rota
+- a experiência precisa continuar simples, rápida e segura
+
+Você deve revisar:
+- telas
+- filtros
+- regras de negócio
+- endpoints
+- consultas
+- permissões
+- travas
+- estados locais
+- qualquer dependência antiga da lógica por seção
+
+Se a configuração de seção por usuário se tornar desnecessária, obsoleta ou conflitante com o novo modelo, remova ou adapte corretamente. Não manter legado inútil por medo de mexer.
+
+==================================================
+CONCORRÊNCIA E BLOQUEIO DE PEDIDOS
+==================================================
+
+Aplique ao módulo de separação a mesma dinâmica conceitual da conferência: dois separadores não podem acessar o mesmo pedido ao mesmo tempo.
+
+Porém, não apenas copie a ideia. Revise a implementação para garantir robustez real.
+
+Requisitos obrigatórios:
+- lock atômico
+- proteção contra race condition
+- consistência em múltiplas abas
+- consistência após refresh
+- consistência em reconexão
+- proteção contra disputa simultânea
+- liberação correta do lock
+- impossibilidade de sobrescrever progresso de outro operador
+
+Se a implementação atual não for forte o suficiente, reestruture corretamente.
+
+==================================================
+SEGURANÇA E ISOLAMENTO DE CONTEXTO
+==================================================
+
+Você deve garantir isolamento por empresa no backend de forma obrigatória.
+
+Exigências:
+- nunca confiar somente no frontend
+- toda rota deve validar empresa ativa
+- toda query deve respeitar empresa
+- todo endpoint deve recusar contexto divergente
+- nenhum cache pode reaproveitar dados de outra empresa
+- toda troca de empresa deve invalidar contexto anterior
+- nenhum usuário pode obter dados de outra empresa via URL, payload, querystring, estado local, cache, ou manipulação manual
+
+Quero endurecimento de segurança real, não somente filtro visual.
+
+==================================================
+PERFORMANCE E ESTABILIDADE
+==================================================
+
+O sistema precisa continuar extremamente rápido.
+
+Você deve revisar e otimizar o que for necessário em:
+- queries
+- filtros
+- índices
+- paginação
+- processamento
+- renderização
+- cache
+- busca de dados
+- sincronização
+- estados derivados
+- tráfego entre frontend e backend
+- coleta de dados
+
+Não aceito:
+- travamentos
+- lentidão
+- comportamento inconsistente
+- gargalos introduzidos pela nova lógica
+- regressão de performance
+
+Se alguma refatoração piorar a performance, ajuste até ficar estável.
+
+==================================================
+REVISÃO COMPLETA DE BUGS E RISCOS
+==================================================
+
+Você deve fazer uma auditoria completa do sistema, não apenas das partes alteradas diretamente.
+
+Procure e corrija imediatamente:
+- bugs funcionais
+- falhas de lógica
+- inconsistências entre módulos
+- validações incompletas
+- condições de corrida
+- conflitos de estado
+- mistura de empresa
+- falhas de autorização
+- problemas de cache
+- dependências frágeis
+- fluxos quebráveis
+- regressões ocultas
+- brechas de segurança
+- comportamentos perigosos que possam causar problema futuro
+
+Se encontrar algo “não solicitado”, mas que representa risco técnico ou operacional, corrija agora.
+
+==================================================
+TESTES OBRIGATÓRIOS
+==================================================
+
+Essa versão será colocada para rodar sem fase manual formal de testes. Portanto, você deve assumir responsabilidade técnica por validar o sistema antes de concluir.
+
+Você deve testar obrigatoriamente:
+- seleção de empresa
+- troca de empresa
+- carregamento de pedidos
+- filtros por ponto de retirada
+- relatórios de romaneio
+- notas fiscais
+- rotas
+- endereços
+- estoque
+- separação
+- conferência
+- travas de pedido
+- concorrência entre usuários
+- cache
+- persistência local
+- estados da interface
+- APIs
+- filtros de backend
+- regressão dos fluxos já existentes
+
+Faça testes de cenário real e testes de regressão.
+Se encontrar qualquer falha, corrija antes de encerrar.
+
+Não finalize sem validar tudo.
+
+==================================================
+MODO DE EXECUÇÃO
+==================================================
+
+Não quero resposta superficial.
+Não quero análise teórica solta.
+Não quero lista de sugestões sem implementação.
+Não quero “posso fazer”.
+Quero que você faça.
+
+Sua sequência de trabalho deve ser:
+1. mapear os pontos impactados
+2. identificar riscos
+3. refatorar arquitetura e fluxos necessários
+4. corrigir regras de negócio
+5. endurecer concorrência e segurança
+6. revisar performance
+7. executar testes
+8. corrigir falhas encontradas
+9. só então concluir
+
+Não pule etapas.
+
+==================================================
+CRITÉRIO DE ACEITE
+==================================================
+
+Só considere a tarefa concluída quando estiver comprovado que:
+- a aplicação está 100% segregada por empresa
+- não existe mistura de dados entre empresas
+- os pedidos respeitam empresa e pontos corretos
+- os romaneios respeitam a empresa e mostram os pontos corretos
+- a separação passou a operar com filtro por rota
+- o separador consegue visualizar e separar o pedido completo
+- dois separadores não conseguem acessar o mesmo pedido ao mesmo tempo
+- a lógica antiga de seção foi revisada corretamente
+- backend e frontend estão consistentes com o novo modelo
+- a aplicação continua rápida e estável
+- bugs, riscos e inconsistências foram corrigidos
+- os fluxos foram testados com rigor
+
+==================================================
+FORMATO DE ENTREGA OBRIGATÓRIO
+==================================================
+
+Ao final, me entregue obrigatoriamente:
+
+1. Resumo objetivo do que foi implementado
+2. Lista dos arquivos e módulos alterados
+3. Explicação da arquitetura de segregação por empresa
+4. Explicação da nova lógica do módulo de separação
+5. Explicação do mecanismo de lock entre separadores
+6. Lista dos bugs, falhas e riscos corrigidos
+7. Lista detalhada dos testes executados
+8. Confirmação explícita de revisão de backend, frontend, queries, cache, concorrência e segurança
+9. Observações sobre correções preventivas feitas para evitar problemas futuros
+
+==================================================
+REGRA FINAL
+==================================================
+
+Não trate essa tarefa como ajuste simples.
+Trate como intervenção crítica de engenharia.
+Não devolva resposta genérica.
+Não finalize por inferência.
+Revise, implemente, corrija, teste e só conclua quando estiver consistente.

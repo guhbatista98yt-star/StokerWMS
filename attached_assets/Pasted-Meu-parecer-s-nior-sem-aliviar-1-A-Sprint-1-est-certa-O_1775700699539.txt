@@ -1,0 +1,29 @@
+Meu parecer sênior, sem aliviar:
+
+1. A Sprint 1 está certa.
+Os três itens críticos escolhidos são exatamente os que mais podem te explodir na operação: conflito entre pendingDelta e banco, dedução de endereço fora de transação e descarte silencioso da fila offline. Esses três não são “melhorias”; são correções de integridade operacional. Se algum deles ficar para depois, você pode ter separação aparentemente concluída, endereço mentindo saldo e operador perdendo bipagem sem perceber.
+
+2. Eu subiria o RISK-04 de sprint.
+No backlog ele está na Sprint 2, mas eu trataria a persistência de msgId no banco como Sprint 1.5, ou até Sprint 1, se já existe chance de queda de conexão, reinício do Node ou reenvio de scan. Hoje a deduplicação ainda depende de processedMsgIds em memória; isso é suficiente para ambiente estável de processo único, mas não é suficiente para blindar duplicidade rara em produção. O próprio backlog já propõe a correção certa: scan_log persistido dentro da mesma transação do update.
+
+3. O RISK-05 está correto, mas a implementação proposta ainda merece um ajuste.
+O backlog manda o frontend enviar orderItemId “do que está em foco na UI no momento da bipagem”. Eu não usaria “o que está em foco” como verdade de negócio. O módulo já faz autoavanço de produto, muda de aba automaticamente ao bipar e trabalha com cache local para resolver o alvo. Então “foco visual” pode não ser a mesma coisa que “item efetivamente escolhido pela fila” em cenários de corrida. O melhor é o cliente enviar o item resolvido no momento exato da confirmação do QtyModal / do enqueue final, não simplesmente o item visível na tela. Senão você diminui o risco, mas não zera.
+
+4. Falta um risco explícito no backlog: o sync do Python ainda é uma fonte estrutural de inconsistência transitória.
+A documentação admite que o sync remove/reinsere dados e que work units podem desaparecer temporariamente da query. Existem proteções boas, como safety redirect com 15s, suspensão de polling durante bipagem e atraso de invalidação SSE, mas isso ainda é defesa reativa. O backlog não traz uma task específica para blindar o módulo contra estados intermediários do sync. Eu colocaria um risco novo para isso, algo como: “durante sync, UI e fila operam sobre visão transitória”.
+
+5. Também falta observabilidade de nível forense.
+Para bug raro de operação, log genérico não basta. O módulo já registra audit log assíncrono no scan, mas o backlog ainda não trata correlação ponta a ponta: msgId, itemId, workUnitId, epoch, origem do canal de scan, horário do enqueue, ACK, reset e conclusão. Sem isso, quando acontecer um caso “o operador diz que bipou”, você continua dependendo de interpretação, não de prova.
+
+6. A escolha do RISK-02 depende da maturidade do teu endereço.
+Se teu saldo por endereço já é confiável e raramente falha, eu iria de opção transacional. Se teu cadastro/endereço ainda passa por inconsistência operacional, eu prefiro fila persistida com painel de falhas para supervisor. Forçar transação num cenário em que endereço falha com frequência pode travar a operação no pior momento. O backlog já separa bem essas duas estratégias.
+
+7. O RISK-10 está muito bem pensado, mas não resolve teus bugs mais caros de agora.
+Sessão de picking no servidor é a solução certa para robustez de múltiplos dispositivos, troca de turno e retomada confiável. Mas eu concordo com a dependência dele vir depois de estabilizar conflito de estado e epoch de item. Se você persistir sessão antes de estabilizar coerência do item, só vai persistir um contexto ainda frágil.
+
+Meu veredito final: o backlog está bom e tecnicamente honesto. Ele não está escondendo os problemas reais. Mas, se eu estivesse aprovando isso como sênior para produção, eu faria duas mudanças antes de bater o martelo:
+
+puxaria idempotência persistida (msgId no banco) para antes da expansão operacional;
+abriria uma task nova só para blindagem explícita contra estados transitórios do sync Python.
+
+Em linguagem direta: hoje o módulo já saiu da zona de desastre óbvio, mas ainda não saiu da zona de bug raro, caro e difícil de provar. O backlog atual te leva para fora dessa zona — com a ressalva de que eu apertaria esses dois pontos antes.

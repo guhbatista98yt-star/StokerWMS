@@ -1,0 +1,84 @@
+
+===================================================================
+  STOKER SYNC  |  2026-04-09 01:21:22  |  modo=serve · SO=Windows
+===================================================================
+
+
+------------------------------------------------------
+  VERIFICANDO SCHEMA DO BANCO
+------------------------------------------------------
+[01:21:22] -   Todas as 33 tabelas já existem
+[01:21:23] -   Todas as colunas verificadas — nada a adicionar
+[01:21:23] -   Índices verificados
+[01:21:23] + Schema verificado com sucesso
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[01:21:23] > DB2 — conectando...
+[01:21:23] + DB2 — conectado em 0.15s
+[01:21:23] + PostgreSQL local — conectado
+[01:21:23] > Produtos — sincronizando lista completa do ERP...
+[01:21:23] X Erro SQL DB2: ('42S22', '[42S22] [IBM][CLI Driver][DB2/LINUXX8664] SQL0206N  "PR.FLAGATIVO" não é válido no contexto em que foi utilizado.  SQLSTATE=42703\r\n (-206) (SQLExecDirectW)')
+[01:21:23] - Query (500 chars): SELECT
+    PG.IDPRODUTO,
+    PG.IDSUBPRODUTO,
+    PG.DESCRRESPRODUTO,
+    PR.IDSECAO,
+    S.DESCRSECAO,
+
+    PVF.FABRICANTE,
+    PVF.IDCODBARPROD AS CODBARRAS,
+
+    PF1.CODIGOINTERNOFORN,
+
+    CBX.CODBARCX AS CODBARRAS_CAIXA,
+
+    PR.FLAGATIVO
+
+FROM DBA.PRODUTO_GRADE PG
+
+JOIN DBA.PRODUTO PR
+  ON PR.IDPRODUTO = PG.IDPRODUTO
+
+LEFT JOIN DBA.SECAO S
+  ON S.IDSECAO = PR.IDSECAO
+
+LEFT JOIN DBA.PRODUTOS_VIEW PVF
+  ON PVF.IDSUBPRODUTO = PG.IDSUBPRODUTO
+
+LEFT JOIN LATERAL (
+    SELECT RTRIM(PF.CODIGOINTE...
+[01:21:23] ! Produtos — nenhum registro retornado do DB2
+[01:21:23] > Orçamentos — buscando últimos 31 dias...
+[01:21:37] + Orçamentos — 28451 obtidos · 28451 removidos (>=2026-03-08) · 28451 inseridos · 0 erros · 14.5s
+[01:21:41] + Transformação — 5319 pedidos · 0 produtos novos · 0 itens novos · 3.2s
+[01:21:41] > Estoque — sincronizando do ERP...
+[01:21:44] + Estoque — 22015 obtidos · 7238 atualizados · 0 erros · 2.8s
+[01:21:44] > Box Barcodes — sincronizando...
+[01:21:44] + Box Barcodes — 332 produtos atualizados · 0.3s
+[01:21:44] > Endereços WMS — sincronizando...
+[01:21:44] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.1s
+[01:21:44] > NFs Recebimento — sincronizando...
+[01:21:46] + NFs Recebimento — 482 NFs · 0 novas · 482 atualizadas · 4328 itens · 1.7s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=23.0s
+------------------------------------------------------
+
+[01:21:46] + Loop de sync em background (300s)
+
+------------------------------------------------------
+  INICIANDO SERVIDOR WEB
+------------------------------------------------------
+[01:21:46] + Servidor disponível em → http://localhost:411
+Seeding database...
+Checking for existing users...
+Existing users count: 14
+Database already seeded
+1:21:48 AM [express] [Routes] Registering routes...
+1:21:48 AM [print] [agent] WebSocket server iniciado em /ws/print-agent
+1:21:48 AM [express] [scanning-ws] WebSocket scanning server iniciado em /ws/scanning
+1:21:49 AM [express] Servidor iniciado na porta 411
+1:21:49 AM [print] 5 impressora(s) carregada(s) | padrão: "CutePDF Writer (1 redirecionada)"
+1:21:53 AM [express] [Auto-Sync] Triggering DB sync...

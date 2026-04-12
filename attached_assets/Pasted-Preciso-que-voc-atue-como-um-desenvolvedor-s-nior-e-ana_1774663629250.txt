@@ -1,0 +1,324 @@
+Preciso que você atue como um desenvolvedor sênior e analista técnico do meu projeto, com responsabilidade de revisar, corrigir e implementar alterações reais no sistema com segurança, consistência e sem quebrar funcionalidades existentes.
+
+IMPORTANTE:
+- Não quero resposta genérica.
+- Não quero apenas sugestões.
+- Quero implementação real no código.
+- Não quero correções paliativas.
+- Quero que você revise backend, frontend, queries, regras de negócio, permissões, montagem de relatórios, experiência operacional e consistência dos dados.
+- Se houver falha estrutural, corrija da forma mais robusta possível.
+- Trate tudo abaixo como alteração para uso real em produção.
+
+==================================================
+CONTEXTO GERAL
+==================================================
+
+O sistema possui módulos operacionais e relatórios utilizados no processo logístico, recebimento, transferência, contagem, check-in e auditoria.
+
+As alterações abaixo são críticas porque impactam diretamente:
+- separação de pedidos;
+- confiabilidade dos relatórios;
+- usabilidade operacional;
+- controle de lote e validade;
+- permissões por usuário;
+- conferência e auditoria de estoque.
+
+Quero que você leia todo o contexto, identifique os arquivos impactados e faça a implementação completa, revisando todo o fluxo necessário para que as mudanças fiquem corretas de ponta a ponta.
+
+==================================================
+1) RELATÓRIO / ROMANEIO / RELATÓRIOS EM GERAL
+==================================================
+
+1.1 - Confiabilidade total do relatório de separação / romaneio
+Existe um problema crítico: o relatório está trazendo produtos de pontos de retirada que não foram selecionados, e às vezes deixa de trazer produtos que deveriam aparecer.
+
+Exemplo observado: pedido 478356.
+
+Quero que você corrija isso de forma definitiva para garantir que:
+- somente apareçam produtos dos pedidos selecionados;
+- somente apareçam produtos dos pontos de retirada selecionados;
+- somente apareçam produtos da empresa selecionada;
+- todos os produtos válidos apareçam no relatório;
+- nenhum produto válido fique de fora;
+- nenhum produto indevido entre no relatório.
+
+Você deve investigar toda a cadeia:
+- query;
+- joins;
+- filtros no backend;
+- filtros no frontend;
+- montagem do payload;
+- agrupamentos;
+- distincts;
+- deduplicação;
+- filtros por empresa;
+- filtros por ponto de retirada;
+- filtros por pedido;
+- regras por seção;
+- cache;
+- reaproveitamento de estado;
+- transformação intermediária dos dados.
+
+Quero a causa raiz identificada e corrigida, não apenas mascarada.
+
+1.2 - Código interno de fábrica no relatório
+No relatório, preciso que saia também o código interno de fábrica dos produtos.
+Esse campo deve aparecer antes da coluna “Descrição do Produto”.
+
+A ordem esperada deve respeitar isso:
+- [Código interno de fábrica]
+- [Descrição do produto]
+- demais colunas já existentes
+
+Esse campo deve vir corretamente da origem de dados dos produtos, sem risco de associar código errado a item errado.
+
+1.3 - Visualização dos relatórios
+Preciso que a visualização dos relatórios seja em formato de lista, para melhorar a leitura e navegação operacional.
+
+Revise a renderização atual e ajuste para modo lista, com boa visualização, organização e leitura rápida.
+
+1.4 - Relatório ciclo de contagem
+O relatório “ciclo de contagem” está com erro.
+Preciso que ele seja corrigido para que o auditor tenha uma análise precisa, confiável e detalhada.
+
+Revise:
+- fonte de dados;
+- filtros;
+- cálculos;
+- status;
+- consolidação das informações;
+- exibição;
+- integridade dos dados apresentados.
+
+1.5 - Relatório de movimentações
+O relatório de movimentações também está sem funcionar.
+Preciso que seja corrigido completamente.
+
+Revise:
+- endpoint;
+- query;
+- filtros;
+- paginação;
+- renderização;
+- transformação de dados;
+- tratamento de erro.
+
+==================================================
+2) MÓDULO DE PERMISSÕES DE ACESSO
+==================================================
+
+No módulo “Permissões de Acesso”, preciso de um sub-menu específico para definir quais relatórios ficarão disponíveis para cada usuário.
+
+Objetivo:
+- permitir controlar, por usuário ou perfil, quais relatórios ele pode visualizar/acessar;
+- esconder da interface os relatórios sem permissão;
+- proteger também no backend ou rota/API, para impedir acesso indevido apenas por URL ou chamada direta;
+- manter coerência com o modelo atual de permissões do sistema.
+
+Quero que você:
+- crie esse sub-menu;
+- integre isso à lógica já existente de permissões;
+- defina a exibição dos relatórios com base nessa configuração;
+- garanta segurança real, não apenas ocultação visual.
+
+==================================================
+3) MÓDULO RECEBIMENTO
+==================================================
+
+3.1 - Lote e validade por produto
+No módulo de recebimento, lote e validade não podem mais ser gerais.
+Precisam ser definidos por produto.
+
+Quero que cada produto tenha sua própria configuração de lote e validade.
+
+Implementação esperada:
+- em cada item/produto do recebimento, deve existir um botão ou ação de configuração;
+- ao clicar, o operador pode informar lote e validade daquele produto específico;
+- esse preenchimento deve ser opcional, não obrigatório para todos os itens;
+- a estrutura de dados deve suportar lote e validade por item, sem sobrescrever geral;
+- a interface deve deixar isso claro e fácil para operação.
+
+3.2 - Código da etiqueta de palete simplificado
+Preciso que o código da etiqueta de palete seja um pouco mais simplificado.
+
+Analise a lógica atual de geração e simplifique sem perder:
+- unicidade;
+- rastreabilidade;
+- legibilidade operacional.
+
+A simplificação deve facilitar digitação, leitura e uso no processo.
+
+==================================================
+4) ABA IMPORTAR NF / NOTAS FISCAIS
+==================================================
+
+Na aba “Importar NF”, dentro de “Notas Fiscais”, não precisa exibir a lista de NFs automaticamente.
+
+Novo comportamento desejado:
+- não exibir a listagem geral de NFs;
+- só mostrar resultado quando o usuário digitar o número da NF;
+- ou seja, a busca deve ser sob demanda pelo número informado.
+
+Revise a tela e o fluxo para:
+- remover a poluição visual da lista;
+- deixar a busca mais objetiva;
+- evitar carregamento desnecessário.
+
+==================================================
+5) MÓDULO CHECK-IN
+==================================================
+
+5.1 - Sugestão de endereço ao digitar
+No módulo Check-in, ao ir digitando o endereço de destino, preciso que cada input vá sugerindo endereços compatíveis.
+
+Exemplo:
+- ao digitar bairro, sugerir bairros;
+- ao digitar rua, sugerir ruas;
+- ao digitar demais campos, sugerir opções compatíveis.
+
+Quero autocomplete/sugestão progressiva para facilitar o preenchimento e reduzir erro operacional.
+
+5.2 - Input “escanear pallet” sem abrir teclado automaticamente
+No input “escanear pallet”, o teclado não deve abrir automaticamente.
+Ele só deve abrir se o operador clicar no ícone do teclado.
+
+Esse comportamento também deve ser aplicado no módulo de transferência.
+
+Objetivo:
+- facilitar operação com leitor/bipador;
+- evitar abertura de teclado sem necessidade;
+- manter opção manual quando o operador quiser digitar.
+
+==================================================
+6) CADASTRO / CRIAÇÃO DE ENDEREÇO
+==================================================
+
+Ao criar um endereço, sempre que houver letras, elas devem ser convertidas para maiúsculas.
+
+Quero isso aplicado de forma consistente:
+- na interface;
+- na persistência dos dados;
+- sem depender apenas do usuário digitar em maiúsculo.
+
+Evite inconsistência entre cadastro, busca, comparação e exibição.
+
+==================================================
+7) MÓDULO TRANSFERÊNCIA
+==================================================
+
+No módulo de transferência, o input principal é para bipar o código do endereço.
+
+Quero que esse módulo também tenha os campos de endereço com sugestão/autocomplete, como:
+- bairro;
+- rua;
+- demais campos relevantes.
+
+Objetivo:
+- permitir localizar o endereço não só por código;
+- facilitar operação quando precisar pesquisar manualmente;
+- manter o fluxo de bipagem, mas enriquecer a busca com sugestões.
+
+Além disso:
+- o comportamento do teclado no input de leitura também deve seguir a regra:
+  - não abrir teclado automaticamente;
+  - abrir somente ao clicar no ícone do teclado.
+
+==================================================
+8) MÓDULO CONTAGEM
+==================================================
+
+Quero ajustes na contagem por endereço, por pallet e por produto.
+
+8.1 - Contagem por endereço
+Ao marcar “por endereço”, preciso que:
+- seja informado o endereço do pallet;
+- os campos do endereço tenham sugestão/autocomplete ao digitar;
+- depois de localizar o endereço/pallet, sejam listados os produtos e quantidades existentes naquele pallet para realizar a contagem.
+
+8.2 - Contagem por pallet
+Na contagem por pallet:
+- informar o código do pallet;
+- após localizar, listar os produtos e quantidades desse pallet para contagem.
+
+8.3 - Contagem por produto
+Na contagem por produto:
+- pode autorizar adicionar produtos manualmente para realizar a auditoria;
+- essa modalidade pode ser mais flexível do que por endereço ou pallet.
+
+8.4 - Restrições importantes
+Para contagem por pallet ou por endereço:
+- somente devem ser permitidos os produtos realmente contidos nesses objetos;
+- não autorizar incluir produto que não pertença àquele pallet/endereço;
+- a listagem deve refletir exatamente o conteúdo daquele objeto logístico.
+
+8.5 - Regra de imutabilidade após lançamento
+Não autorize alterar uma contagem após ela ser lançada.
+
+Se houver necessidade de ajuste posterior:
+- criar uma nova contagem complementar;
+- exigir que o operador informe na observação o motivo do complemento/ajuste.
+
+Quero que essa regra seja aplicada tanto em interface quanto em lógica de persistência, para evitar alteração indevida de histórico.
+
+==================================================
+9) REGRAS GERAIS DE IMPLEMENTAÇÃO
+==================================================
+
+Você deve:
+
+1. Analisar os impactos de todas essas mudanças antes de codificar.
+2. Identificar todos os arquivos impactados.
+3. Revisar backend, frontend, banco, endpoints, permissões e montagem de dados.
+4. Corrigir problemas de lógica encontrados no caminho.
+5. Garantir que as alterações não quebrem fluxos existentes.
+6. Não fazer remendos visuais sem proteção real na lógica.
+7. Escrever código limpo, legível e de fácil manutenção.
+8. Se necessário, refatorar com segurança para suportar corretamente essas regras.
+9. Validar estados antigos, cache, filtros persistidos e efeitos colaterais.
+10. Garantir coerência entre interface e backend.
+
+==================================================
+10) CRITÉRIOS DE ACEITAÇÃO
+==================================================
+
+A entrega só deve ser considerada concluída se:
+
+- o relatório trouxer exatamente os produtos corretos, sem faltar e sem sobrar;
+- o código interno de fábrica aparecer antes da descrição do produto no relatório;
+- os relatórios estiverem em visualização de lista;
+- existir sub-menu de permissões para definir quais relatórios cada usuário pode acessar;
+- lote e validade no recebimento funcionarem por produto, com configuração opcional por item;
+- o código da etiqueta de palete estiver simplificado sem perder controle;
+- a aba Importar NF não exibir lista de NF automaticamente, apenas por busca do número;
+- o Check-in tiver sugestões de endereço por digitação;
+- o input escanear pallet não abra teclado automaticamente, salvo clique no ícone;
+- criação de endereço salve letras em maiúsculo;
+- transferência tenha busca por endereço com campos e sugestões;
+- contagem por endereço e por pallet liste apenas os produtos reais daqueles objetos;
+- contagem por produto permita adicionar produtos para auditoria;
+- não seja possível alterar contagem já lançada;
+- o relatório de ciclo de contagem esteja corrigido;
+- o relatório de movimentações esteja funcionando corretamente.
+
+==================================================
+11) ENTREGA FINAL OBRIGATÓRIA
+==================================================
+
+Ao concluir, me entregue um resumo objetivo contendo:
+
+1. Quais arquivos foram alterados.
+2. O que foi alterado em cada arquivo.
+3. Qual era a causa raiz dos erros encontrados.
+4. Como a nova lógica garante integridade dos dados.
+5. Quais validações foram adicionadas.
+6. Quais regras de permissão foram implementadas.
+7. Quais cenários foram testados.
+8. Quais riscos foram evitados.
+9. Se houver qualquer limitação residual, informe claramente.
+
+IMPORTANTE FINAL
+Faça a implementação real no código.
+Não responda apenas com plano.
+Não responda apenas com hipótese.
+Não entregue correção parcial.
+Quero a solução completa, coerente, segura e pronta para uso.

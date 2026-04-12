@@ -1,0 +1,42 @@
+Modulo Recebimento:
+- Inative o teclado ao clicar na barra de coleta de codigo de barras, deixa um icone de teclado ao lado, se caso quiser abrir o teclado para digitar o codigo do produto.
+
+- Em Pallets Aguardando Endereço, preciso ter a opção de editar e apagar um pallet criado.
+
+- Opção para Gerar Pallet com alguma nota fiscal atribuida. Caso essa opção não esteja ativada, só atribuir quantidade de produtos baseado no estoque atual, por exemplo, se no estoque consta 100 unidade de um produto, não permitir colocar 101 unidades, pois esse numero não existe, mas se ele quiser atribuir 50 unidades, as outras 50 ficará em pick se caso não tiver outro pallet e endereço atribuido.
+
+- Sempre mostrar a quantidade real do estoque pick e alocado se existir.
+
+
+Modulo Check-in / Alocação:
+- Permitir alterar, remover produtos e quantidades.
+
+- Em cada campo do endereço de destino, não abra o teclado, somente de clicar no icone do teclado, para digitar os endereços.
+
+- Retira as letras do input.
+
+- Sempre mostrar a quantidade real do estoque pick e alocado se existir.
+
+- P
+
+
+Modulo Transferência:
+- Permite definir a quantidade ou o produto a ser transferido.
+
+- Sempre mostrar a quantidade real do estoque pick e alocado se existir.
+
+
+Modulo Ciclo de Contagem:
+- permite realizar auditoria de estoque, por produto, pallet, endereço.
+
+- Não mostrar estoque no ciclo de contagem, pois ela precisa ser cega. Apresente, informações necessarias do produto, tipo o fabricante, referencia, validade(permitir alterar ou definir), lote... 
+
+
+Modulo Buscar Produtos:
+- No modo de pequisa Código, só apresenta o produto com o codigo ERP informado, e não outros produtos que contem o mesmo numero no codigo. Mostre o produto somente se estiver o codigo ERP exato.
+
+- Preciso das informações um pouco maiores e a lista dos produtos dentro de uma caixa de lista.
+
+
+
+Preciso que o layout, UI/UX seja melhorada e responsiva para coletores de dados Smartfone, pois não pode ter card ou informações vazando da tela ou do menu.

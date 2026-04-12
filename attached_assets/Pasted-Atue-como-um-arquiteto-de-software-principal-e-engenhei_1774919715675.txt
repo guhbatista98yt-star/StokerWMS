@@ -1,0 +1,480 @@
+Atue como um arquiteto de software principal e engenheiro sênior especialista em WMS, segurança, concorrência, integridade transacional, performance, UX operacional crítica e prevenção de regressão.
+
+Sua missão é fazer uma AUDITORIA TÉCNICA TOTAL, PROFUNDA E CIRÚRGICA em toda a minha aplicação WMS, com foco máximo nos módulos:
+
+- Separação
+- Conferência
+- Balcão
+
+Esses módulos são o coração da operação e precisam funcionar com:
+- precisão operacional máxima
+- estabilidade máxima
+- agilidade máxima
+- previsibilidade máxima
+- consistência total entre frontend, backend e banco
+- segurança contra falhas humanas, técnicas e concorrenciais
+
+POSTURA OBRIGATÓRIA
+
+Quero que você revise esta aplicação como se fosse o responsável técnico final por aprovar a entrada dela em produção real.
+
+Não faça análise superficial.
+Não assuma que algo está correto só porque “funciona”.
+Não aceite paliativos.
+Não aceite lógica frágil.
+Não aceite código ambíguo.
+Não aceite comportamento implícito perigoso.
+Não aceite fluxo crítico dependente apenas do frontend.
+Não aceite risco de regressão silenciosa.
+
+Quero que você encontre, explique e corrija tudo o que um programador sênior realmente experiente jamais deixaria passar em um WMS operacional.
+
+OBJETIVO CENTRAL
+
+Quero eliminar ou endurecer qualquer risco que possa causar:
+
+- mistura de pedidos
+- separação errada
+- conferência errada
+- atendimento de balcão no pedido errado
+- item de um pedido aparecendo em outro
+- estado residual de operação anterior contaminando operação atual
+- stale state
+- race condition
+- sessão antiga contaminando sessão nova
+- resposta tardia sobrescrevendo estado atual
+- pedido “ressuscitando” após conclusão
+- lock mal implementado
+- lock não liberado
+- lock burlado
+- dois operadores no mesmo pedido sem proteção real
+- pedido reaparecendo na lista indevidamente
+- conclusão automática indevida
+- reabertura indevida de pedido já finalizado
+- divergência entre pedido, separação, conferência e status final
+- erro de quantidade
+- tratamento inconsistente entre bipagem e digitação manual
+- quantidade excedente aceita incorretamente
+- perda de item já conferido
+- inconsistência entre múltiplas abas
+- inconsistência entre múltiplas sessões
+- falha de sincronização entre frontend, API e banco
+- clique duplo gerando duplicidade
+- requisição duplicada gerando efeito duplo
+- bugs futuros por arquitetura fraca
+- lentidão em fluxo crítico
+- falhas de segurança
+- regressões invisíveis
+
+CONTEXTO FUNCIONAL CRÍTICO
+
+Considere que este WMS opera com usuários reais, ritmo alto, pressão operacional e necessidade de precisão.
+Nesses módulos, qualquer erro causa retrabalho, prejuízo, perda de confiança e quebra operacional.
+
+Trate como HIPERCRÍTICO qualquer risco de:
+
+1. PEDIDO RESSUSCITAR
+Investigue profundamente qualquer cenário em que:
+- pedido concluído reaparece
+- conferência anterior reaparece em pedido novo
+- item marcado em pedido antigo aparece em pedido atual
+- estado de uma aba antiga volta para a interface
+- navegação de volta ou cancelamento traz pedido já finalizado
+
+2. LOCK INCORRETO
+Investigue profundamente qualquer cenário em que:
+- lockedBy não é limpo corretamente ao concluir ou cancelar
+- pedido fica preso indevidamente
+- pedido fica visível para quem não deveria
+- mais de um operador acessa o mesmo pedido
+- o frontend acredita que possui o lock quando o backend não garante isso
+- o lock depende demais de estado local
+- o lock não é protegido por backend e persistência adequados
+
+3. STALE STATE / SESSÃO ANTIGA CONTAMINANDO A NOVA
+Investigue profundamente qualquer cenário em que:
+- promises tardias chegam depois da troca de pedido
+- resposta antiga sobrescreve estado novo
+- selectedWorkUnits antigo continua afetando a tela
+- checkingTab, step, sessionVersion, token de sessão ou stores locais podem vazar para outro fluxo
+- troca rápida entre pedidos causa contaminação
+- navegação entre telas não limpa contexto corretamente
+- localStorage / sessionStorage / stores transitórias mantêm dados críticos além do necessário
+
+4. CONCLUSÃO AUTOMÁTICA INDEVIDA
+Investigue qualquer lógica que:
+- conclua conferência automaticamente ao atingir último item
+- avance status sem ação explícita do operador
+- permita finalização implícita
+- finalize por efeito colateral de validação de item
+- misture regra de conferência com regra de separação
+- gere transição de status sem confirmação manual e rastreável
+
+5. QUANTIDADE EXCEDENTE / ITEM EXCEDENTE
+Investigue profundamente se existe qualquer inconsistência entre:
+- bipagem
+- digitação manual
+- validação de item
+- reset de item
+- persistência de checkedQty
+- reversão de excesso
+- feedback visual para excesso
+- preservação da quantidade válida já conferida
+
+Verifique se o sistema pode:
+- zerar quantidade válida por engano
+- perder conferência válida após tentativa excedente
+- tratar diferente a mesma regra quando vem de barcode versus input manual
+- permitir excesso por corrida de requisições
+
+6. MÚLTIPLAS ABAS / MÚLTIPLAS SESSÕES
+Investigue profundamente:
+- mesma conta em múltiplas abas
+- mesmo operador em sessões paralelas
+- operadores diferentes no mesmo pedido
+- conflitos de atualização
+- polling concorrente
+- telas abertas em estados diferentes
+- sessão antiga reaplicando mudança em pedido novo
+- falta de invalidação/coerência entre abas
+
+7. SEGREGAÇÃO POR EMPRESA / PERFIL / MÓDULO
+Audite rigorosamente se existe qualquer possibilidade de:
+- usuário da empresa A ver dados da empresa B
+- operador acessar pedido que não deveria
+- módulo ficar acessível sem permissão correta
+- rota, pedido, conferência, balcão, endereço, romaneio ou nota ficarem cruzados entre empresas
+- perfil antigo ou cacheado manter permissão indevida
+- backend confiar apenas na UI para restringir acesso
+
+ESCOPO OBRIGATÓRIO DA AUDITORIA
+
+1) SEGURANÇA
+Analise profundamente:
+- autenticação
+- autorização
+- segregação por empresa
+- segregação por usuário
+- segregação por perfil
+- segregação por módulo
+- broken access control
+- IDOR
+- privilege escalation
+- SQL Injection
+- XSS
+- CSRF
+- SSRF
+- command injection
+- mass assignment
+- exposição de endpoints internos
+- credenciais hardcoded
+- segredos em código
+- tokens inseguros
+- sessões frágeis
+- CORS incorreto
+- headers de segurança ausentes
+- logs expondo dados sensíveis
+- erros detalhados demais no cliente
+- dados críticos no frontend sem necessidade
+- uso inseguro de localStorage/sessionStorage
+- dependências vulneráveis
+- bibliotecas antigas ou perigosas
+- ausência de rate limit em endpoints sensíveis
+
+2) CONCORRÊNCIA, INTEGRIDADE E CONSISTÊNCIA
+Analise profundamente:
+- race conditions
+- stale state
+- stale promises
+- update fora de ordem
+- respostas antigas contaminando estado atual
+- contaminação entre pedido anterior e pedido atual
+- estado residual em stores
+- contexto não limpo ao trocar pedido
+- locks lógicos e físicos
+- liberação incorreta de lock
+- ausência de idempotência
+- requisição duplicada
+- clique duplo
+- double submit
+- rollback incompleto
+- transações ausentes
+- persistência parcial
+- inconsistência entre backend e banco
+- inconsistência entre banco e frontend
+- invalidação de cache/estado
+- falhas sob múltiplos operadores
+- falhas sob múltiplas abas
+
+3) PERFORMANCE
+Analise profundamente:
+- lentidão para listar pedidos
+- lentidão ao entrar na separação
+- lentidão ao entrar na conferência
+- lentidão ao validar item
+- lentidão ao concluir pedido
+- N+1 queries
+- índices ausentes
+- consultas desnecessariamente pesadas
+- overfetching
+- re-renderizações excessivas
+- hooks pesados
+- stores com atualização excessiva
+- polling agressivo ou mal controlado
+- debounce/throttle ausente onde deveria existir
+- gargalos em endpoints críticos
+- comportamento sob uso simultâneo
+- risco de degradação com crescimento do volume
+
+4) ARQUITETURA E QUALIDADE DE CÓDIGO
+Procure e corrija:
+- regra de negócio espalhada
+- regra crítica no frontend sem proteção backend
+- duplicação de lógica
+- divergência entre validações
+- controllers fazendo trabalho demais
+- funções longas e frágeis
+- acoplamento excessivo
+- nomes ruins
+- estados implícitos
+- comportamento dependente de ordem acidental
+- código difícil de testar
+- pontos frágeis a regressão
+- fluxos críticos sem centralização
+- ausência de contratos fortes
+- tratamento inconsistente de erro
+- estruturas que um sênior experiente reescreveria por perigo operacional
+
+5) BANCO DE DADOS E INTEGRIDADE TRANSACIONAL
+Verifique profundamente:
+- constraints ausentes
+- índices ausentes
+- integridade referencial fraca
+- status inconsistentes
+- falta de transação em fluxos críticos
+- lock apenas em memória sem respaldo seguro
+- escrita parcial perigosa
+- concorrência na persistência
+- gravação fora de ordem
+- trilha de auditoria insuficiente
+- ausência de proteção contra duplicidade
+- falta de idempotência persistida
+- inconsistência temporal entre eventos e status
+
+6) UX OPERACIONAL CRÍTICA
+Analise se a interface induz erro humano.
+Trate como grave qualquer tela que:
+- não deixe claro qual pedido está ativo
+- permita agir em pedido errado
+- permita concluir rápido demais sem barreira adequada
+- permita ação crítica duplicada
+- não sinalize loading e erro corretamente
+- esconda falha de sincronização
+- permita acreditar que concluiu sem concluir
+- permita confusão entre item, quantidade, pedido ou etapa
+- atualize visualmente com atraso sem indicar isso
+- não proteja contra cliques repetidos
+- não trate bem rede lenta, erro parcial ou reconexão
+
+PONTOS ESPECIAIS QUE DEVEM SER AUDITADOS COM MÁXIMA RIGIDEZ
+
+Quero investigação explícita sobre:
+
+- limpeza correta de lockedBy ao concluir/cancelar
+- existência de qualquer caminho que deixe lock órfão
+- qualquer caminho que permita pedido concluído reaparecer
+- qualquer caminho que permita estado de conferência/separação vazar entre pedidos
+- qualquer caminho em que selectedWorkUnits, step, checkingTab, sessionVersion, token de sessão, PendingDeltaStore ou stores equivalentes possam contaminar a próxima operação
+- qualquer caminho em que clear de contexto não seja completo
+- qualquer caminho em que resposta assíncrona atrasada continue válida quando já deveria ser ignorada
+- qualquer caminho em que conferência seja concluída sem clique explícito de concluir
+- qualquer caminho em que quantidade válida seja perdida ao tratar excesso
+- qualquer divergência entre barcode e quantidade manual
+- qualquer inconsistência entre Separação, Conferência e Balcão para o mesmo pedido
+- qualquer ponto em que o frontend esteja decidindo algo que deveria ser garantido no backend
+- qualquer ponto em que a empresa selecionada não esteja sendo validada ponta a ponta
+- qualquer ponto em que perfil/permissão esteja sendo confiado mais na interface do que na API
+- qualquer endpoint que aceite operar sem validar operador, pedido, empresa, status e lock
+
+METODOLOGIA DE EXECUÇÃO
+
+FASE 1 — MAPEAMENTO GERAL
+Mapeie toda a arquitetura:
+- frontend
+- backend
+- banco
+- stores
+- hooks
+- endpoints
+- serviços
+- integrações
+- tabelas críticas
+- transições de status
+- pontos de lock
+- pontos de concorrência
+- fluxos de Separação
+- fluxos de Conferência
+- fluxos de Balcão
+
+FASE 2 — AUDITORIA PROFUNDA
+Revise arquivo por arquivo e fluxo por fluxo.
+Não pare no primeiro problema.
+Cruze regras entre frontend, backend e banco.
+Valide se o comportamento visual realmente corresponde ao comportamento persistido.
+
+FASE 3 — CLASSIFICAÇÃO DOS PROBLEMAS
+Classifique tudo por severidade:
+- CRÍTICO
+- ALTO
+- MÉDIO
+- BAIXO
+
+Para cada problema, informe obrigatoriamente:
+1. título
+2. severidade
+3. local exato
+4. causa raiz
+5. cenário real de falha
+6. impacto operacional
+7. impacto de segurança
+8. impacto de performance
+9. impacto de manutenção
+10. correção recomendada
+11. prioridade
+12. risco de regressão
+13. teste necessário
+
+FASE 4 — CORREÇÕES CIRÚRGICAS
+Aplique as correções com extremo cuidado.
+Regras:
+- não faça refatoração cosmética
+- preserve o que já funciona corretamente
+- fortaleça backend como fonte da verdade
+- endureça validações críticas no backend
+- implemente proteção real contra concorrência
+- adicione idempotência onde necessário
+- bloqueie respostas antigas
+- limpe contexto agressivamente ao trocar pedido/concluir/cancelar
+- impeça estado residual
+- impeça pedido ressuscitar
+- impeça auto-conclusão
+- garanta liberação correta de lock
+- garanta consistência transacional
+- proteja contra duplicidade
+- adicione observabilidade mínima em pontos críticos
+
+FASE 5 — TESTES E BLINDAGEM CONTRA REGRESSÃO
+Crie ou ajuste testes cobrindo no mínimo:
+
+SEPARAÇÃO
+- operador assumir pedido corretamente
+- impedir dois operadores no mesmo pedido
+- lock liberado corretamente
+- lock órfão não persistir
+- troca rápida de pedido
+- requisição duplicada
+- clique duplo
+- pedido não ressuscitar
+- estado antigo não contaminar novo pedido
+
+CONFERÊNCIA
+- validar item correto
+- bloquear item inválido
+- tratar excesso corretamente
+- preservar quantidade válida mesmo após tentativa excedente
+- manter comportamento consistente entre bipagem e digitação manual
+- conclusão só por ação manual explícita
+- pedido concluído não reaparecer
+- resposta atrasada não contaminar sessão nova
+- limpeza total ao trocar/concluir/cancelar
+- múltiplas abas
+- múltiplas sessões
+
+BALCÃO
+- pedido correto
+- operador correto
+- status correto
+- ação duplicada
+- proteção contra concorrência
+- validação de permissão
+- sincronização correta da interface com backend
+
+GERAL
+- segregação por empresa
+- segregação por perfil
+- segregação por módulo
+- usuário sem permissão
+- race conditions
+- rollback
+- falha parcial
+- falha de rede
+- erro de sincronização
+- regressão de bugs históricos
+
+ENTREGA FINAL OBRIGATÓRIA
+
+Ao final, quero:
+
+1. RESUMO EXECUTIVO
+- visão geral da qualidade técnica
+- estado atual dos módulos críticos
+- principais riscos encontrados
+- avaliação objetiva se o sistema está pronto ou não para produção séria
+
+2. RELATÓRIO TÉCNICO DETALHADO
+- arquitetura identificada
+- fluxos críticos mapeados
+- problemas encontrados por severidade
+- causa raiz de cada problema
+- cenários reais de falha
+
+3. CORREÇÕES APLICADAS
+Para cada correção:
+- o que foi alterado
+- onde foi alterado
+- por que foi alterado
+- qual risco eliminou
+- por que a solução escolhida é segura
+
+4. TESTES CRIADOS/ALTERADOS
+- nome
+- objetivo
+- risco coberto
+- regressão evitada
+
+5. RISCOS RESIDUAIS
+- o que ainda depende de decisão arquitetural
+- o que precisa ser monitorado em produção
+- o que não pode ficar sem log, rastreabilidade ou alerta
+
+6. SEÇÃO ESPECIAL OBRIGATÓRIA
+“COISAS QUE UM PROGRAMADOR SÊNIOR EXPERT NÃO DEIXARIA PASSAR”
+Liste explicitamente os erros graves encontrados, como:
+- backend confiando demais no frontend
+- lock mal implementado
+- stale state
+- auto-conclusão implícita
+- falta de transação
+- contaminação entre pedidos
+- ausência de idempotência
+- autorização fraca
+- regra crítica duplicada
+- endpoint permissivo
+- inconsistência entre interface e persistência
+- UX induzindo erro operacional
+- performance ruim em fluxo central
+
+DIRETRIZ FINAL
+
+Considere que este sistema será usado em operação real, por operadores sob pressão, e que Separação, Conferência e Balcão são módulos de missão crítica.
+Portanto:
+- priorize robustez sobre conveniência
+- priorize consistência sobre flexibilidade perigosa
+- priorize backend como autoridade final
+- priorize proteção contra erro operacional
+- priorize prevenção de regressão
+- priorize previsibilidade e rastreabilidade
+
+Não entregue resposta superficial.
+Não pare nas primeiras melhorias óbvias.
+Faça uma auditoria no nível de quem realmente vai assinar tecnicamente a entrada desse WMS em produção.

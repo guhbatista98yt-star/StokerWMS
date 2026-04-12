@@ -1,0 +1,46 @@
+O Windows PowerShell
+Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+
+Instale o PowerShell mais recente para obter novos recursos e aprimoramentos! https://aka.ms/PSWindows
+
+PS C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test> npm run build
+
+> rest-express@1.0.0 build
+> tsx script/build.ts
+
+building client...
+vite v7.3.1 building client environment for production...
+transforming (59) ..\node_modules\wouter\src\react-deps.js
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 3501 modules transformed.
+../dist/public/manifest.webmanifest                            0.85 kB
+../dist/public/index.html                                      3.61 kB │ gzip:   1.38 kB
+../dist/public/assets/index-_gJ1hLzd.css                     133.55 kB │ gzip:  21.16 kB
+../dist/public/assets/workbox-window.prod.es5-BIl4cyR9.js      5.76 kB │ gzip:   2.37 kB
+../dist/public/assets/JsBarcode-MgWuNlEw.js                   68.47 kB │ gzip:  14.75 kB
+../dist/public/assets/index-BKxfa1As.js                    2,169.20 kB │ gzip: 610.00 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 15.41s
+Error:
+  Configure "workbox.maximumFileSizeToCacheInBytes" to change the limit: the default value is 2 MiB.
+  Check https://vite-pwa-org.netlify.app/guide/faq.html#missing-assets-from-sw-precache-manifest for more information.
+  Assets exceeding the limit:
+  - assets/index-BKxfa1As.js is 2.17 MB, and won't be precached.
+
+    at logWorkboxResult (file:///C:/Users/SERVIDOR03/Desktop/GLA_WMS_Test/node_modules/vite-plugin-pwa/dist/chunk-G4TAN34B.js:44:13)
+    at generateServiceWorker (C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\node_modules\vite-plugin-pwa\dist\index.js:209:3)
+    at async _generateSW (C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\node_modules\vite-plugin-pwa\dist\index.js:234:5)
+    at async Object.handler (C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\node_modules\vite-plugin-pwa\dist\index.js:427:13)
+    at async PluginDriver.hookParallel (C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\node_modules\rollup\dist\es\shared\node-entry.js:22452:17)
+    at async Object.close (C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\node_modules\rollup\dist\es\shared\node-entry.js:23471:13)
+    at async buildEnvironment (C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\node_modules\vite\dist\node\chunks\config.js:33555:15)
+    at async Object.build (C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\node_modules\vite\dist\node\chunks\config.js:33900:19)
+    at async buildAll (C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\script\build.ts:39:3) {
+  code: 'PLUGIN_ERROR',
+  plugin: 'vite-plugin-pwa:build',
+  hook: 'closeBundle'
+}

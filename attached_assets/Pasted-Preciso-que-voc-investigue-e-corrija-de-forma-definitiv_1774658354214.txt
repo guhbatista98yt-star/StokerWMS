@@ -1,0 +1,117 @@
+Preciso que você investigue e corrija de forma definitiva um erro crítico no relatório/romaneio de separação do sistema.
+
+CONTEXTO DO PROBLEMA
+O relatório está trazendo produtos que pertencem a pontos de retirada que não foram selecionados. Um caso percebido foi o pedido 478356.
+
+Além disso, em alguns momentos, produtos que deveriam aparecer no relatório não estão saindo, inclusive itens de determinadas seções. Isso compromete diretamente a operação, porque se um item não sair no relatório, ele pode deixar de ser separado e a entrega sai incompleta.
+
+Esse problema é crítico. O relatório precisa refletir exatamente os produtos corretos, sem incluir itens indevidos e sem omitir nenhum item válido.
+
+OBJETIVO DA CORREÇÃO
+Quero que você ajuste a lógica do relatório para garantir, de ponta a ponta, que:
+
+1. Apenas apareçam produtos dos pedidos selecionados.
+2. Apenas apareçam produtos dos pontos de retirada selecionados.
+3. Apenas apareçam produtos da empresa atualmente selecionada.
+4. Todos os produtos válidos que atendam a esses critérios apareçam no relatório.
+5. Nenhum produto válido fique de fora por erro de filtro, join, agrupamento, deduplicação, transformação intermediária, cache ou estado anterior.
+6. Nenhum produto de ponto de retirada não selecionado entre no relatório.
+7. Nenhum produto de outra empresa entre no relatório.
+
+TRATE COMO FALHA DE CONFIABILIDADE OPERACIONAL
+Esse relatório não pode ser “aproximado”. Ele precisa ser exato.
+Não aceito correção paliativa, ajuste apenas visual ou filtro superficial no frontend.
+A solução precisa atacar a causa real e garantir integridade total dos dados exibidos no romaneio.
+
+ESCOPO DA INVESTIGAÇÃO
+Quero que você revise toda a cadeia de geração do relatório, incluindo:
+
+- origem dos dados;
+- query ou queries usadas;
+- joins entre pedidos, itens, pontos de retirada, seções e empresa;
+- filtros aplicados no backend;
+- filtros aplicados no frontend;
+- payload enviado pela API;
+- montagem final do relatório;
+- agrupamentos, distincts, maps, reductions ou deduplicações;
+- tratamento de múltiplas seções;
+- persistência de filtros antigos;
+- cache, memoização, estado reaproveitado ou parâmetros residuais;
+- qualquer transformação que possa remover itens válidos ou incluir itens indevidos.
+
+HIPÓTESES QUE DEVEM SER VERIFICADAS
+Analise explicitamente se o problema está sendo causado por um ou mais dos pontos abaixo:
+
+1. Filtro de empresa aplicado de forma incompleta.
+2. Filtro de ponto de retirada aplicado apenas em parte do fluxo.
+3. Filtro de pedido aplicado de forma incorreta.
+4. Join com cardinalidade errada.
+5. INNER JOIN eliminando itens que deveriam permanecer.
+6. LEFT JOIN trazendo dados indevidos sem validação posterior.
+7. Uso incorreto de DISTINCT eliminando linhas legítimas.
+8. Agrupamento colapsando produtos diferentes em uma linha só.
+9. Regra por seção excluindo produtos de forma indevida.
+10. Reaproveitamento de estado anterior ao trocar empresa, pedido ou ponto de retirada.
+11. Divergência entre o que é filtrado na API e o que é filtrado na interface.
+12. Construção incorreta do dataset final do relatório.
+
+REGRAS OBRIGATÓRIAS DA NOVA LÓGICA
+A implementação final deve obedecer rigorosamente estas regras:
+
+- O contexto da empresa selecionada deve ser o filtro-base de tudo.
+- Dentro da empresa, o relatório deve considerar somente os pedidos selecionados.
+- Dentro desses pedidos, o relatório deve considerar somente os pontos de retirada selecionados.
+- Depois disso, devem ser listados todos os itens elegíveis desses pedidos, sem perda de nenhum produto válido.
+- Nenhum item pode ser descartado silenciosamente.
+- Nenhum item pode ser incluído por associação indireta errada.
+- Se houver inconsistência de origem, isso deve ser tratado ou sinalizado claramente, nunca ignorado.
+
+EXIGÊNCIA DE VALIDAÇÃO DE INTEGRIDADE
+Quero que você implemente validações de conferência para garantir a veracidade do relatório.
+
+Se necessário, crie checagens internas temporárias ou permanentes para validar:
+
+- quantidade total de itens esperados dos pedidos selecionados;
+- quantidade total de itens efetivamente enviados ao relatório;
+- lista de pontos de retirada encontrados nos dados finais;
+- lista de empresas encontradas nos dados finais;
+- itens excluídos durante o processamento;
+- motivo de exclusão de cada item, se houver;
+- divergência entre base bruta e resultado final.
+
+Se necessário, adicione logs de auditoria ou validações auxiliares para facilitar homologação e impedir recorrência do problema.
+
+CRITÉRIOS DE ACEITAÇÃO
+A correção só será aceita se todos os critérios abaixo forem atendidos:
+
+1. O pedido 478356 não pode mais trazer produtos de pontos de retirada não selecionados.
+2. Todos os produtos corretos dos pedidos selecionados devem aparecer.
+3. Nenhum produto correto pode ficar faltando.
+4. O filtro por empresa deve ser respeitado em 100% do fluxo.
+5. O filtro por ponto de retirada deve ser respeitado em 100% do fluxo.
+6. O filtro por pedido deve ser respeitado em 100% do fluxo.
+7. A causa raiz deve ser identificada e corrigida.
+8. A solução deve estar segura para produção.
+
+O QUE ESPERO NA ENTREGA
+Ao concluir, me entregue:
+
+1. A causa raiz exata do problema.
+2. Os arquivos alterados.
+3. O que foi corrigido em cada arquivo.
+4. Como a nova lógica garante que nenhum item válido fique de fora.
+5. Como a nova lógica impede a entrada de itens indevidos.
+6. Quais validações foram adicionadas.
+7. Quais cenários foram testados.
+8. Se houver risco residual, descreva claramente.
+
+IMPORTANTE
+- Não quero resposta genérica.
+- Não quero hipótese sem validação no código.
+- Não quero correção parcial.
+- Não quero mascaramento do problema no frontend.
+- Quero correção real, completa e segura.
+- Se encontrar falha estrutural no fluxo atual, corrija da forma mais robusta possível.
+- Revise cuidadosamente tudo que impacta a montagem do romaneio antes de concluir.
+
+Faça a implementação completa no código.

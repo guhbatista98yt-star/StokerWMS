@@ -1,0 +1,104 @@
+2026-03-30 17:56:00,408 [INFO] Máquina: DESKTOP-K600KQT
+2026-03-30 17:56:00,408 [INFO] Servidor: ws://192.168.1.254:411/ws/print-agent
+2026-03-30 17:56:00,441 [INFO] ============================================================
+2026-03-30 17:56:00,441 [INFO]   Stoker WMS — Print Agent
+2026-03-30 17:56:00,441 [INFO]   Máquina: DESKTOP-K600KQT
+2026-03-30 17:56:00,441 [INFO]   Servidor: ws://192.168.1.254:411/ws/print-agent
+2026-03-30 17:56:00,441 [INFO] ============================================================
+2026-03-30 17:56:00,442 [INFO] Conectando a ws://192.168.1.254:411/ws/print-agent ...
+2026-03-30 17:56:00,447 [INFO] Websocket connected
+2026-03-30 17:56:00,448 [INFO] Conectado ao servidor. Registrando agente...
+2026-03-30 17:56:00,454 [INFO] 1 impressora(s) encontrada(s)
+2026-03-30 17:56:00,456 [INFO] ✓ Registrado como 'LOJA03' (MACHINE_ID=DESKTOP-K600KQT)
+2026-03-30 17:56:20,302 [INFO] Job #92e0f160 recebido: impressora='HP LaserJet Professional P 1102w' copies=1 user='Rafael'
+2026-03-30 17:56:20,303 [INFO] [d55025da] Gerando PDF via xhtml2pdf para impressora 'HP LaserJet Professional P 1102w' x1
+2026-03-30 17:56:23,941 [INFO] [d55025da] Gerando PDF via xhtml2pdf...
+2026-03-30 17:56:24,330 [WARNING] @fontface, unknown value font-weight '400'
+
+2026-03-30 17:56:25,505 [ERROR] Error while parsing CSS file
+Traceback (most recent call last):
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\reportlab\lib\utils.py", line 525, in open_for_read
+    return open_for_read_by_name(name,mode)
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\reportlab\lib\utils.py", line 463, in open_for_read_by_name
+    return open(name,mode)
+PermissionError: [Errno 13] Permission denied: 'C:\\Users\\Micro\\AppData\\Local\\Temp\\tmpjlfxwctq'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\reportlab\lib\utils.py", line 532, in open_for_read
+    return BytesIO((datareader if name[:5].lower()=='data:' else rlUrlRead)(name))
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\reportlab\lib\utils.py", line 478, in rlUrlRead
+    return urlopen(Request(name,headers=headers)).read()
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\urllib\request.py", line 187, in urlopen
+    return opener.open(url, data, timeout)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\urllib\request.py", line 487, in open
+    response = self._open(req, data)
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\urllib\request.py", line 509, in _open
+    return self._call_chain(self.handle_open, 'unknown',
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                            'unknown_open', req)
+                            ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\urllib\request.py", line 464, in _call_chain
+    result = func(*args)
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\urllib\request.py", line 1397, in unknown_open
+    raise URLError('unknown url type: %s' % type)
+urllib.error.URLError: <urlopen error unknown url type: c>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\reportlab\pdfbase\ttfonts.py", line 159, in TTFOpenFile
+    f = open_for_read(fn,'rb')
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\reportlab\lib\utils.py", line 536, in open_for_read
+    return open_for_read(name,mode)
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\reportlab\lib\utils.py", line 534, in open_for_read
+    raise IOError('Cannot open resource "%s"' % name)
+OSError: Cannot open resource "C:\Users\Micro\AppData\Local\Temp\tmpjlfxwctq"
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xhtml2pdf\context.py", line 519, in parseExternal
+    result = self.parse(cssFile.getData())
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xhtml2pdf\w3c\cssParser.py", line 458, in parse
+    src, stylesheet = self._parseStylesheet(src)
+                      ~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xhtml2pdf\w3c\cssParser.py", line 561, in _parseStylesheet
+    src, atResults = self._parseAtKeyword(src)
+                     ~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xhtml2pdf\w3c\cssParser.py", line 685, in _parseAtKeyword
+    src, result = self._parseAtFontFace(src)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xhtml2pdf\w3c\cssParser.py", line 866, in _parseAtFontFace
+    result = [self.cssBuilder.atFontFace(properties)]
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xhtml2pdf\context.py", line 221, in atFontFace
+    self.c.loadFont(names, src, bold=bold, italic=italic)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\xhtml2pdf\context.py", line 1116, in loadFont
+    file = TTFont(fullFontName, filename)
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\reportlab\pdfbase\ttfonts.py", line 1207, in __init__
+    self.face = TTFontFace(filename, validate=validate, subfontIndex=subfontIndex)
+                ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\reportlab\pdfbase\ttfonts.py", line 1088, in __init__
+    TTFontFile.__init__(self, filename, validate=validate, subfontIndex=subfontIndex)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\reportlab\pdfbase\ttfonts.py", line 447, in __init__
+    TTFontParser.__init__(self, file, validate=validate,subfontIndex=subfontIndex)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\reportlab\pdfbase\ttfonts.py", line 183, in __init__
+    self.readFile(file)
+    ~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\reportlab\pdfbase\ttfonts.py", line 259, in readFile
+    self.filename, f = TTFOpenFile(f)
+                       ~~~~~~~~~~~^^^
+  File "C:\Users\Micro\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\reportlab\pdfbase\ttfonts.py", line 169, in TTFOpenFile
+    raise TTFError('Can\'t open file "%s"' % fn)
+reportlab.pdfbase.ttfonts.TTFError: Can't open file "C:\Users\Micro\AppData\Local\Temp\tmpjlfxwctq"
+2026-03-30 17:56:25,998 [INFO] [d55025da] PDF gerado com sucesso (13704 bytes)
+2026-03-30 17:56:25,998 [INFO] [d55025da] PDF gerado (13704 bytes, 5.7s)
+2026-03-30 17:56:27,334 [INFO] [d55025da] ✓ Impresso em 'HP LaserJet Professional P 1102w' x1 (7.0s total)

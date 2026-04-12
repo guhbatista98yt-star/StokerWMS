@@ -1,0 +1,377 @@
+Atue como um especialista sênior em WMS, logística operacional, arquitetura de sistemas, UX para operação de armazém e qualidade de software. Sua missão é fazer uma auditoria completa, propor melhorias relevantes, implementar correções e evoluir o módulo de logística da minha aplicação para um nível mais profissional, inteligente, rápido, seguro e confiável.
+
+OBJETIVO PRINCIPAL
+Quero que você revise, melhore e fortaleça os módulos de logística da aplicação, com foco em eficiência operacional, inteligência de uso, segurança de processo, velocidade e redução de erro humano.
+
+MÓDULOS PRINCIPAIS A ANALISAR
+- Endereçamento
+- Transferência
+- Recebimento
+- Busca de produtos
+- Movimentações relacionadas
+- Ações e botões operacionais desses módulos
+
+META FINAL
+Deixar os módulos mais inteligentes, com melhores filtros, melhores buscas, melhores informações, melhor fluxo de tela, melhor validação, melhor rastreabilidade, mais agilidade operacional e sem erros ou comportamentos incoerentes.
+
+==================================================
+ESCOPO DA ANÁLISE E IMPLEMENTAÇÃO
+==================================================
+
+1. AUDITORIA COMPLETA DOS PROCESSOS
+Revise todos os fluxos desses módulos de ponta a ponta e identifique:
+- gargalos operacionais
+- cliques desnecessários
+- etapas redundantes
+- campos inúteis
+- ausência de informações importantes
+- validações insuficientes
+- regras de negócio frágeis
+- ações sem confirmação adequada
+- incoerência entre tela e operação real
+- inconsistência entre frontend, backend e banco
+- oportunidades de automação
+- riscos de erro humano
+- riscos de movimentação incorreta
+- riscos de lentidão
+- riscos de concorrência
+- bugs visíveis e ocultos
+
+Se encontrar falhas, corrija imediatamente.
+
+2. MELHORIAS DE INTELIGÊNCIA OPERACIONAL
+Quero que você avalie e implemente melhorias para deixar os módulos mais inteligentes no uso real, por exemplo:
+- sugestões automáticas de melhor endereço
+- sugestão de destino ideal para transferência
+- alerta de produto sem endereço
+- alerta de saldo divergente
+- alerta de endereço incompatível com tipo de produto
+- alerta de estoque em endereço incorreto
+- aviso de produto com múltiplos endereços conflitantes
+- destaque de pendências operacionais
+- indicação de excesso ou falta de estoque por endereço
+- sugestão de ação mais provável para o operador
+- priorização de tarefas
+- rastreabilidade por operador
+- histórico de movimentações
+- indicadores visuais úteis
+- validações preventivas antes da conclusão de ações
+
+3. FILTROS, PARÂMETROS E INFORMAÇÕES
+Analise criticamente se faltam filtros, parâmetros, colunas, indicadores e informações relevantes.
+
+Verifique a necessidade de incluir, revisar, reorganizar ou remover itens como:
+- empresa
+- depósito
+- ponto de retirada
+- rota
+- endereço de origem
+- endereço de destino
+- corredor
+- módulo
+- nível
+- face
+- seção
+- código do produto
+- descrição
+- EAN / código de barras
+- referência
+- fornecedor
+- grupo
+- subgrupo
+- unidade
+- lote
+- validade
+- status do estoque
+- saldo por endereço
+- estoque disponível
+- estoque reservado
+- estoque bloqueado
+- última movimentação
+- data de recebimento
+- documento de origem
+- pedido de compra
+- nota fiscal
+- romaneio
+- operador responsável
+- conferente responsável
+- prioridade
+- divergência
+- situação da tarefa
+- produto sem endereço
+- produto com inconsistência
+- produto inativo
+- produto com movimentação recente
+
+Não quero excesso de informação sem utilidade. Quero filtros e dados realmente úteis para operação rápida e precisa.
+
+==================================================
+BUSCAS INTELIGENTES
+==================================================
+
+4. REVISÃO COMPLETA DA BUSCA DE PRODUTOS E CONSULTAS
+Quero que a busca dos módulos seja realmente inteligente, rápida e funcional.
+
+Analise, implemente ou melhore:
+- busca por código exato
+- busca por parte do código
+- busca por descrição
+- busca por múltiplas palavras
+- busca por EAN
+- busca por referência
+- busca por fornecedor
+- busca por endereço
+- busca por lote
+- busca por grupo/subgrupo
+- busca combinando múltiplos filtros
+- busca tolerante a pequenas variações de digitação
+- busca priorizando resultados mais relevantes
+- ordenação inteligente dos resultados
+- busca com histórico recente
+- busca com preenchimento rápido
+- busca com Enter funcionando corretamente
+- limpeza rápida dos filtros
+- manutenção do foco no campo de busca quando fizer sentido
+- prevenção de busca lenta em grandes volumes
+
+Verifique também:
+- se a busca retorna dados corretos
+- se a busca pode retornar itens errados ou incompletos
+- se a busca falha com termos parciais
+- se a busca está lenta
+- se a busca precisa de paginação, debounce ou otimização
+- se a busca deve mostrar estoques por endereço
+- se a busca deve evidenciar produtos sem endereço, com divergência ou com bloqueio
+
+Quero uma experiência de busca realmente profissional, útil para operação real.
+
+==================================================
+BOTÕES, AÇÕES E FUNCIONALIDADES
+==================================================
+
+5. VALIDE TODOS OS BOTÕES E AÇÕES DOS MÓDULOS
+Quero que você revise detalhadamente todos os botões, ícones, ações rápidas e interações dos módulos.
+
+Verifique para cada botão:
+- se está funcionando corretamente
+- se executa a ação certa
+- se o texto está claro
+- se o comportamento está coerente com a regra de negócio
+- se existe risco de clique indevido
+- se precisa de confirmação antes de executar
+- se precisa ser desabilitado em determinados estados
+- se precisa de loading
+- se precisa de feedback visual de sucesso ou erro
+- se precisa impedir clique duplo
+- se existe botão sem função real
+- se existe ação redundante
+- se existe ação perigosa sem validação
+- se existe incoerência entre nome do botão e resultado real
+
+Analise especialmente:
+- botões de buscar
+- limpar filtros
+- confirmar
+- cancelar
+- salvar
+- transferir
+- endereçar
+- receber
+- concluir
+- editar
+- visualizar
+- imprimir
+- atualizar
+- voltar
+- recarregar
+- ações em lote
+- atalhos operacionais
+
+Quero garantir que todos os botões estejam corretos, úteis, claros, seguros e alinhados com a operação.
+
+==================================================
+ANÁLISE ESPECÍFICA POR MÓDULO
+==================================================
+
+6. ENDEREÇAMENTO
+Revise o módulo de endereçamento e avalie se ele precisa:
+- melhores filtros
+- melhor exibição de saldo por endereço
+- melhor leitura visual do endereço
+- histórico de ocupação
+- sugestão automática de melhor endereço
+- validação de endereço incompatível
+- aviso de endereço cheio, bloqueado, misto ou inválido
+- alerta de produto sem endereço definido
+- visualização rápida de múltiplos endereços do mesmo produto
+- mais agilidade para consulta e movimentação
+- mais segurança para evitar endereçamento errado
+
+7. TRANSFERÊNCIA
+Revise o módulo de transferência e avalie se precisa:
+- validação forte do saldo antes da movimentação
+- validação entre origem e destino
+- bloqueio de transferência inconsistente
+- exibição do saldo antes e depois
+- exigência de motivo quando fizer sentido
+- histórico por operador
+- rastreabilidade completa
+- filtros mais úteis
+- busca mais rápida
+- transferência em lote
+- confirmação inteligente
+- prevenção de erros operacionais
+- feedback claro após concluir a ação
+
+8. RECEBIMENTO
+Revise o fluxo de recebimento e avalie se ele precisa:
+- melhor conferência por pedido de compra
+- conferência por nota fiscal
+- tratamento de divergência
+- bloqueio de produto não previsto
+- indicação de recebimento parcial
+- indicação de pendência
+- sugestão de endereço de armazenagem
+- priorização do que deve ser tratado primeiro
+- separação por etapa
+- rastreabilidade do operador
+- melhor visualização do progresso do recebimento
+- validações para evitar entrada errada
+
+9. BUSCA DE PRODUTOS
+A busca precisa ser tratada como módulo crítico.
+Quero que ela seja inteligente, rápida e com dados úteis.
+
+Avalie se ela deve exibir:
+- estoque total
+- estoque por endereço
+- endereços vinculados
+- última movimentação
+- fornecedor
+- grupo/subgrupo
+- situação do item
+- bloqueios
+- divergências
+- produtos sem endereço
+- produtos mais movimentados
+- produtos recém-recebidos
+- produtos com saldo inconsistente
+
+==================================================
+BUGS, SEGURANÇA, PERFORMANCE E ROBUSTEZ
+==================================================
+
+10. BUGS E FALHAS
+Faça uma auditoria profunda em busca de:
+- bugs funcionais
+- falhas de lógica
+- falhas de validação
+- falhas de fluxo
+- inconsistências de interface
+- divergência entre frontend e backend
+- erro em ações de botões
+- risco de duplicidade
+- risco de processamento incorreto
+- estados quebrados
+- mensagens erradas ou ausentes
+- bugs silenciosos
+
+Se encontrar, corrija.
+
+11. PERFORMANCE
+Garanta que as melhorias não tornem o sistema pesado.
+Revise:
+- consultas
+- filtros
+- buscas
+- carregamento
+- renderização
+- listas grandes
+- paginação
+- debounce
+- ordenação
+- cache
+- atualização de tela
+
+O sistema deve continuar rápido e responsivo.
+
+12. SEGURANÇA OPERACIONAL
+Valide se existem ações perigosas sem controle suficiente.
+Reforce:
+- confirmações quando necessário
+- bloqueio de ações inválidas
+- prevenção de cliques duplicados
+- validação no backend
+- consistência de dados
+- proteção contra estados indevidos
+- proteção contra movimentações incorretas
+
+==================================================
+TESTES OBRIGATÓRIOS
+==================================================
+
+13. TESTES E VALIDAÇÃO FINAL
+Ao concluir, teste de forma prática:
+- filtros
+- busca simples
+- busca combinada
+- busca parcial
+- busca com erro de digitação leve
+- botão de buscar
+- botão de limpar
+- botões de ação principais
+- endereçamento
+- transferência
+- recebimento
+- visualização de estoques
+- mensagens de erro e sucesso
+- estados de loading
+- prevenção de clique duplo
+- fluxos com dados válidos
+- fluxos com dados inválidos
+- cenários de borda
+- desempenho em volume maior
+
+Corrija tudo que encontrar antes de encerrar.
+
+==================================================
+FORMATO DE ENTREGA OBRIGATÓRIO
+==================================================
+
+Ao final, me entregue exatamente:
+
+1. Diagnóstico dos módulos analisados
+2. Lista de problemas encontrados
+3. Lista de bugs corrigidos
+4. Lista de melhorias implementadas
+5. Lista de melhorias sugeridas que ainda podem ser evoluídas
+6. Explicação das melhorias nas buscas inteligentes
+7. Explicação das correções e melhorias nos botões e ações
+8. Lista dos novos filtros, parâmetros e informações adicionados
+9. Melhorias de performance realizadas
+10. Testes executados e seus resultados
+11. Ajustes preventivos feitos para evitar problemas futuros
+
+==================================================
+CRITÉRIO DE ACEITE
+==================================================
+
+Só considere a tarefa concluída quando os módulos estiverem:
+- mais inteligentes
+- mais rápidos
+- mais claros
+- com buscas realmente eficientes
+- com botões funcionando corretamente
+- com menos risco de erro humano
+- com melhor usabilidade
+- com melhores filtros e informações
+- com processos mais ágeis
+- com bugs corrigidos
+- com validações mais robustas
+- com visão profissional de logística operacional
+
+IMPORTANTE
+Não quero resposta genérica.
+Não quero apenas ideias soltas.
+Não quero análise superficial.
+Quero auditoria real, implementação prática, correção de falhas, melhoria dos fluxos, fortalecimento das buscas, revisão completa dos botões e validação técnica do funcionamento.

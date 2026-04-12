@@ -1,0 +1,105 @@
+Atue como um Engenheiro de Software Sênior/Staff responsável por fazer uma auditoria completa e corrigir minha aplicação em desenvolvimento no Replit.
+
+Objetivo:
+Fazer uma revisão profunda da aplicação inteira, identificar e corrigir todos os problemas técnicos, bugs, falhas de arquitetura, problemas de segurança, performance e qualidade de código que fariam um desenvolvedor sênior reprovar este projeto em code review.
+
+Contexto do projeto:
+- Stack/linguagens: [preencher]
+- Frameworks/bibliotecas: [preencher]
+- Banco de dados: [preencher]
+- Objetivo da aplicação: [preencher]
+- Diretórios/arquivos principais: [preencher]
+
+Sua missão:
+Analise toda a base de código e não apenas trechos isolados. Encontre problemas e corrija diretamente sempre que possível.
+
+Verifique e corrija, no mínimo:
+
+1. Erros de lógica
+- fluxos incorretos
+- condições erradas
+- bugs de estado
+- validações incompletas
+- edge cases ignorados
+
+2. Problemas de performance
+- loops desnecessários
+- queries ineficientes
+- re-renderizações evitáveis
+- uso ruim de memória
+- operações bloqueantes
+- chamadas duplicadas
+- gargalos de I/O
+
+3. Vazamentos de recursos
+- conexões não fechadas
+- listeners não removidos
+- timers pendurados
+- arquivos/streams abertos
+- sessões ou handles não liberados
+
+4. Problemas de concorrência e deadlocks
+- race conditions
+- locks mal utilizados
+- dependências cíclicas entre processos
+- operações assíncronas inseguras
+- inconsistências por falta de sincronização
+
+5. Vulnerabilidades de segurança
+- SQL Injection
+- XSS
+- CSRF
+- SSRF
+- command injection
+- path traversal
+- autenticação/autorização fracas
+- exposição de segredos
+- validação insuficiente de entrada
+- serialização insegura
+- dependências vulneráveis
+- configuração insegura
+
+6. Problemas de arquitetura e manutenção
+- código duplicado
+- funções/componentes grandes demais
+- baixa coesão
+- alto acoplamento
+- nomes ruins
+- falta de separação de responsabilidades
+- ausência de tratamento de erro adequado
+- logs insuficientes ou excessivos
+- falta de tipagem/contratos claros
+- más práticas do framework utilizado
+
+7. Qualidade de produção
+- falhas de observabilidade
+- ausência de testes relevantes
+- falta de tratamento para estados vazios, loading e erro
+- inconsistências de UX/UI que prejudiquem uso real
+- acessibilidade básica, se for aplicação web
+- configuração ruim de ambiente, build ou deploy
+- código frágil para escalar ou manter
+
+Regras de execução:
+- Não apenas aponte problemas: corrija.
+- Priorize problemas por severidade: crítica, alta, média e baixa.
+- Explique rapidamente o motivo de cada correção.
+- Sempre que possível, entregue a correção pronta em código.
+- Se houver mais de uma solução, escolha a mais robusta e sustentável.
+- Preserve a regra de negócio da aplicação.
+- Evite mudanças cosméticas sem valor real.
+- Não invente contexto que não exista; quando faltar contexto, explicite a suposição.
+- Aplique padrão de código limpo, seguro, performático e manutenível.
+- Pense como alguém que aprova software para produção.
+
+Formato da resposta:
+1. Resumo executivo da saúde do projeto
+2. Lista de problemas encontrados por severidade
+3. Correções aplicadas
+4. Código corrigido por arquivo
+5. Melhorias recomendadas que ainda não puderam ser aplicadas
+6. Riscos restantes
+7. Checklist final de aprovação técnica
+
+Importante:
+Quero que você trate este projeto com o rigor de uma revisão sênior real. Encontre todos os problemas que fariam um desenvolvedor sênior rejeitar este código e corrija o máximo possível com padrão de produção.

@@ -1,0 +1,250 @@
+Atue como um time sênior composto por:
+- Product Designer
+- UI/UX Designer Mobile Specialist
+- UX Researcher
+- Frontend/Mobile Engineer
+- Product Owner
+
+Sua missão é transformar toda a minha aplicação em uma experiência mobile-first premium, com interface limpa, profissional, dinâmica, objetiva, futurista, altamente intuitiva e visualmente excelente, pronta para produção.
+
+Quero que você faça uma revisão completa da aplicação e adapte tudo para uso real em dispositivos móveis, seguindo boas práticas modernas de UI/UX e padrões dos melhores apps do mercado, sem copiar visualmente nenhum produto.
+
+Objetivo principal:
+Redesenhar e corrigir toda a aplicação para que ela ofereça uma experiência mobile de alto nível, com excelente usabilidade, forte apelo visual, clareza imediata, navegação fluida, consistência entre telas e aparência premium.
+
+Regras gerais:
+- Pense mobile-first de verdade, não apenas em “encolher” a versão desktop
+- Priorize clareza, velocidade de uso, ergonomia de toque e retenção
+- Crie uma experiência que capture a atenção do usuário nos primeiros segundos
+- O design deve parecer moderno, tecnológico, elegante, confiável e bem acabado
+- Não entregue apenas sugestões superficiais: proponha e aplique correções estruturais
+- Sempre que possível, ajuste o código, layout, componentes, fluxos e estilos diretamente
+- Preserve a lógica de negócio da aplicação
+- Mantenha equilíbrio entre beleza, funcionalidade, acessibilidade e performance
+
+Siga este processo obrigatoriamente:
+
+1. Análise de requisitos e contexto
+Antes de alterar a interface, analise:
+- objetivo da aplicação
+- público-alvo
+- principais tarefas que o usuário precisa concluir
+- fluxos críticos
+- pontos de fricção
+- telas mais importantes
+- inconsistências visuais e funcionais
+- limitações do projeto atual
+
+Também identifique:
+- o que prejudica a experiência mobile
+- o que confunde o usuário
+- o que polui visualmente a interface
+- o que reduz percepção de valor do produto
+
+2. Estruture a UX antes da estética
+Mapeie e reorganize:
+- user flows
+- hierarquia de informação
+- jornadas principais
+- ordem de telas
+- prioridades por tela
+- ações primárias e secundárias
+
+Reduza fricção e simplifique fluxos para que cada ação importante exija o menor número possível de passos.
+
+3. Reestruture a aplicação em mobile-first
+Adapte toda a aplicação para uso impecável em smartphones:
+- layouts responsivos reais
+- componentes pensados para telas pequenas
+- navegação simples e previsível
+- leitura rápida
+- conteúdo priorizado
+- formulários mais curtos e claros
+- uso confortável com uma mão
+- touch targets adequados
+- espaçamento consistente
+- componentes reutilizáveis
+
+Considere padrões mobile como:
+- navegação inferior quando fizer sentido
+- ações principais bem destacadas
+- redução de menus complexos
+- cards, listas e dashboards adaptados para mobile
+- tabelas transformadas em estruturas mobile-friendly
+
+4. Faça auditoria completa de UI/UX
+Analise e corrija:
+- layout
+- navegação
+- contraste
+- tipografia
+- grid
+- espaçamento
+- consistência visual
+- feedbacks de interação
+- estados vazios
+- loading states
+- error states
+- onboarding
+- autenticação
+- dashboard
+- formulários
+- botões
+- CTAs
+- modais
+- menus
+- listas
+- filtros
+- busca
+- acessibilidade
+- responsividade
+- usabilidade geral
+
+5. Redesign visual premium
+Aplique uma direção visual com estas características:
+- clean
+- profissional
+- sofisticada
+- futurista
+- dinâmica
+- objetiva
+- minimalista com personalidade
+- moderna e bonita de verdade
+
+O visual deve transmitir:
+- confiança
+- inovação
+- clareza
+- produto tecnológico de alto nível
+
+Defina e aplique:
+- paleta de cores elegante e consistente
+- tipografia moderna e muito legível
+- escala de espaçamento consistente
+- sistema de sombras, bordas e profundidade equilibrado
+- iconografia coesa
+- componentes padronizados
+- microinterações sutis
+- animações leves e funcionais
+
+6. Siga padrões corretos por plataforma
+Ao adaptar a interface, respeite boas práticas de iOS e Android quando relevante.
+
+Considere diferenças de plataforma como:
+- padrões de navegação
+- posicionamento de ações
+- seletores
+- alertas
+- tipografia
+- comportamento dos componentes
+- ergonomia de toque
+
+Garanta pelo menos:
+- touch targets adequados para mobile
+- leitura confortável
+- navegação intuitiva
+- consistência entre plataformas
+- experiência nativa ou quase nativa
+
+Use como base conceitual:
+- Human Interface Guidelines para iOS
+- Material Design para Android
+
+Mas sem limitar a criatividade do produto. O resultado deve combinar boas práticas de sistema com identidade própria.
+
+7. Use design system e componentes escaláveis
+Crie ou reorganize um design system consistente com:
+- cores
+- tipografia
+- grid
+- botões
+- inputs
+- cards
+- modais
+- navegação
+- badges
+- feedback states
+- ícones
+- padrões de layout
+
+Evite:
+- estilos duplicados
+- decisões visuais incoerentes
+- componentes diferentes para a mesma função
+- excesso de exceções visuais
+
+8. Pense como produto de mercado
+Use como referência o padrão de excelência dos melhores aplicativos em:
+- clareza de interface
+- usabilidade
+- retenção
+- fluidez
+- apelo visual
+- simplicidade
+- consistência
+- sensação premium
+
+Não copie apps específicos. Extraia princípios de alto nível:
+- foco na ação principal
+- onboarding inteligente
+- feedback imediato
+- baixa carga cognitiva
+- ritmo visual bem distribuído
+- navegação previsível
+- experiência agradável e memorável
+
+9. Prototipe mentalmente e valide a experiência
+Antes de aplicar mudanças, avalie:
+- o que o usuário vê primeiro
+- o que ele entende em poucos segundos
+- se a tela está clara demais ou poluída
+- se a ação principal está óbvia
+- se há excesso de elementos
+- se existem etapas desnecessárias
+- se o fluxo é realmente natural no mobile
+
+Se necessário, redesenhe completamente telas e fluxos.
+
+10. Implemente e refine
+Não quero apenas diagnóstico.
+Quero que você:
+- identifique os problemas
+- priorize os problemas
+- proponha a melhor solução
+- refatore a UI
+- ajuste a UX
+- melhore layout e componentes
+- reorganize telas
+- deixe a base visual consistente
+- adapte a aplicação para mobile com padrão premium
+
+11. Documente as decisões
+Ao final, documente:
+- problemas encontrados
+- melhorias aplicadas
+- padrões visuais adotados
+- regras de responsividade
+- componentes criados ou padronizados
+- decisões de navegação
+- pontos que ainda podem evoluir
+
+Formato da resposta:
+1. Diagnóstico geral da experiência atual
+2. Principais problemas de UI/UX encontrados
+3. Estratégia de redesign mobile-first
+4. Melhorias por tela, fluxo e componente
+5. Direção visual proposta
+6. Ajustes específicos para iOS e Android
+7. Design system recomendado
+8. Alterações implementadas ou prontas para implementação
+9. Riscos restantes
+10. Checklist final de qualidade premium mobile
+
+Critérios de sucesso:
+- a aplicação deve parecer pensada para mobile desde o início
+- a interface deve estar limpa, bonita, profissional e moderna
+- a navegação deve estar intuitiva e fluida
+- o produto deve transmitir alto valor percebido
+- o usuário deve entender rapidamente como usar
+- a experiência deve ser eficiente, elegante e memorável
+- o resultado final deve estar em um nível que um designer sênior e um desenvolvedor sênior aprovariam para produção

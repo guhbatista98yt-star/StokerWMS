@@ -1,0 +1,713 @@
+Atue como um Engenheiro de Software Sênior full-stack, especialista em React, Express, TypeScript, Drizzle ORM, SQLite e WMS.
+
+Você está trabalhando no projeto StokerWMS e sua missão é IMPLEMENTAR a evolução WMS com segurança, sem quebrar o legado existente.
+
+IMPORTANTE:
+- Não responda com análise genérica.
+- Não me devolva apenas plano teórico.
+- Primeiro inspecione a base atual e implemente com o menor risco possível.
+- Trabalhe por fases, na ordem definida abaixo.
+- Preserve o comportamento atual dos módulos de separação, conferência e balcão.
+- Reaproveite ao máximo o que já existe.
+- Sempre prefira alterações incrementais, isoladas e reversíveis.
+
+==================================================
+1. CONTEXTO IMUTÁVEL
+==================================================
+
+- ERP é somente leitura para esta aplicação.
+- A aplicação NÃO envia dados ao ERP.
+- O CissControl continua sendo usado para recebimento físico e transmissão ao ERP.
+- O novo fluxo WMS começa APÓS a transmissão feita pelo CissControl.
+- A stack deve ser mantida:
+  - Node.js
+  - Express
+  - React
+  - TypeScript
+  - Drizzle ORM
+  - SQLite
+- O sistema deve continuar preparado para futura migração para PostgreSQL, mas AGORA deve permanecer em SQLite.
+- Apenas interface Web por enquanto. Não implementar Flutter/mobile nesta etapa.
+- Não invente integrações externas que não existem.
+- Quando algo depender de informação ainda não fornecida, implemente a estrutura preparada e marque claramente o ponto pendente.
+
+==================================================
+2. ARQUITETURA ATUAL QUE VOCÊ DEVE RESPEITAR
+==================================================
+
+Considere a arquitetura real do projeto:
+- Frontend React SPA
+- Backend Express monolítico
+- `server/routes.ts` concentra as rotas
+- `server/storage.ts` concentra acesso a dados
+- `shared/schema.ts` concentra schema Drizzle
+- `sync_db2.py` sincroniza ERP DB2 -> SQLite
+- Há padrão já consolidado de módulos operacionais:
+  1. seleção
+  2. lock
+  3. operação com leitura de código de barras
+  4. finalização
+- Há hook reutilizável de leitura de código de barras e store de atualização otimista, que devem ser reaproveitados onde fizer sentido:
+  - `client/src/hooks/use-barcode-scanner.ts`
+  - `client/src/lib/pendingDeltaStore.ts`
+- Há autenticação/sessão já funcional:
+  - `server/auth.ts`
+  - `client/src/lib/auth.tsx`
+
+IMPORTANTE:
+- Não faça refatoração ampla desnecessária.
+- Não tente “reescrever o sistema”.
+- Evite mover arquivos legados grandes sem necessidade.
+- Só modularize algo se isso reduzir risco e não quebrar importações existentes.
+
+==================================================
+3. DECISÕES DE NEGÓCIO JÁ CONFIRMADAS
+==================================================
+
+Estas decisões estão fechadas e devem ser tratadas como verdade:
+
+MULTIEMPRESA
+- O sistema suportará 2 empresas:
+  - IDEMPRESA 1
+  - IDEMPRESA 3
+- A empresa é selecionada no login.
+- A empresa fica TRAVADA por toda a sessão.
+- O mesmo produto/código pode existir nas 2 empresas com estoques diferentes.
+
+ENDEREÇAMENTO
+- Estrutura do endereço:
+  - Bairro
+  - Rua
+  - Bloco
+  - Nível
+- Existe lista prévia para importação.
+- Novos endereços poderão ser criados pelo webapp.
+
+PALLETS
+- Um pallet pode conter itens de múltiplas NFs, mas sempre de uma única empresa.
+- Regra rígida: 1 pallet por endereço.
+- Cancelar pallet NÃO é exclusão física.
+- Ao cancelar, o pallet vai logicamente para a zona/endereço especial `PICKING`.
+
+LOTE / VALIDADE
+- Lote existe para cerca de 90% dos produtos.
+- Validade se aplica principalmente a adesivos, químicos e abrasivos.
+- Lote e validade são opcionais.
+- Deve existir estrutura para FEFO por produto, opcional.
+
+CICLO DE CONTAGEM
+- Contagem simples com aprovação de supervisor.
+- Contagem cega por padrão.
+- Exibir quantidade esperada somente mediante liberação de supervisor/admin.
+
+IMPRESSÃO
+- A impressora será implantada futuramente.
+- Desde já, a estrutura deve existir.
+- A API deve conseguir gerar preview/PDF/estrutura pronta para futura impressão local.
+
+NF
+- NF virá por sync via DB2.
+- O operador digita o número da NF para buscar.
+- O SQL exato de sync da NF ainda poderá ser fornecido depois.
+- Enquanto isso, prepare a estrutura e pontos de integração.
+
+ROLES
+- Manter os atuais e adicionar:
+  - `recebedor`
+  - `empilhador`
+  - `conferente_wms`
+
+==================================================
+4. OBJETIVO DE IMPLEMENTAÇÃO
+==================================================
+
+Implementar a evolução WMS com estas entregas:
+
+1. Seletor de empresa no login
+2. Estoque por empresa
+3. Endereçamento WMS
+4. Recebimento com geração de pallets/etiquetas
+5. Check-in / alocação de pallets
+6. Transferência de pallets
+7. Ciclo de contagem
+8. Rastreabilidade e auditoria
+9. Base preparada para impressão de etiquetas
+10. Tudo filtrado por empresa da sessão
+
+==================================================
+5. RESTRIÇÕES CRÍTICAS
+==================================================
+
+RESTRIÇÕES OBRIGATÓRIAS:
+- Não quebrar separação.
+- Não quebrar conferência.
+- Não quebrar balcão.
+- Não alterar comportamento de barcode nos módulos legados sem extrema necessidade.
+- Não mexer em arquitetura estável se o mesmo objetivo puder ser atingido por extensão incremental.
+- Não remover campos antigos que o legado ainda usa.
+- Não eliminar `products.stock_qty`; manter compatibilidade e usar como fallback.
+- Não reutilizar `work_units.palletQrCode` como se fosse entidade real de pallet WMS.
+- Toda API autenticada deve respeitar a empresa da sessão.
+- Toda alteração relevante deve gerar audit log.
+- Toda movimentação WMS deve ser rastreável.
+
+==================================================
+6. ORDEM DE IMPLEMENTAÇÃO — EXECUTE NESTA SEQUÊNCIA
+==================================================
+
+FASE 1 — FUNDAÇÃO MULTIEMPRESA
+Objetivo:
+- adicionar empresa na sessão e nos dados-base sem quebrar o legado
+
+Implementar:
+- `users.default_company_id`
+- `users.allowed_companies`
+- `orders.company_id`
+- `work_units.company_id`
+- nova tabela `product_company_stock`
+- empresa na sessão server-side
+- endpoint `POST /api/auth/select-company`
+- retorno de `companyId` em `/api/auth/me`
+- tela `CompanySelectPage`
+- seleção automática quando usuário tiver somente 1 empresa permitida
+- badge da empresa atual na UI
+- filtro por empresa em queries existentes
+- filtro `WHERE IDEMPRESA IN (1,3)` no `sync_db2.py`
+- migração de dados antigos para preencher `company_id` quando possível a partir de `cache_orcamentos.IDEMPRESA`
+
+Regra importante:
+- manter `products.stock_qty` por compatibilidade
+- sempre priorizar `product_company_stock` ao consultar estoque
+
+Critério de aceite:
+- login funciona
+- empresa fica gravada na sessão
+- separação/conferência/balcão continuam funcionando
+- operador só vê dados da empresa da sessão
+
+--------------------------------------------------
+
+FASE 2 — ENDEREÇAMENTO WMS
+Implementar:
+- tabela `wms_addresses`
+- CRUD de endereços
+- importação de lista prévia
+- endereço especial `PICKING` por empresa
+- filtros por empresa
+- permissões:
+  - supervisor
+  - administrador
+
+Estrutura de endereço:
+- bairro
+- rua
+- bloco
+- nível
+- code concatenado
+- type (`standard`, `picking`, `recebimento`, `expedicao`)
+- active
+
+Critério de aceite:
+- supervisor consegue importar/criar/editar/inativar endereços
+- cada empresa enxerga apenas seus próprios endereços
+
+--------------------------------------------------
+
+FASE 3 — RECEBIMENTO E PALLETS
+Implementar tabelas:
+- `pallets`
+- `pallet_items`
+- `pallet_movements`
+- `nf_cache`
+- `nf_items`
+
+Implementar módulo `/recebimento`:
+- busca NF por número
+- leitura/adicional de item por:
+  - código de barras
+  - código ERP
+  - código de caixa
+- informar quantidade
+- informar lote opcional
+- informar validade opcional
+- permitir gerar 1 ou mais pallets para a mesma NF
+- permitir múltiplas NFs no mesmo pallet, desde que sejam da mesma empresa
+- criar pallet com status inicial `sem_endereco`
+- gerar etiqueta com:
+  - código do pallet
+  - empresa
+  - data
+  - operador
+  - NFs
+  - lista de itens
+  - lote
+  - validade
+  - QR/barcode para check-in
+- preparar endpoint:
+  - `POST /api/pallets/:id/print-label`
+- para MVP, retornar preview HTML/PDF
+- deixar estrutura preparada para impressão futura via servidor
+
+Permissões:
+- `recebedor`
+- `supervisor`
+- `administrador`
+
+Barcode/performance:
+- reutilizar o mesmo padrão robusto já usado em `use-barcode-scanner.ts`
+- usar fila sequencial de scans
+- evitar re-render excessivo
+- preservar atualização otimista quando fizer sentido
+
+Critério de aceite:
+- recebedor consegue criar pallet a partir de NF
+- pallet fica sem endereço
+- etiqueta pode ser visualizada em tela
+
+--------------------------------------------------
+
+FASE 4 — CHECK-IN / ALOCAÇÃO
+Implementar módulo `/checkin`:
+- scan da etiqueta do pallet
+- exibição do conteúdo do pallet
+- sugestão de endereços disponíveis
+- opção de digitar ou scanear endereço manualmente
+- validação:
+  - endereço existe
+  - endereço é da mesma empresa
+  - endereço está livre
+- ao confirmar:
+  - atualizar pallet
+  - registrar movimentação `allocated`
+
+Implementar também:
+- divisão de pallet
+- regras de consistência
+- bloqueios operacionais
+- rastreabilidade completa
+
+Permissões:
+- `empilhador`
+- `supervisor`
+- `administrador`
+
+Regra rígida:
+- 1 pallet por endereço
+
+Critério de aceite:
+- empilhador consegue alocar pallet
+- sistema bloqueia endereço ocupado
+- divisão gera rastreabilidade
+
+--------------------------------------------------
+
+FASE 5 — TRANSFERÊNCIA
+Implementar módulo `/transferencia`:
+- transferir pallet entre endereços
+- criar pallet manual
+- editar pallet
+- cancelar pallet logicamente
+
+Regra de cancelamento:
+- não excluir fisicamente
+- status `cancelado`
+- pallet vai para endereço `PICKING` da empresa
+- registrar `cancelled_at`, `cancelled_by`, `cancel_reason`
+- registrar movimentação correspondente
+
+Permissões:
+- transferência/edição:
+  - `empilhador`
+  - `supervisor`
+  - `administrador`
+- cancelamento:
+  - `supervisor`
+  - `administrador`
+
+Critério de aceite:
+- pallet pode ser movido com histórico
+- cancelamento preserva rastreabilidade
+- pallet cancelado continua existente
+
+--------------------------------------------------
+
+FASE 6 — CICLO DE CONTAGEM
+Implementar tabelas:
+- `counting_cycles`
+- `counting_cycle_items`
+
+Implementar:
+- criação de ciclo por endereço ou produto
+- contagem cega
+- registro de quantidade contada
+- atualização de lote/validade
+- cálculo de divergência
+- fluxo de aprovação por supervisor/admin
+- ícone de olho para revelar quantidade esperada somente com autorização
+- ajuste final com auditoria
+- movimentação `counted`
+
+Permissões:
+- execução:
+  - `conferente_wms`
+  - `supervisor`
+  - `administrador`
+- aprovação:
+  - `supervisor`
+  - `administrador`
+
+Critério de aceite:
+- ciclo pode ser criado, contado, aprovado e auditado
+- divergências ficam registradas
+- alterações de lote/validade ficam rastreáveis
+
+==================================================
+7. MODELO DE DADOS — IMPLEMENTE COM BASE NISSO
+==================================================
+
+Implemente ou adapte o schema Drizzle para contemplar:
+
+- `users`
+  - `default_company_id`
+  - `allowed_companies`
+
+- `orders`
+  - `company_id`
+
+- `work_units`
+  - `company_id`
+
+- `product_company_stock`
+  - `id`
+  - `product_id`
+  - `company_id`
+  - `stock_qty`
+  - `erp_updated_at`
+  - unique(product_id, company_id)
+
+- `wms_addresses`
+  - `id`
+  - `company_id`
+  - `bairro`
+  - `rua`
+  - `bloco`
+  - `nivel`
+  - `code`
+  - `type`
+  - `active`
+  - `created_by`
+  - `created_at`
+
+- `pallets`
+  - `id`
+  - `company_id`
+  - `code`
+  - `status`
+  - `address_id`
+  - `created_by`
+  - `created_at`
+  - `allocated_at`
+  - `cancelled_at`
+  - `cancelled_by`
+  - `cancel_reason`
+
+- `pallet_items`
+  - `id`
+  - `pallet_id`
+  - `product_id`
+  - `erp_nf_id`
+  - `quantity`
+  - `lot`
+  - `expiry_date`
+  - `fefo_enabled`
+  - `company_id`
+  - `created_at`
+
+- `pallet_movements`
+  - `id`
+  - `pallet_id`
+  - `company_id`
+  - `movement_type`
+  - `from_address_id`
+  - `to_address_id`
+  - `from_pallet_id`
+  - `user_id`
+  - `notes`
+  - `created_at`
+
+- `counting_cycles`
+  - `id`
+  - `company_id`
+  - `type`
+  - `status`
+  - `created_by`
+  - `approved_by`
+  - `approved_at`
+  - `notes`
+  - `created_at`
+  - `completed_at`
+
+- `counting_cycle_items`
+  - `id`
+  - `cycle_id`
+  - `company_id`
+  - `address_id`
+  - `product_id`
+  - `pallet_id`
+  - `expected_qty`
+  - `counted_qty`
+  - `lot`
+  - `expiry_date`
+  - `old_lot`
+  - `old_expiry_date`
+  - `status`
+  - `counted_by`
+  - `counted_at`
+  - `divergence_pct`
+  - `created_at`
+
+- `nf_cache`
+  - `id`
+  - `company_id`
+  - `nf_number`
+  - `nf_series`
+  - `supplier_name`
+  - `supplier_cnpj`
+  - `issue_date`
+  - `total_value`
+  - `status`
+  - `synced_at`
+
+- `nf_items`
+  - `id`
+  - `nf_id`
+  - `product_id`
+  - `erp_code`
+  - `product_name`
+  - `quantity`
+  - `unit`
+  - `lot`
+  - `expiry_date`
+  - `company_id`
+
+Também crie índices mínimos necessários para performance, especialmente:
+- pallets(company_id, status)
+- pallet_items(pallet_id)
+- wms_addresses(company_id, code)
+- counting_cycles(company_id, status)
+- nf_cache(company_id, nf_number)
+- product_company_stock(product_id, company_id)
+
+==================================================
+8. APIS NECESSÁRIAS
+==================================================
+
+Implemente ou adapte endpoints para:
+
+AUTH / EMPRESA
+- POST `/api/auth/select-company`
+
+ENDEREÇOS
+- GET `/api/wms-addresses`
+- POST `/api/wms-addresses`
+- PATCH `/api/wms-addresses/:id`
+- DELETE `/api/wms-addresses/:id`
+- GET `/api/wms-addresses/available`
+- POST `/api/wms-addresses/import`
+
+PALLETS
+- GET `/api/pallets`
+- POST `/api/pallets`
+- GET `/api/pallets/:id`
+- PATCH `/api/pallets/:id`
+- POST `/api/pallets/:id/allocate`
+- POST `/api/pallets/:id/transfer`
+- POST `/api/pallets/:id/split`
+- POST `/api/pallets/:id/cancel`
+- POST `/api/pallets/:id/print-label`
+- GET `/api/pallets/by-address/:id`
+
+NF
+- GET `/api/nf/:nfNumber`
+- POST `/api/nf/sync`
+
+MOVIMENTAÇÕES
+- GET `/api/pallet-movements`
+
+CONTAGEM
+- GET `/api/counting-cycles`
+- POST `/api/counting-cycles`
+- GET `/api/counting-cycles/:id`
+- PATCH `/api/counting-cycles/:id/item`
+- POST `/api/counting-cycles/:id/approve`
+- POST `/api/counting-cycles/:id/reject`
+
+ESTOQUE
+- GET `/api/products/:id/stock`
+
+REGRAS GERAIS DE API:
+- toda rota autenticada deve ler `companyId` da sessão
+- nenhuma rota pode retornar dados de outra empresa
+- sempre aplicar validação por role quando necessário
+- sempre registrar audit log nas ações relevantes
+
+==================================================
+9. BARCODE, PERFORMANCE E LEGADO
+==================================================
+
+Ponto crítico:
+- Não reimplementar do zero a leitura de barcode.
+- Reutilize o padrão já consolidado no projeto.
+- Preserve a arquitetura de:
+  - queue de scans
+  - mutex/worker sequencial
+  - atualização otimista
+  - reconcile posterior
+- Onde houver operação intensiva por scan, evite:
+  - setState excessivo
+  - refetch concorrente desnecessário
+  - listeners duplicados
+  - chamadas em paralelo para o mesmo item
+  - bloqueio da UI por processamento síncrono
+
+Muito importante:
+- O diagnóstico indicou que separação e conferência já usam estrutura semelhante de scan queue.
+- Portanto, não faça refatoração radical nesses módulos.
+- Apenas reutilize esse padrão nos novos módulos WMS.
+- Só ajuste conferência se encontrar problema real e isolado, sem regressão.
+
+==================================================
+10. REGRAS DE SEGURANÇA E CONSISTÊNCIA
+==================================================
+
+Você deve implementar com estas regras:
+
+- Operador não pode trocar de empresa no meio da sessão operacional
+- Endereço deve pertencer à mesma empresa do pallet
+- Um endereço só pode ter 1 pallet
+- Toda criação/edição/transferência/cancelamento/alocação/contagem deve gerar audit log
+- Toda movimentação deve gerar registro em `pallet_movements`
+- Cancelamento de pallet é lógico
+- Contagem cega oculta `expected_qty` por padrão
+- Revelação da quantidade esperada exige autorização de supervisor/admin
+- Dados antigos devem continuar compatíveis com o legado
+- O sistema não deve depender de escrita no ERP
+- A sincronização deve continuar sendo fonte externa de leitura
+
+==================================================
+11. ARQUIVOS E PONTOS DO PROJETO QUE VOCÊ DEVE INSPECIONAR
+==================================================
+
+Antes de alterar, inspecione explicitamente estes arquivos e adapte a implementação real a partir deles:
+
+- `shared/schema.ts`
+- `server/routes.ts`
+- `server/storage.ts`
+- `server/auth.ts`
+- `server/sse.ts`
+- `client/src/App.tsx`
+- `client/src/lib/auth.tsx`
+- `client/src/lib/queryClient.ts`
+- `client/src/lib/pendingDeltaStore.ts`
+- `client/src/hooks/use-barcode-scanner.ts`
+- `client/src/hooks/use-sse.ts`
+- `client/src/pages/separacao/index.tsx`
+- `client/src/pages/conferencia/index.tsx`
+- `client/src/pages/balcao/index.tsx`
+- `client/src/pages/supervisor/*`
+- `sync_db2.py`
+
+==================================================
+12. COMO QUERO SUA EXECUÇÃO
+==================================================
+
+Execute assim:
+
+ETAPA A
+- inspecione a base real
+- identifique arquivos exatos a alterar
+- confirme o impacto de cada fase
+
+ETAPA B
+- implemente Fase 1 completamente
+- garanta compatibilidade do legado
+- rode correções necessárias
+
+ETAPA C
+- implemente Fase 2
+- depois Fase 3
+- depois Fase 4
+- depois Fase 5
+- depois Fase 6
+
+ETAPA D
+- valide integridade e compatibilidade
+
+Se encontrar bloqueio por falta do SQL final de NF no DB2:
+- não pare a implementação inteira
+- prepare schema, telas, serviços e endpoints
+- deixe o ponto de sync da NF isolado, com comentário claro de pendência
+
+==================================================
+13. FORMATO DA SUA RESPOSTA
+==================================================
+
+Quero que você responda com este formato:
+
+1. RESUMO DO QUE SERÁ ALTERADO
+- lista objetiva dos arquivos que vai alterar/criar
+
+2. IMPLEMENTAÇÃO POR FASE
+- o que foi feito em cada fase
+
+3. MIGRAÇÕES / SCHEMA
+- tabelas novas
+- colunas novas
+- índices novos
+
+4. BACKEND
+- rotas criadas/alteradas
+- storage/services alterados
+- regras de sessão/empresa
+
+5. FRONTEND
+- páginas novas
+- componentes novos
+- rotas novas
+- mudanças no login/auth
+
+6. PROTEÇÕES DE LEGADO
+- explique objetivamente como garantiu que separação, conferência e balcão não foram quebrados
+
+7. PENDÊNCIAS
+- tudo que ficou dependente de informação externa
+- especialmente SQL final de NF no DB2
+- qualquer ponto que foi preparado mas não finalizado por falta de insumo
+
+8. CHECKLIST DE VALIDAÇÃO
+- login com empresa
+- filtro por empresa
+- criação de endereço
+- criação de pallet
+- alocação
+- transferência
+- cancelamento
+- ciclo de contagem
+- validação do legado
+
+==================================================
+14. CRITÉRIO DE QUALIDADE
+==================================================
+
+Sua implementação só será considerada correta se:
+- respeitar o legado
+- respeitar a empresa da sessão em toda a aplicação
+- usar SQLite + Drizzle
+- preparar migração futura para PostgreSQL sem migrar agora
+- reaproveitar o scanner existente
+- manter compatibilidade com `products.stock_qty`
+- introduzir rastreabilidade e auditoria
+- implementar os módulos WMS de forma funcional
+- não inventar comportamento fora das regras definidas acima
+
+Agora comece pela inspeção real da base atual e implemente.

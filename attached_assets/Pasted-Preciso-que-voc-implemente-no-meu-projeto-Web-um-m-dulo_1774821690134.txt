@@ -1,0 +1,101 @@
+Preciso que você implemente no meu projeto Web um módulo de impressão via servidor, integrado ao backend já existente que é iniciado pelo arquivo `sync_db2.py` usando o comando:
+
+`python sync_db2.py --serve`
+
+IMPORTANTE:
+- Não crie um servidor separado se não for necessário.
+- A implementação deve ser incorporada ao servidor já existente.
+- Preserve tudo que já funciona hoje.
+- Antes de alterar qualquer coisa, analise a estrutura atual do projeto, identifique o framework já usado no backend e frontend, e siga o mesmo padrão do sistema.
+- A solução precisa funcionar de forma confiável em ambiente Windows, porque a máquina do servidor terá impressoras instaladas localmente.
+- Quero uma implementação prática, robusta, segura e preparada para produção.
+
+====================================================
+OBJETIVO GERAL
+====================================================
+
+Quero adicionar ao meu app web um fluxo de impressão com 2 opções quando o usuário clicar em “Imprimir”:
+
+1. Abrir a página de impressão no navegador
+   - O sistema gera a visualização/impressão no próprio navegador do usuário.
+   - Essa opção é útil quando o usuário quiser usar o diálogo padrão de impressão do browser.
+
+2. Enviar direto para a impressora do servidor
+   - O frontend envia os dados de impressão para o backend.
+   - O backend lista as impressoras disponíveis na máquina onde o servidor está rodando.
+   - O usuário escolhe uma impressora configurada nessa máquina.
+   - O backend envia a impressão diretamente para essa impressora, sem depender do coletor abrir o diálogo de impressão.
+
+====================================================
+REQUISITOS FUNCIONAIS
+====================================================
+
+1. Criar um serviço de impressão no backend, embutido no servidor atual.
+2. Criar endpoints para:
+   - listar impressoras instaladas na máquina do servidor;
+   - obter impressora padrão;
+   - enviar trabalho de impressão;
+   - opcionalmente testar impressão;
+   - opcionalmente consultar histórico/status simples dos últimos trabalhos.
+3. No frontend, ao clicar em “Imprimir”, exibir um modal com:
+   - opção “Abrir página de impressão no navegador”;
+   - opção “Enviar direto para a impressora do servidor”.
+4. Se o usuário escolher impressão direta:
+   - carregar e mostrar a lista de impressoras disponíveis na máquina do servidor;
+   - permitir selecionar uma impressora;
+   - permitir confirmar o envio do trabalho;
+   - mostrar retorno de sucesso ou erro.
+5. A aplicação deve permitir que eu veja exatamente quais impressoras estão configuradas na máquina onde o servidor está rodando.
+6. A impressão deve aceitar dados vindos da minha aplicação e montar o conteúdo a ser impresso de forma organizada.
+7. O fluxo precisa ser genérico, para que depois eu possa adaptar o layout impresso conforme o tipo de documento.
+8. Não quero depender do coletor para impressão direta, porque hoje ele não consegue imprimir diretamente.
+
+====================================================
+COMO DEVE FUNCIONAR
+====================================================
+
+Fluxo esperado no frontend:
+- Usuário clica em um botão “Imprimir”.
+- O sistema abre um modal ou popup com duas escolhas:
+  1. “Abrir no navegador para imprimir”
+  2. “Enviar direto para impressora do servidor”
+- Se escolher navegador:
+  - abrir uma página/rota de impressão com layout pronto para print.
+  - chamar `window.print()` apenas na tela de impressão, se fizer sentido.
+- Se escolher impressão direta:
+  - chamar API para listar impressoras do servidor;
+  - mostrar nome das impressoras em um select/dropdown;
+  - destacar a impressora padrão;
+  - permitir escolher quantidade de cópias, se for viável;
+  - enviar os dados do documento para o backend imprimir.
+
+====================================================
+BACKEND – O QUE IMPLEMENTAR
+====================================================
+
+Analise o projeto atual e implemente um módulo de impressão compatível com o backend existente.
+
+Se o projeto já usa FastAPI/Flask/outro framework, siga o mesmo padrão.
+
+Criar algo como:
+
+- `GET /api/print/printers`
+  Retorna lista de impressoras instaladas na máquina do servidor.
+  Exemplo de retorno:
+  ```json
+  {
+    "success": true,
+    "default_printer": "Nome da Impressora Padrão",
+    "printers": [
+      {
+        "name": "Microsoft Print to PDF",
+        "is_default": false,
+        "status": "ready"
+      },
+      {
+        "name": "Zebra ZD220",
+        "is_default": true,
+        "status": "ready"
+      }
+    ]
+  }

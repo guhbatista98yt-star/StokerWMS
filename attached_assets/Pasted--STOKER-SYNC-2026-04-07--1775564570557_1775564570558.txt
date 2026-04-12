@@ -1,0 +1,59 @@
+
+===================================================================
+  STOKER SYNC  |  2026-04-07 09:17:20  |  modo=serve · SO=Windows
+===================================================================
+
+
+------------------------------------------------------
+  VERIFICANDO SCHEMA DO BANCO
+------------------------------------------------------
+[09:17:20] -   Todas as 33 tabelas já existem
+[09:17:20] -   Todas as colunas verificadas — nada a adicionar
+[09:17:20] -   Índices verificados
+[09:17:20] + Schema verificado com sucesso
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[09:17:20] > DB2 — conectando...
+[09:17:21] + DB2 — conectado em 0.09s
+[09:17:21] + PostgreSQL local — conectado
+[09:17:21] > Orçamentos — buscando últimos 31 dias...
+[09:17:39] + Orçamentos — 26314 obtidos · 26303 removidos (>=2026-03-06) · 26314 inseridos · 0 erros · 18.8s
+[09:17:43] ! Remoção ERP — 5 pedido(s) excluído(s): ['473547', '473714', '473715', '473716', '473718']
+[09:17:43] + Transformação — 4943 pedidos · 0 produtos novos · 20 itens novos · 3.5s
+[09:17:43] > Estoque — sincronizando do ERP...
+[09:17:46] + Estoque — 22001 obtidos · 7086 atualizados · 0 erros · 2.8s
+[09:17:46] > Box Barcodes — sincronizando...
+[09:17:46] + Box Barcodes — 332 produtos atualizados · 0.3s
+[09:17:46] > Endereços WMS — sincronizando...
+[09:17:46] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[09:17:46] > NFs Recebimento — sincronizando...
+[09:17:49] + NFs Recebimento — 463 NFs · 0 novas · 463 atualizadas · 4152 itens · 3.1s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=29.0s
+------------------------------------------------------
+
+[09:17:49] + Loop de sync em background (300s)
+
+------------------------------------------------------
+  INICIANDO SERVIDOR WEB
+------------------------------------------------------
+[09:17:50] + Servidor disponível em → http://localhost:411
+Seeding database...
+Checking for existing users...
+Existing users count: 14
+Database already seeded
+9:17:53 AM [express] [Routes] Registering routes...
+9:17:53 AM [print] [agent] WebSocket server iniciado em /ws/print-agent
+9:17:53 AM [express] [scanning-ws] WebSocket scanning server iniciado em /ws/scanning
+9:17:54 AM [express] Servidor iniciado na porta 411
+9:17:54 AM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+9:17:57 AM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+9:17:58 AM [express] [Auto-Sync] Triggering DB sync...
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+9:18:22 AM [express] [Sync] Sincronização concluída.
+9:18:23 AM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+9:18:27 AM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"

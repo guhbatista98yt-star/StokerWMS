@@ -1,0 +1,273 @@
+version: "2"
+type: frontend
+tech_stack:
+  - TypeScript
+  - React 18
+  - Vite
+  - Express.js
+  - Drizzle ORM
+  - SQLite (better-sqlite3)
+  - TanStack Query (React Query)
+  - Tailwind CSS
+  - Radix UI / shadcn/ui
+  - Wouter (routing)
+  - Zustand
+  - Zod
+
+routes:
+  - path: /login
+    file: client/src/pages/login.tsx
+    auth_required: false
+    description: Página de login com usuário/senha e leitura de crachá
+  - path: /supervisor
+    file: client/src/pages/supervisor/index.tsx
+    auth_required: true
+    description: Dashboard principal do supervisor com acesso aos módulos
+  - path: /supervisor/orders
+    file: client/src/pages/supervisor/orders.tsx
+    auth_required: true
+    description: Gerenciamento de pedidos — lançamento, conferência, atribuição de rotas
+  - path: /supervisor/exceptions
+    file: client/src/pages/supervisor/exceptions.tsx
+    auth_required: true
+    description: Módulo de exceções (produtos não encontrados, avariados, vencidos)
+  - path: /supervisor/reports
+    file: client/src/pages/supervisor/reports.tsx
+    auth_required: true
+    description: Relatórios — picking list, mapa de carregamento, cartões de acesso
+  - path: /supervisor/manual-qty
+    file: client/src/pages/supervisor/manual-qty.tsx
+    auth_required: true
+    description: Regras de quantidade manual por produto
+  - path: /supervisor/audit
+    file: client/src/pages/supervisor/audit.tsx
+    auth_required: true
+    description: Auditoria de ações dos usuários
+  - path: /supervisor/mapping
+    file: client/src/pages/supervisor/mapping.tsx
+    auth_required: true
+    description: Mapping Studio para configuração de mapeamento de campos
+  - path: /separacao
+    file: client/src/pages/separacao/index.tsx
+    auth_required: true
+    description: Módulo de separação de mercadorias por operador
+  - path: /conferencia
+    file: client/src/pages/conferencia/index.tsx
+    auth_required: true
+    description: Módulo de conferência de mercadorias
+  - path: /balcao
+    file: client/src/pages/balcao/index.tsx
+    auth_required: true
+    description: Módulo de atendimento de balcão
+
+features:
+  - name: Autenticação de Usuário
+    description: Login com usuário/senha e suporte a leitura de crachá QR
+    files:
+      - client/src/pages/login.tsx
+      - client/src/lib/auth.ts
+      - server/auth.ts
+    entry_route: /login
+    user_interactions:
+      - Preencher campo de usuário
+      - Preencher campo de senha
+      - Clicar em Entrar
+      - Ler crachá QR code (alternativa)
+      - Ver mensagem de erro em credenciais inválidas
+    api_calls:
+      - method: POST
+        endpoint: /api/auth/login
+      - method: GET
+        endpoint: /api/auth/me
+    auth_required: false
+
+  - name: Gerenciamento de Pedidos
+    description: Listar, filtrar, lançar, cancelar lançamento e alterar status de pedidos
+    files:
+      - client/src/pages/supervisor/orders.tsx
+      - server/routes.ts
+      - server/storage.ts
+    entry_route: /supervisor/orders
+    user_interactions:
+      - Filtrar pedidos por período, status, rota, código
+      - Selecionar pedidos via checkbox
+      - Clicar em Lançar para iniciar separação
+      - Clicar em Cancelar Lançamento para reverter
+      - Clicar em Separar Total (admin) para forçar status separado
+      - Clicar em Conferir Total (admin) para forçar status conferido
+      - Atribuir rota a pedidos selecionados
+      - Visualizar produtos do pedido clicando no ícone de olho
+      - Imprimir lista de pedidos
+    api_calls:
+      - method: GET
+        endpoint: /api/orders
+      - method: POST
+        endpoint: /api/orders/launch
+      - method: POST
+        endpoint: /api/orders/cancel-launch
+      - method: POST
+        endpoint: /api/orders/force-status
+      - method: POST
+        endpoint: /api/orders/assign-route
+    auth_required: true
+
+  - name: Separação de Mercadorias
+    description: Operador seleciona pedidos, escaneia itens e registra separação
+    files:
+      - client/src/pages/separacao/index.tsx
+      - server/routes.ts
+    entry_route: /separacao
+    user_interactions:
+      - Selecionar unidades de trabalho disponíveis
+      - Clicar em Iniciar Separação para travar unidades
+      - Escanear código de barras do produto
+      - Inserir quantidade manual (quando permitido)
+      - Criar exceção para produto não encontrado/avariado/vencido
+      - Navegar entre produtos por abas (produto/pedido)
+      - Clicar em Finalizar para concluir a separação
+      - Cancelar separação e liberar pedidos
+    api_calls:
+      - method: POST
+        endpoint: /api/work-units/lock
+      - method: POST
+        endpoint: /api/work-units/:id/scan-item
+      - method: POST
+        endpoint: /api/work-units/unlock
+      - method: POST
+        endpoint: /api/exceptions
+      - method: POST
+        endpoint: /api/work-units/:id/complete
+    auth_required: true
+
+  - name: Conferência de Mercadorias
+    description: Operador confere os itens separados escaneando os produtos
+    files:
+      - client/src/pages/conferencia/index.tsx
+      - server/routes.ts
+    entry_route: /conferencia
+    user_interactions:
+      - Selecionar pedidos com status separado
+      - Iniciar conferência (travar unidades)
+      - Escanear código de barras para conferir produto
+      - Inserir quantidade manual quando permitido
+      - Registrar exceção para divergências
+      - Finalizar conferência do pedido
+    api_calls:
+      - method: POST
+        endpoint: /api/work-units/lock
+      - method: POST
+        endpoint: /api/work-units/:id/check-item
+      - method: POST
+        endpoint: /api/exceptions
+      - method: POST
+        endpoint: /api/work-units/:id/complete-conference
+    auth_required: true
+
+  - name: Atendimento de Balcão
+    description: Operador atende pedidos de balcão com escaneamento de produtos
+    files:
+      - client/src/pages/balcao/index.tsx
+      - server/routes.ts
+    entry_route: /balcao
+    user_interactions:
+      - Selecionar pedidos de balcão disponíveis
+      - Escanear QR code do carrinho
+      - Escanear produtos para separação
+      - Registrar exceção
+      - Concluir atendimento
+    api_calls:
+      - method: POST
+        endpoint: /api/work-units/lock
+      - method: POST
+        endpoint: /api/work-units/batch/scan-cart
+      - method: POST
+        endpoint: /api/work-units/:id/balcao-item
+      - method: POST
+        endpoint: /api/work-units/:id/complete-balcao
+    auth_required: true
+
+  - name: Módulo de Exceções
+    description: Listar, filtrar, autorizar e deletar exceções registradas pelos operadores
+    files:
+      - client/src/pages/supervisor/exceptions.tsx
+      - server/routes.ts
+    entry_route: /supervisor/exceptions
+    user_interactions:
+      - Visualizar lista de exceções
+      - Filtrar por data, pedido e tipo
+      - Autorizar exceção pendente
+      - Deletar exceção pendente (somente admin)
+      - Imprimir relatório de exceções
+    api_calls:
+      - method: GET
+        endpoint: /api/exceptions
+      - method: POST
+        endpoint: /api/exceptions/authorize
+      - method: DELETE
+        endpoint: /api/exceptions/:id
+    auth_required: true
+
+  - name: Volumes de Pedido
+    description: Registrar e apagar volumes gerados para cada pedido
+    files:
+      - client/src/pages/supervisor/orders.tsx
+      - server/routes.ts
+    entry_route: /supervisor/orders
+    user_interactions:
+      - Visualizar volumes registrados no pedido
+      - Adicionar volume ao pedido
+      - Apagar volume gerado
+    api_calls:
+      - method: GET
+        endpoint: /api/orders/:id/volumes
+      - method: POST
+        endpoint: /api/orders/:id/volumes
+      - method: DELETE
+        endpoint: /api/orders/:id/volumes/:volumeId
+    auth_required: true
+
+  - name: Relatórios
+    description: Gerar relatórios de picking list e mapa de carregamento
+    files:
+      - client/src/pages/supervisor/reports.tsx
+      - client/src/pages/supervisor/reports/loading-map.tsx
+      - server/routes.ts
+    entry_route: /supervisor/reports
+    user_interactions:
+      - Selecionar pedidos para gerar picking list
+      - Gerar mapa de separação por pedido
+      - Imprimir relatório diretamente do browser
+    api_calls:
+      - method: POST
+        endpoint: /api/reports/picking-list
+      - method: GET
+        endpoint: /api/reports/loading-map/:loadCode
+    auth_required: true
+
+  - name: Controle de Acesso por Perfil
+    description: Diferentes permissões para perfis administrador, supervisor, separacao, conferencia e balcao
+    files:
+      - client/src/lib/auth.ts
+      - server/auth.ts
+    entry_route: /supervisor
+    user_interactions:
+      - Administrador acessa todos os módulos e botões
+      - Supervisor não acessa módulos ocultos (Qtd Manual, Auditoria, Mapping Studio)
+      - Supervisor não vê botões Separar Total / Conferir Total
+      - Supervisor não vê relatório Cartões de Acesso
+      - Operadores de separação/conferência/balcão acessam apenas seus módulos
+    api_calls:
+      - method: GET
+        endpoint: /api/auth/me
+    auth_required: true
+
+known_limitations:
+  - issue: import.meta.url retorna undefined em bundle CJS, causando crash do servidor em produção
+    location: server/static.ts e server/routes.ts (rota /api/db2-query)
+    impact: Servidor não inicia em modo production (npm start) — CORRIGIDO nesta sessão
+  - issue: python3 hardcoded no spawn da rota /api/db2-query
+    location: server/routes.ts linha ~2443
+    impact: No Windows o executável é 'python', não 'python3' — pode falhar ao chamar db2_query.py
+  - issue: Botões Separar Total / Conferir Total aparecem mesmo para pedidos já no status alvo
+    location: client/src/pages/supervisor/orders.tsx
+    impact: Backend retorna erro adequado, mas UX poderia filtrar esses pedidos previamente

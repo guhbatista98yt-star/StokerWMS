@@ -1,0 +1,66 @@
+{
+    "tech_stack": [
+        "TypeScript",
+        "Express",
+        "React",
+        "SQLite",
+        "Drizzle ORM",
+        "Vite",
+        "TailwindCSS"
+    ],
+    "features": [
+        {
+            "name": "Auth",
+            "description": "Authentication endpoints including login, logout, and session checks.",
+            "files": [
+                "server/routes.ts",
+                "server/auth.ts"
+            ]
+        },
+        {
+            "name": "Order Management",
+            "description": "Endpoints for managing orders, assigning routes, and launching orders.",
+            "files": [
+                "server/routes.ts",
+                "server/storage.ts"
+            ]
+        },
+        {
+            "name": "Warehouse Operations",
+            "description": "Core warehouse operations: sorting (separação), checking (conferência), and work unit management.",
+            "files": [
+                "server/routes.ts",
+                "server/storage.ts"
+            ]
+        },
+        {
+            "name": "User Management",
+            "description": "CRUD operations for users, restricted to supervisors.",
+            "files": [
+                "server/routes.ts",
+                "server/storage.ts"
+            ]
+        },
+        {
+            "name": "Frontend - Login",
+            "description": "Login page.",
+            "files": [
+                "client/src/pages/login.tsx"
+            ]
+        },
+        {
+            "name": "Frontend - Supervisor Dashboard",
+            "description": "Dashboard for supervisors to manage orders and users.",
+            "files": [
+                "client/src/pages/supervisor/*"
+            ]
+        },
+        {
+            "name": "Frontend - Picking",
+            "description": "Interface for picking items (separação).",
+            "files": [
+                "client/src/pages/separacao/*"
+            ]
+        }
+    ]
+}
