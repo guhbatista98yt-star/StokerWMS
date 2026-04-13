@@ -203,6 +203,13 @@ export default function SeparacaoPage() {
   const pendingScanContextRef = useRef<Map<string, PendingScanCtx>>(new Map());
   const sendScanRef = useRef<any>(null);
 
+  interface ModalItemEntry {
+    itemId: string;
+    workUnitId: string;
+    remaining: number;
+    targetQty: number;
+    exceptionQty: number;
+  }
   interface QtyModalData {
     productId: string;
     productName: string;
@@ -215,6 +222,7 @@ export default function SeparacaoPage() {
     maxRemaining: number;
     targetQty: number;
     exceptionQty: number;
+    allItems: ModalItemEntry[];
   }
   const [qtyModal, setQtyModal] = useState<QtyModalData | null>(null);
   const qtyModalRef = useRef<QtyModalData | null>(null);
@@ -999,17 +1007,6 @@ export default function SeparacaoPage() {
           continue;
         }
 
-        const serverSeparated = Number(matchedItem.separatedQty);
-        const itemDelta = getDelta("separacao", matchedItem.id);
-        const exceptionQty = Number(matchedItem.exceptionQty || 0);
-        const alreadyComplete = serverSeparated + itemDelta + exceptionQty >= Number(matchedItem.quantity);
-
-        if (alreadyComplete) {
-          setScanStatus("success");
-          setScanMessage(`"${matchedItem.product.name}" já separado`);
-          continue;
-        }
-
         let isBoxBarcode = false;
         let boxQty = 1;
         if (matchedItem.product.barcode !== barcode && matchedItem.product.boxBarcodes && Array.isArray(matchedItem.product.boxBarcodes)) {
@@ -1021,114 +1018,107 @@ export default function SeparacaoPage() {
         }
 
         const productId = matchedItem.product.id;
-        const remaining = Number(matchedItem.quantity) - (serverSeparated + itemDelta) - exceptionQty;
+
+        // Agrega todos os itens do mesmo produto em todas as unidades travadas (multi-pedido)
+        const allProductEntries: ModalItemEntry[] = unitsWithProduct.flatMap((wu: any) =>
+          (wu.items as ItemWithProduct[])
+            .filter((i: ItemWithProduct) =>
+              i.product?.barcode === barcode || i.product?.boxBarcode === barcode ||
+              (Array.isArray(i.product?.boxBarcodes) && i.product.boxBarcodes.some((bx: any) => bx.code === barcode))
+            )
+            .map((i: ItemWithProduct) => {
+              const ss = Number(i.separatedQty);
+              const d = getDelta("separacao", i.id);
+              const eq = Number(i.exceptionQty || 0);
+              return {
+                itemId: i.id,
+                workUnitId: wu.id,
+                remaining: Math.max(0, Number(i.quantity) - ss - d - eq),
+                targetQty: Number(i.quantity) - eq,
+                exceptionQty: eq,
+              } as ModalItemEntry;
+            })
+            .filter(e => e.remaining > 0)
+        );
+
+        const totalRemaining = allProductEntries.reduce((s, e) => s + e.remaining, 0);
+        const totalTargetQty = allProductEntries.reduce((s, e) => s + e.targetQty, 0);
+
+        if (totalRemaining <= 0) {
+          setScanStatus("success");
+          setScanMessage(`"${matchedItem.product.name}" já separado`);
+          continue;
+        }
+
         const currentModal = qtyModalRef.current;
 
+        // Flush modal se o operador mudou de produto
         if (currentModal && currentModal.productId !== productId) {
           if (currentModal.accumulated > 0) {
-            usePendingDeltaStore.getState().inc("separacao", currentModal.itemId, currentModal.accumulated);
-            const msgId = generateMsgId();
-            pendingScanContextRef.current.set(msgId, {
-              itemId: currentModal.itemId,
-              qty: currentModal.accumulated,
-              barcode: currentModal.barcode,
-              workUnitId: currentModal.workUnitId,
-              apItems: [{ id: currentModal.itemId }],
-              productName: currentModal.productName,
-              targetQty: currentModal.targetQty,
-              exceptionQty: currentModal.exceptionQty,
-            });
-            sendScan(currentModal.workUnitId, currentModal.barcode, currentModal.accumulated, msgId);
+            let leftToFlush = currentModal.accumulated;
+            for (const entry of currentModal.allItems) {
+              if (leftToFlush <= 0) break;
+              const toSend = Math.min(leftToFlush, entry.remaining);
+              if (toSend <= 0) continue;
+              usePendingDeltaStore.getState().inc("separacao", entry.itemId, toSend);
+              const flushMsgId = generateMsgId();
+              pendingScanContextRef.current.set(flushMsgId, {
+                itemId: entry.itemId,
+                qty: toSend,
+                barcode: currentModal.barcode,
+                workUnitId: entry.workUnitId,
+                apItems: [{ id: entry.itemId }],
+                productName: currentModal.productName,
+                targetQty: entry.targetQty,
+                exceptionQty: entry.exceptionQty,
+              });
+              sendScan(entry.workUnitId, currentModal.barcode, toSend, flushMsgId);
+              leftToFlush -= toSend;
+            }
           }
           setQtyModal(null);
         }
 
         if (currentModal && currentModal.productId === productId) {
+          // Modal já aberto para o mesmo produto — incrementa o total acumulado
           const addQty = isBoxBarcode ? boxQty : currentModal.multiplier;
           const newAccumulated = currentModal.accumulated + addQty;
-          if (newAccumulated > remaining) {
-            // Verifica se existem outros itens incompletos do mesmo produto em outras unidades de trabalho
-            const allSameProductEntries = unitsWithProduct.flatMap((wu: any) =>
-              (wu.items as ItemWithProduct[])
-                .filter((i: ItemWithProduct) =>
-                  i.product?.barcode === barcode || i.product?.boxBarcode === barcode ||
-                  (Array.isArray(i.product?.boxBarcodes) && i.product.boxBarcodes.some((bx: any) => bx.code === barcode))
-                )
-                .map((i: ItemWithProduct) => ({ item: i, wu }))
-            );
-            const nextEntry = allSameProductEntries.find(({ item }: { item: ItemWithProduct; wu: any }) => {
-              if (item.id === currentModal.itemId) return false;
-              const ss = Number(item.separatedQty);
-              const d = getDelta("separacao", item.id);
-              const eq = Number(item.exceptionQty || 0);
-              return ss + d + eq < Number(item.quantity);
+          if (newAccumulated > currentModal.maxRemaining) {
+            // Overflow real: total bipado ultrapassa o total solicitado
+            setQtyModal(null);
+            const resetIds = currentModal.allItems.map(e => e.itemId);
+            for (const id of resetIds) {
+              usePendingDeltaStore.getState().clearItem("separacao", id);
+              usePendingDeltaStore.getState().resetBaseline("separacao", id);
+            }
+            queryClient.setQueryData(workUnitsQueryKey, (old: any) => {
+              if (!old) return old;
+              const idSet = new Set(resetIds);
+              return old.map((wu: any) => ({
+                ...wu,
+                items: wu.items.map((item: any) =>
+                  idSet.has(item.id) ? { ...item, separatedQty: 0, status: "recontagem" } : item
+                ),
+              }));
             });
-
-            if (nextEntry) {
-              // Envia a quantidade restante para o item atual e abre modal para o próximo item
-              const flushQty = remaining;
-              if (flushQty > 0) {
-                usePendingDeltaStore.getState().inc("separacao", currentModal.itemId, flushQty);
-                const flushMsgId = generateMsgId();
-                pendingScanContextRef.current.set(flushMsgId, {
-                  itemId: currentModal.itemId,
-                  qty: flushQty,
-                  barcode: currentModal.barcode,
-                  workUnitId: currentModal.workUnitId,
-                  apItems: [{ id: currentModal.itemId }],
-                  productName: currentModal.productName,
-                  targetQty: currentModal.targetQty,
-                  exceptionQty: currentModal.exceptionQty,
-                });
-                sendScan(currentModal.workUnitId, currentModal.barcode, flushQty, flushMsgId);
-              }
-              const overflow = newAccumulated - remaining;
-              const { item: nextItem, wu: nextWu } = nextEntry as { item: ItemWithProduct; wu: any };
-              const nextSs = Number(nextItem.separatedQty);
-              const nextD = getDelta("separacao", nextItem.id);
-              const nextEq = Number(nextItem.exceptionQty || 0);
-              const nextRemaining = Number(nextItem.quantity) - nextSs - nextD - nextEq;
-              beep("scan");
-              setQtyModal({
-                productId,
-                productName: nextItem.product.name,
-                productCode: nextItem.product.erpCode || String(nextItem.product.id),
-                multiplier: currentModal.multiplier,
-                accumulated: overflow,
-                itemId: nextItem.id,
-                workUnitId: nextWu.id,
-                barcode,
-                maxRemaining: nextRemaining,
-                targetQty: Number(nextItem.quantity) - nextEq,
-                exceptionQty: nextEq,
-              });
-            } else {
-              // Nenhum outro item disponível — overflow real
-              setQtyModal(null);
-              usePendingDeltaStore.getState().clearItem("separacao", currentModal.itemId);
-              usePendingDeltaStore.getState().resetBaseline("separacao", currentModal.itemId);
-              queryClient.setQueryData(workUnitsQueryKey, (old: any) => {
-                if (!old) return old;
-                return old.map((wu: any) => ({
-                  ...wu,
-                  items: wu.items.map((item: any) =>
-                    item.id === currentModal.itemId
-                      ? { ...item, separatedQty: 0, status: "recontagem" }
-                      : item
-                  ),
-                }));
-              });
-              beep("error");
-              toast({ title: "Quantidade excedida", description: "Produto zerado para recontagem. Escaneie novamente.", variant: "destructive" });
-              apiRequest("POST", `/api/work-units/${currentModal.workUnitId}/reset-item-picking`, { itemIds: [currentModal.itemId] })
-                .catch(() => { /* reset optimista — UI atualizada via invalidateQueries */ })
+            beep("error");
+            toast({ title: "Quantidade excedida", description: "Produto zerado para recontagem. Escaneie novamente.", variant: "destructive" });
+            // Agrupa ids por workUnitId para resetar via API
+            const byWu: Record<string, string[]> = {};
+            for (const entry of currentModal.allItems) {
+              (byWu[entry.workUnitId] ??= []).push(entry.itemId);
+            }
+            for (const [wuId, ids] of Object.entries(byWu)) {
+              apiRequest("POST", `/api/work-units/${wuId}/reset-item-picking`, { itemIds: ids })
+                .catch(() => {})
                 .finally(() => queryClient.invalidateQueries({ queryKey: workUnitsQueryKey }));
             }
           } else {
             beep("scan");
-            setQtyModal({ ...currentModal, accumulated: newAccumulated, maxRemaining: remaining });
+            setQtyModal({ ...currentModal, accumulated: newAccumulated });
           }
         } else {
+          // Abre novo modal unificado com o total agregado de todos os pedidos
           beep("scan");
           setQtyModal({
             productId,
@@ -1136,12 +1126,13 @@ export default function SeparacaoPage() {
             productCode: matchedItem.product.erpCode || String(matchedItem.product.id),
             multiplier: 1,
             accumulated: 0,
-            itemId: matchedItem.id,
-            workUnitId: finalUnit.id,
+            itemId: allProductEntries[0]?.itemId ?? matchedItem.id,
+            workUnitId: allProductEntries[0]?.workUnitId ?? finalUnit.id,
             barcode,
-            maxRemaining: remaining,
-            targetQty: Number(matchedItem.quantity) - exceptionQty,
-            exceptionQty,
+            maxRemaining: totalRemaining,
+            targetQty: totalTargetQty,
+            exceptionQty: allProductEntries[0]?.exceptionQty ?? 0,
+            allItems: allProductEntries,
           });
         }
 
@@ -1186,19 +1177,27 @@ export default function SeparacaoPage() {
   const handleConfirmQtyModal = useCallback(() => {
     const modal = qtyModalRef.current;
     if (!modal || modal.accumulated <= 0) return;
-    usePendingDeltaStore.getState().inc("separacao", modal.itemId, modal.accumulated);
-    const msgId = generateMsgId();
-    pendingScanContextRef.current.set(msgId, {
-      itemId: modal.itemId,
-      qty: modal.accumulated,
-      barcode: modal.barcode,
-      workUnitId: modal.workUnitId,
-      apItems: [{ id: modal.itemId }],
-      productName: modal.productName,
-      targetQty: modal.targetQty,
-      exceptionQty: modal.exceptionQty,
-    });
-    sendScan(modal.workUnitId, modal.barcode, modal.accumulated, msgId);
+    // Distribui a quantidade acumulada entre todos os itens do produto em ordem
+    let leftToSend = modal.accumulated;
+    for (const entry of modal.allItems) {
+      if (leftToSend <= 0) break;
+      const toSend = Math.min(leftToSend, entry.remaining);
+      if (toSend <= 0) continue;
+      usePendingDeltaStore.getState().inc("separacao", entry.itemId, toSend);
+      const msgId = generateMsgId();
+      pendingScanContextRef.current.set(msgId, {
+        itemId: entry.itemId,
+        qty: toSend,
+        barcode: modal.barcode,
+        workUnitId: entry.workUnitId,
+        apItems: [{ id: entry.itemId }],
+        productName: modal.productName,
+        targetQty: entry.targetQty,
+        exceptionQty: entry.exceptionQty,
+      });
+      sendScan(entry.workUnitId, modal.barcode, toSend, msgId);
+      leftToSend -= toSend;
+    }
     setQtyModal(null);
     if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
     syncTimerRef.current = setTimeout(() => {
@@ -1214,24 +1213,30 @@ export default function SeparacaoPage() {
     const newAccumulated = modal.accumulated + modal.multiplier;
     if (newAccumulated > modal.maxRemaining) {
       setQtyModal(null);
-      usePendingDeltaStore.getState().clearItem("separacao", modal.itemId);
-      usePendingDeltaStore.getState().resetBaseline("separacao", modal.itemId);
+      const resetIds = modal.allItems.map(e => e.itemId);
+      for (const id of resetIds) {
+        usePendingDeltaStore.getState().clearItem("separacao", id);
+        usePendingDeltaStore.getState().resetBaseline("separacao", id);
+      }
       queryClient.setQueryData(workUnitsQueryKey, (old: any) => {
         if (!old) return old;
+        const idSet = new Set(resetIds);
         return old.map((wu: any) => ({
           ...wu,
           items: wu.items.map((item: any) =>
-            item.id === modal.itemId
-              ? { ...item, separatedQty: 0, status: "recontagem" }
-              : item
+            idSet.has(item.id) ? { ...item, separatedQty: 0, status: "recontagem" } : item
           ),
         }));
       });
       beep("error");
       toast({ title: "Quantidade excedida", description: "Produto zerado para recontagem. Escaneie novamente.", variant: "destructive" });
-      apiRequest("POST", `/api/work-units/${modal.workUnitId}/reset-item-picking`, { itemIds: [modal.itemId] })
-        .catch(() => { /* reset optimista — UI atualizada via invalidateQueries */ })
-        .finally(() => queryClient.invalidateQueries({ queryKey: workUnitsQueryKey }));
+      const byWu: Record<string, string[]> = {};
+      for (const entry of modal.allItems) { (byWu[entry.workUnitId] ??= []).push(entry.itemId); }
+      for (const [wuId, ids] of Object.entries(byWu)) {
+        apiRequest("POST", `/api/work-units/${wuId}/reset-item-picking`, { itemIds: ids })
+          .catch(() => {})
+          .finally(() => queryClient.invalidateQueries({ queryKey: workUnitsQueryKey }));
+      }
       return;
     }
     setQtyModal({ ...modal, accumulated: newAccumulated });
