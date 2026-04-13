@@ -905,14 +905,16 @@ export class DatabaseStorage implements IStorage {
   // IMPORTANTE: Para 'conferencia', filtra pedidos que ainda não estão 'separado' ou adiante.
   async getWorkUnits(type?: string, companyId?: number): Promise<(WorkUnit & { order: Order; items: (OrderItem & { product: Product; exceptionQty?: number })[]; lockedByName?: string })[]> {
     let conditions = [];
-    if (type) conditions.push(eq(workUnits.type, type as any));
+    // Balcão orders are never launched through the normal flow and their WUs keep
+    // type="separacao". Filter them by pickup point only — NOT by type field.
+    if (type && type !== "balcao") conditions.push(eq(workUnits.type, type as any));
     if (companyId) conditions.push(eq(workUnits.companyId, companyId));
-    
+
     if (companyId && type !== "separacao" && type !== "conferencia") {
       const allowedPP = type === "balcao"
         ? getCompanyBalcaoPickupPoints(companyId)
         : getCompanyOperationPickupPoints(companyId);
-      if (allowedPP) {
+      if (allowedPP && allowedPP.length > 0) {
         conditions.push(inArray(workUnits.pickupPoint, allowedPP));
       }
     }

@@ -706,7 +706,8 @@ export async function registerRoutes(
 
         let status: string;
         if (!wu || wu.status === "pendente") {
-          status = order.isLaunched ? "em_fila" : "aguardando";
+          // Balcão orders skip the supervisor launch step — treat them as em_fila
+          status = (order.isLaunched || balcaoPoints.length > 0) ? "em_fila" : "aguardando";
         } else if (wu.status === "concluido") {
           status = "concluido";
         } else if (wu.lockedBy) {
@@ -1515,7 +1516,10 @@ export async function registerRoutes(
       const allWorkUnits = await storage.getWorkUnits(type, companyId);
 
       // Filter: only return work units belonging to launched orders
-      let launched = allWorkUnits.filter(wu => wu.order?.isLaunched === true);
+      // Balcão type is exempt — walk-in pickup orders never go through the launch step
+      let launched = type === "balcao"
+        ? allWorkUnits
+        : allWorkUnits.filter(wu => wu.order?.isLaunched === true);
 
       if (requestingUser?.role === "separacao") {
         const mode = await getCachedSeparationMode();
