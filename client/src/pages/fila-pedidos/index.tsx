@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth, useSessionQueryKey } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,10 @@ import {
   Eye,
   EyeOff,
   Timer,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
+import { beep, getSoundEnabled, setSoundEnabled as persistSoundEnabled } from "@/lib/audio-feedback";
 
 const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
 const FIVE_MIN_MS = 5 * 60 * 1000;
@@ -272,6 +275,18 @@ export default function FilaPedidosPage() {
   const queryClient = useQueryClient();
   const [showHidden, setShowHidden] = useState(false);
   const [tick, setTick] = useState(0);
+  const [soundOn, setSoundOn] = useState(() => getSoundEnabled());
+
+  const toggleSound = () => {
+    const next = !soundOn;
+    setSoundOn(next);
+    persistSoundEnabled(next);
+  };
+
+  // Track previous queue state to detect arrivals and completions
+  const prevOrderIdsRef = useRef<Set<string>>(new Set());
+  const prevCompletedIdsRef = useRef<Set<string>>(new Set());
+  const initialLoadDoneRef = useRef(false);
 
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 30_000);
@@ -284,6 +299,35 @@ export default function FilaPedidosPage() {
     queryKey: queueQueryKey,
     refetchInterval: 5000,
   });
+
+  // Sound alerts: new orders + completions
+  useEffect(() => {
+    if (!rawOrders) return;
+
+    const currentIds = new Set(rawOrders.map(o => o.orderId));
+    const completedIds = new Set(rawOrders.filter(o => o.status === "concluido").map(o => o.orderId));
+
+    if (!initialLoadDoneRef.current) {
+      // First load — set baseline without playing sounds
+      prevOrderIdsRef.current = currentIds;
+      prevCompletedIdsRef.current = completedIds;
+      initialLoadDoneRef.current = true;
+      return;
+    }
+
+    if (soundOn) {
+      // New orders that weren't in the previous snapshot
+      const hasNew = [...currentIds].some(id => !prevOrderIdsRef.current.has(id));
+      if (hasNew) beep("warning");
+
+      // Orders that are newly completed
+      const hasNewCompleted = [...completedIds].some(id => !prevCompletedIdsRef.current.has(id));
+      if (hasNewCompleted) beep("complete");
+    }
+
+    prevOrderIdsRef.current = currentIds;
+    prevCompletedIdsRef.current = completedIds;
+  }, [rawOrders, soundOn]);
 
   const handleSSEMessage = useCallback(
     (_type: string, _data: any) => {
@@ -410,6 +454,17 @@ export default function FilaPedidosPage() {
             data-testid="button-refresh"
           >
             <RefreshCw className="h-4 w-4" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={toggleSound}
+            title={soundOn ? "Silenciar alertas" : "Ativar alertas sonoros"}
+            data-testid="button-toggle-sound"
+          >
+            {soundOn ? <Volume2 className="h-4 w-4 text-amber-500" /> : <VolumeX className="h-4 w-4 text-slate-400" />}
           </Button>
 
           <span className="text-xs text-slate-500 hidden lg:block">{user?.name}</span>

@@ -652,12 +652,13 @@ export default function BalcaoPage() {
     return workUnits?.filter((wu) => {
       if (wu.order.status === "finalizado") return false;
       if (wu.status === "concluido") return false;
-      if (!wu.order.isLaunched) return false;
+      // Balcão orders skip the supervisor launch step — never filter by isLaunched
 
       if (filterOrderId && !processMultipleOrderSearch(filterOrderId, wu.order.erpOrderId)) return false;
 
       if (dateRange?.from) {
-        const orderDate = new Date(wu.order.launchedAt || wu.order.createdAt);
+        // Balcão orders may not have launchedAt — fall back to createdAt
+        const orderDate = new Date(wu.order.createdAt);
         const fromDate = new Date(dateRange.from);
         fromDate.setHours(0, 0, 0, 0);
         if (dateRange.to) {

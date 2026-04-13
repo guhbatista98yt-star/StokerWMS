@@ -705,13 +705,14 @@ export async function registerRoutes(
         const wu = wuByOrder.get(order.id);
 
         let status: string;
-        if (!wu || wu.status === "pendente") {
+        if (wu && wu.lockedBy && wu.status !== "concluido") {
+          // WU is locked by an operator — it is actively being separated
+          status = "em_andamento";
+        } else if (!wu || wu.status === "pendente") {
           // Balcão orders skip the supervisor launch step — treat them as em_fila
-          status = (order.isLaunched || balcaoPoints.length > 0) ? "em_fila" : "aguardando";
+          status = "em_fila";
         } else if (wu.status === "concluido") {
           status = "concluido";
-        } else if (wu.lockedBy) {
-          status = "em_andamento";
         } else {
           status = "em_fila";
         }
