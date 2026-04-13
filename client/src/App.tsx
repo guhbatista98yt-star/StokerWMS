@@ -83,7 +83,6 @@ import LimpezaPage from "@/pages/admin/limpeza";
 import KpiDashboardPage from "@/pages/admin/kpi-dashboard";
 import PrintAgentsPage from "@/pages/admin/print-agents";
 import SeparationSettingsPage from "@/pages/supervisor/separation-settings";
-import ProductAddressesPage from "@/pages/supervisor/product-addresses";
 import PrintSettingsPage from "@/pages/supervisor/print-settings";
 import BarcodeManagementPage from "@/pages/supervisor/barcode-management";
 import CodigosBarrasPage from "@/pages/wms/codigos-barras";
@@ -367,12 +366,6 @@ function Router() {
       <Route path="/supervisor/separation-settings">
         <ProtectedRoute allowedRoles={["supervisor", "administrador"]}>
           <SeparationSettingsPage />
-        </ProtectedRoute>
-      </Route>
-
-      <Route path="/supervisor/product-addresses">
-        <ProtectedRoute allowedRoles={["supervisor", "administrador"]}>
-          <ProductAddressesPage />
         </ProtectedRoute>
       </Route>
 

@@ -52,7 +52,6 @@ const ALL_MODULES = [
   { id: "/supervisor/route-orders", label: "Expedição", section: "Logística" },
   { id: "/supervisor/exceptions", label: "Exceções", section: "Logística" },
   { id: "/supervisor/users", label: "Usuários", section: "Administração" },
-  { id: "/supervisor/product-addresses", label: "End. Produto", section: "Administração" },
   { id: "/supervisor/mapping-studio", label: "Mapping Studio", section: "Administração" },
   { id: "/supervisor/codigos-barras", label: "Gestão Barcodes", section: "Administração" },
   { id: "/supervisor/separation-settings", label: "Modo Separação", section: "Administração" },
