@@ -727,7 +727,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/system-settings/features", isAuthenticated, requireRole("administrador"), async (req: Request, res: Response) => {
+  app.patch("/api/system-settings/features", isAuthenticated, requireRole("supervisor", "administrador"), async (req: Request, res: Response) => {
     try {
       const { quickLinkEnabled } = req.body;
       if (typeof quickLinkEnabled !== "boolean") {

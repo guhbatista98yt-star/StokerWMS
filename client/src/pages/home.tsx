@@ -6,7 +6,7 @@ import {
   Package, ClipboardCheck, Store, LogOut, ClipboardList,
   Warehouse, PackagePlus, ArrowRightLeft, MapPin, BarChart3,
   Truck, AlertTriangle, FileText, Users, Settings, ShieldCheck,
-  Printer, Cog, BoxesIcon, ScrollText, Search, Trash2, TrendingUp, Barcode, PackageMinus,
+  Printer, Cog, BoxesIcon, ScrollText, Search, Trash2, TrendingUp, Barcode, PackageMinus, Layers,
   PanelLeftClose, PanelLeftOpen,
   Menu, X, Sun, Moon,
 } from "lucide-react";
@@ -82,6 +82,8 @@ const ALL_GROUPS: NavGroup[] = [
       { icon: ShieldCheck,   label: "Permissões",       description: "Definir acessos",               href: "/admin/permissoes",               color: "text-amber-400",  bg: "bg-amber-500/15" },
       { icon: Barcode,       label: "Gestão Barcodes",  description: "Gerenciar códigos de barras",   href: "/supervisor/codigos-barras",      color: "text-rose-400",   bg: "bg-rose-500/15" },
       { icon: Printer,       label: "Impressoras",      description: "Configurar impressoras",        href: "/supervisor/print-settings",      color: "text-indigo-400", bg: "bg-indigo-500/15" },
+      { icon: Layers,        label: "Modo Separação",   description: "Configurar modo de separação",  href: "/supervisor/separation-settings", color: "text-purple-400", bg: "bg-purple-500/15" },
+      { icon: MapPin,        label: "End. Produto",     description: "Configurar endereços de produto",href: "/supervisor/product-addresses",   color: "text-teal-400",   bg: "bg-teal-500/15" },
       { icon: Trash2,        label: "Limpeza de Dados", description: "Resetar dados de teste",        href: "/admin/limpeza",                  color: "text-red-400",    bg: "bg-red-500/15" },
     ],
   },
@@ -101,13 +103,13 @@ const ROLE_MODULE_ACCESS: Record<string, string[]> = {
     "/fila-pedidos","/supervisor/orders","/supervisor/routes","/supervisor/route-orders","/supervisor/exceptions",
     "/supervisor/users","/supervisor/product-addresses","/supervisor/mapping-studio","/supervisor/codigos-barras",
     "/supervisor/reports","/supervisor/audit","/admin/permissoes",
-    "/admin/limpeza","/supervisor/print-settings","/admin/kpi-operadores",
+    "/admin/limpeza","/supervisor/print-settings","/admin/kpi-operadores","/supervisor/separation-settings",
   ],
   supervisor: [
     "/wms/recebimento","/wms/checkin","/wms/transferencia","/wms/retirada","/wms/adicao","/wms/contagem","/wms/enderecos","/wms/produtos","/wms/codigos-barras",
     "/fila-pedidos","/supervisor/orders","/supervisor/routes","/supervisor/route-orders","/supervisor/exceptions",
     "/supervisor/users","/supervisor/product-addresses","/supervisor/reports","/supervisor/audit",
-    "/supervisor/codigos-barras","/admin/kpi-operadores",
+    "/supervisor/codigos-barras","/admin/kpi-operadores","/supervisor/separation-settings",
   ],
   separacao:      ["/separacao","/wms/codigos-barras"],
   conferencia:    ["/conferencia","/wms/codigos-barras"],
@@ -120,8 +122,8 @@ const ROLE_MODULE_ACCESS: Record<string, string[]> = {
 
 function buildAllowedHrefs(role: string, customModules?: string[] | null): string[] {
   const base = Array.isArray(customModules) ? customModules : (ROLE_MODULE_ACCESS[role] ?? []);
-  if (role === "administrador") return [...new Set([...base, "/admin/permissoes","/admin/limpeza","/supervisor/print-settings","/admin/kpi-operadores"])];
-  if (role === "supervisor")    return [...new Set([...base, "/admin/kpi-operadores"])];
+  if (role === "administrador") return [...new Set([...base, "/admin/permissoes","/admin/limpeza","/supervisor/print-settings","/admin/kpi-operadores","/supervisor/separation-settings"])];
+  if (role === "supervisor")    return [...new Set([...base, "/admin/kpi-operadores","/supervisor/separation-settings"])];
   return base;
 }
 
