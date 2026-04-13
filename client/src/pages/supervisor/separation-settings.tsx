@@ -196,7 +196,7 @@ export default function SeparationSettingsPage() {
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
-                Separadores podem pegar qualquer pedido disponível. Os itens são agrupados por pedido e rota.
+                O separador vê o pedido inteiro com todos os produtos. Apenas um operador por pedido — exclusivo.
               </p>
             </button>
 
@@ -222,7 +222,7 @@ export default function SeparationSettingsPage() {
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
-                Cada separador trabalha apenas na(s) seção(ões) que lhe foram atribuídas no cadastro de usuário.
+                O separador vê todos os pedidos, mas coleta apenas os produtos das suas seções. Vários operadores podem entrar no mesmo pedido simultaneamente.
               </p>
             </button>
           </div>

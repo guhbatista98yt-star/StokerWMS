@@ -35,13 +35,25 @@ function getUserAgent(req: Request): string | undefined {
   return ua;
 }
 
-function authorizeWorkUnit(wu: { companyId: number; section: string | null }, req: Request): { allowed: boolean; reason?: string } {
+// Cache de modo de separação — TTL de 30s para evitar consultas repetidas ao banco
+let _sepModeCache: { mode: string; expiry: number } | null = null;
+async function getCachedSeparationMode(): Promise<string> {
+  if (_sepModeCache && Date.now() < _sepModeCache.expiry) return _sepModeCache.mode;
+  const settings = await storage.getSystemSettings();
+  _sepModeCache = { mode: settings.separationMode, expiry: Date.now() + 30_000 };
+  return _sepModeCache.mode;
+}
+export function invalidateSeparationModeCache() { _sepModeCache = null; }
+
+function authorizeWorkUnit(wu: { companyId: number; section: string | null }, req: Request, mode?: string): { allowed: boolean; reason?: string } {
   const companyId = req.companyId;
   const user = req.user;
   if (companyId && wu.companyId !== companyId) {
     return { allowed: false, reason: "Acesso negado: empresa diferente" };
   }
   if (user?.role === "separacao") {
+    // Em modo por_pedido o separador acessa o pedido inteiro — sem restrição de seção
+    if (mode === "by_order") return { allowed: true };
     const userSections: string[] = (user.sections as string[]) || [];
     if (userSections.length === 0) {
       return { allowed: false, reason: "Acesso negado: sem seções atribuídas" };
@@ -789,6 +801,7 @@ export async function registerRoutes(
       }
 
       const updated = await storage.updateSeparationMode(mode as any, user.id);
+      invalidateSeparationModeCache();
 
       await storage.createAuditLog({
         userId: user.id,
@@ -1469,15 +1482,23 @@ export async function registerRoutes(
       let launched = allWorkUnits.filter(wu => wu.order?.isLaunched === true);
 
       if (requestingUser?.role === "separacao") {
-        const userSections: string[] = (requestingUser.sections as string[]) || [];
-        if (userSections.length === 0) {
-          launched = [];
+        const mode = await getCachedSeparationMode();
+
+        if (mode === "by_order") {
+          // Modo Por Pedido: separador vê o pedido inteiro — sem filtro de seção
+          // Nenhuma filtragem adicional (todos os work units lançados são visíveis)
         } else {
-          launched = launched.filter(wu => wu.section != null && userSections.includes(wu.section));
-          launched = launched.map(wu => ({
-            ...wu,
-            items: wu.items.filter(item => userSections.includes(item.section))
-          }));
+          // Modo Por Seção (padrão): separador vê apenas as seções do seu perfil
+          const userSections: string[] = (requestingUser.sections as string[]) || [];
+          if (userSections.length === 0) {
+            launched = [];
+          } else {
+            launched = launched.filter(wu => wu.section != null && userSections.includes(wu.section));
+            launched = launched.map(wu => ({
+              ...wu,
+              items: wu.items.filter(item => userSections.includes(item.section))
+            }));
+          }
         }
       }
 
@@ -1495,6 +1516,7 @@ export async function registerRoutes(
     try {
       const { workUnitIds, reset } = req.body;
       const userId = req.user!.id;
+      const mode = await getCachedSeparationMode();
 
       const affectedOrderIds = new Set<string>();
       let isConferenciaUnlock = false;
@@ -1502,7 +1524,7 @@ export async function registerRoutes(
       for (const wuId of workUnitIds) {
         const wu = await storage.getWorkUnitById(wuId);
         if (!wu) continue;
-        const authWU = authorizeWorkUnit(wu, req);
+        const authWU = authorizeWorkUnit(wu, req, mode);
         if (!authWU.allowed) return res.status(403).json({ error: authWU.reason });
         if (reset && wu.status === "concluido") continue;
         if (wu.orderId) affectedOrderIds.add(wu.orderId);
@@ -1574,12 +1596,26 @@ export async function registerRoutes(
       const { workUnitIds } = req.body;
       const userId = req.user!.id;
       const expiresAt = new Date(Date.now() + LOCK_TTL_MINUTES * 60 * 1000);
+      const mode = await getCachedSeparationMode();
+      const now = new Date().toISOString();
 
       for (const wuId of workUnitIds) {
         const wu = await storage.getWorkUnitById(wuId);
         if (!wu) return res.status(404).json({ error: "Unidade não encontrada" });
-        const authWU = authorizeWorkUnit(wu, req);
+        const authWU = authorizeWorkUnit(wu, req, mode);
         if (!authWU.allowed) return res.status(403).json({ error: authWU.reason });
+
+        // Modo Por Pedido: garantir exclusividade por pedido inteiro
+        if (mode === "by_order" && req.user?.role === "separacao") {
+          const orderWUs = await storage.getWorkUnitsByOrderId(wu.orderId);
+          const conflict = orderWUs.find(owu =>
+            owu.lockedBy && owu.lockedBy !== userId &&
+            (!owu.lockExpiresAt || owu.lockExpiresAt > now)
+          );
+          if (conflict) {
+            return res.status(409).json({ error: "Este pedido já está sendo separado por outro operador" });
+          }
+        }
       }
 
       const lockedCount = await storage.lockWorkUnits(workUnitIds, userId, expiresAt);
@@ -1612,13 +1648,14 @@ export async function registerRoutes(
         return res.status(400).json({ error: "IDs das unidades de trabalho são obrigatórios" });
       }
 
+      const mode = await getCachedSeparationMode();
       const results = [];
       const orderIdsToUpdate = new Set<string>();
 
       for (const id of workUnitIds) {
         const workUnit = await storage.getWorkUnitById(id);
         if (!workUnit) continue;
-        const authWU = authorizeWorkUnit(workUnit, req);
+        const authWU = authorizeWorkUnit(workUnit, req, mode);
         if (!authWU.allowed) return res.status(403).json({ error: authWU.reason });
         const lockCheck = assertLockOwnership(workUnit, req);
         if (!lockCheck.allowed) return res.status(403).json({ error: lockCheck.reason });
@@ -1720,7 +1757,7 @@ export async function registerRoutes(
       if (!workUnit) {
         return res.status(404).json({ error: "Unidade não encontrada" });
       }
-      const authWU = authorizeWorkUnit(workUnit, req);
+      const authWU = authorizeWorkUnit(workUnit, req, await getCachedSeparationMode());
       if (!authWU.allowed) return res.status(403).json({ error: authWU.reason });
 
       if (workUnit.status === "concluido") {
@@ -1798,7 +1835,7 @@ export async function registerRoutes(
       if (!workUnit) {
         return res.status(404).json({ error: "Unidade não encontrada" });
       }
-      const authWU = authorizeWorkUnit(workUnit, req);
+      const authWU = authorizeWorkUnit(workUnit, req, await getCachedSeparationMode());
       if (!authWU.allowed) return res.status(403).json({ error: authWU.reason });
       const lockCheck = assertLockOwnership(workUnit, req);
       if (!lockCheck.allowed) return res.status(403).json({ error: lockCheck.reason });
@@ -2339,10 +2376,11 @@ export async function registerRoutes(
       }
 
       // Validar autorização para cada WU antes de entrar na transação
+      const mode = await getCachedSeparationMode();
       for (const wuId of workUnitIds) {
         const wu = await storage.getWorkUnitById(wuId);
         if (!wu) return res.status(404).json({ error: `Unidade ${wuId} não encontrada` });
-        const authWU = authorizeWorkUnit(wu, req);
+        const authWU = authorizeWorkUnit(wu, req, mode);
         if (!authWU.allowed) return res.status(403).json({ error: authWU.reason });
         const lockCheck = assertLockOwnership(wu, req);
         if (!lockCheck.allowed) return res.status(403).json({ error: lockCheck.reason });

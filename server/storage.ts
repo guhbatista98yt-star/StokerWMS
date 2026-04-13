@@ -88,6 +88,7 @@ export interface IStorage {
   // Work Units
   getWorkUnits(type?: string, companyId?: number): Promise<(WorkUnit & { order: Order; items: (OrderItem & { product: Product; exceptionQty?: number })[]; lockedByName?: string })[]>;
   getWorkUnitById(id: string): Promise<(WorkUnit & { order: Order; items: (OrderItem & { product: Product; exceptionQty?: number })[] }) | undefined>;
+  getWorkUnitsByOrderId(orderId: string): Promise<WorkUnit[]>;
   createWorkUnit(workUnit: InsertWorkUnit): Promise<WorkUnit>;
   updateWorkUnit(id: string, data: Partial<WorkUnit>): Promise<WorkUnit | undefined>;
   lockWorkUnits(workUnitIds: string[], userId: string, expiresAt: Date): Promise<number>;
@@ -1104,6 +1105,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(workUnits.id, id))
       .returning();
     return updated;
+  }
+
+  async getWorkUnitsByOrderId(orderId: string): Promise<WorkUnit[]> {
+    return db.select().from(workUnits).where(eq(workUnits.orderId, orderId));
   }
 
   async lockWorkUnits(workUnitIds: string[], userId: string, expiresAt: Date): Promise<number> {
