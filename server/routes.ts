@@ -3,7 +3,8 @@ import { createServer, type Server } from "http";
 import cookieParser from "cookie-parser";
 import { storage } from "./storage";
 import { hashPassword, verifyPassword, createAuthSession, isAuthenticated, requireRole, requireCompany, getTokenFromRequest, getUserFromToken, generateBadgeCode } from "./auth";
-import { loginSchema, insertRouteSchema, orderItems, workUnits, pickingSessions, pickupPoints, type MappingField, datasetEnum, type User, type OrderItem, type Product, type WorkUnit, type Exception, type PickingSession, type ExceptionType, type UserSettings, BatchSyncPayload, batchSyncPayloadSchema } from "@shared/schema";
+import { loginSchema, insertRouteSchema, orderItems, workUnits, pickingSessions, pickupPoints, orders, type MappingField, datasetEnum, type User, type OrderItem, type Product, type WorkUnit, type Exception, type PickingSession, type ExceptionType, type UserSettings, BatchSyncPayload, batchSyncPayloadSchema } from "@shared/schema";
+import { getCompanyBalcaoPickupPoints } from "./company-config";
 
 
 import { registerWmsRoutes } from "./wms-routes";
@@ -666,47 +667,78 @@ export async function registerRoutes(
 
   app.get("/api/queue/balcao", isAuthenticated, requireCompany, async (req: Request, res: Response) => {
     try {
-      const companyId = req.companyId;
+      const companyId = req.companyId!;
+      const balcaoPoints = getCompanyBalcaoPickupPoints(companyId) || [];
+
+      // Fetch all non-finalized orders for this company
+      const allOrders = await db.select().from(orders).where(
+        and(
+          eq(orders.companyId, companyId),
+          drizzleSql`${orders.status} != 'finalizado'`
+        )
+      );
+
+      // Keep only orders that include at least one balcão pickup point
+      const balcaoOrders = allOrders.filter(o => {
+        if (balcaoPoints.length === 0) return true;
+        const pp = Array.isArray(o.pickupPoints) ? o.pickupPoints : [];
+        return pp.some((p: unknown) => balcaoPoints.includes(Number(p)));
+      });
+
+      if (balcaoOrders.length === 0) return res.json([]);
+
+      // Fetch work units to enrich order data
       const wus = await storage.getWorkUnits("balcao", companyId);
-      const activeOrders = new Map<string, {
-        orderId: string;
-        erpOrderId: string;
-        customerCode: string | null;
-        customerName: string;
-        vendedor: string | null;
-        totalProducts: number;
-        financialStatus: string;
-        status: string;
-        operatorName: string | null;
-        startedAt: string | null;
-        lockedAt: string | null;
-      }>();
 
+      // Index WUs by orderId — prefer locked WUs
+      const wuByOrder = new Map<string, typeof wus[0]>();
       for (const wu of wus) {
-        if (!wu.lockedBy || wu.status === "concluido") continue;
-        if (wu.order.status === "finalizado") continue;
-
-        const existing = activeOrders.get(wu.orderId);
+        const existing = wuByOrder.get(wu.orderId);
         if (!existing) {
-          activeOrders.set(wu.orderId, {
-            orderId: wu.orderId,
-            erpOrderId: wu.order.erpOrderId,
-            customerCode: wu.order.customerCode,
-            customerName: wu.order.customerName,
-            vendedor: wu.order.observation || null,
-            totalProducts: wu.items.length,
-            financialStatus: wu.order.financialStatus || "pendente",
-            status: wu.order.status,
-            operatorName: wu.lockedByName || null,
-            startedAt: wu.startedAt || wu.lockedAt || null,
-            lockedAt: wu.lockedAt || null,
-          });
-        } else {
-          existing.totalProducts += wu.items.length;
+          wuByOrder.set(wu.orderId, wu);
+        } else if (wu.lockedBy && !existing.lockedBy) {
+          wuByOrder.set(wu.orderId, wu);
         }
       }
 
-      res.json(Array.from(activeOrders.values()));
+      const result = balcaoOrders.map(order => {
+        const wu = wuByOrder.get(order.id);
+
+        let status: string;
+        if (!wu || wu.status === "pendente") {
+          status = order.isLaunched ? "em_fila" : "aguardando";
+        } else if (wu.status === "concluido") {
+          status = "concluido";
+        } else if (wu.lockedBy) {
+          status = "em_andamento";
+        } else {
+          status = "em_fila";
+        }
+
+        return {
+          orderId: order.id,
+          erpOrderId: order.erpOrderId,
+          customerCode: order.customerCode,
+          customerName: order.customerName,
+          vendedor: order.observation || null,
+          totalProducts: wu ? wu.items.length : 0,
+          financialStatus: order.financialStatus || "pendente",
+          status,
+          isLaunched: order.isLaunched,
+          operatorName: wu?.lockedByName || null,
+          startedAt: wu?.startedAt || wu?.lockedAt || null,
+          lockedAt: wu?.lockedAt || null,
+          completedAt: wu?.completedAt || null,
+          queuedAt: order.createdAt,
+          launchedAt: order.launchedAt || null,
+        };
+      });
+
+      // Sort: em_andamento → em_fila → aguardando → concluido
+      const statusOrder: Record<string, number> = { em_andamento: 0, em_fila: 1, aguardando: 2, concluido: 3 };
+      result.sort((a, b) => (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9));
+
+      res.json(result);
     } catch (error) {
       log(`[Routes] Get balcao queue error: ${error instanceof Error ? error.message : String(error)}`);
       res.status(500).json({ error: "Erro interno" });

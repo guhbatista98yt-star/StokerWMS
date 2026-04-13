@@ -412,6 +412,17 @@ export default function BalcaoPage() {
           workUnits.some(wu => wu.id === id && wu.lockedBy === user.id)
         );
         if (stillLockedIds.length > 0) {
+          // Sync timer from server lockedAt so it survives page reload
+          const lockedWUs = stillLockedIds
+            .map(id => workUnits.find(wu => wu.id === id))
+            .filter((wu): wu is NonNullable<typeof wu> => !!wu);
+          const earliest = lockedWUs
+            .map(wu => wu.lockedAt ? new Date(wu.lockedAt).getTime() : null)
+            .filter((t): t is number => t !== null)
+            .sort((a, b) => a - b)[0];
+          if (earliest) {
+            setElapsedTime(Math.max(0, Math.floor((Date.now() - earliest) / 1000)));
+          }
           setStep("picking");
           setPickingTab(saved.tab);
           setCurrentProductIndex(0);
@@ -425,6 +436,15 @@ export default function BalcaoPage() {
       const myUnit = workUnits.find(wu => wu.lockedBy === user.id && wu.status !== "concluido");
       if (myUnit) {
         const myIds = workUnits.filter(wu => wu.lockedBy === user.id).map(wu => wu.id);
+        // Sync timer from server lockedAt
+        const earliest = myIds
+          .map(id => workUnits.find(wu => wu.id === id)?.lockedAt)
+          .filter((t): t is string => !!t)
+          .map(t => new Date(t).getTime())
+          .sort((a, b) => a - b)[0];
+        if (earliest) {
+          setElapsedTime(Math.max(0, Math.floor((Date.now() - earliest) / 1000)));
+        }
         setStep("picking");
         setSelectedWorkUnits(myIds);
       }
@@ -445,7 +465,16 @@ export default function BalcaoPage() {
     let interval: NodeJS.Timeout | null = null;
     if (step === "picking" && allMyUnits.length > 0) {
       interval = setInterval(() => {
-        setElapsedTime((prev) => prev + 1);
+        // Compute from server's lockedAt so timer stays in sync with Fila de Pedidos
+        const earliest = allMyUnitsHeartbeatRef.current
+          .map(wu => wu.lockedAt ? new Date(wu.lockedAt).getTime() : null)
+          .filter((t): t is number => t !== null)
+          .sort((a, b) => a - b)[0];
+        if (earliest) {
+          setElapsedTime(Math.max(0, Math.floor((Date.now() - earliest) / 1000)));
+        } else {
+          setElapsedTime((prev) => prev + 1);
+        }
       }, 1000);
     }
     return () => {
