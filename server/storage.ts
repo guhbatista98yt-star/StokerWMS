@@ -2334,10 +2334,28 @@ export class DatabaseStorage implements IStorage {
 
   // System Settings
   async getSystemSettings(): Promise<SystemSettings> {
-    const [settings] = await db.select().from(systemSettings).where(eq(systemSettings.id, "global"));
-    if (settings) return settings;
-    const [created] = await db.insert(systemSettings).values({ id: "global", separationMode: "by_order", updatedAt: new Date().toISOString() }).returning();
-    return created;
+    try {
+      const [settings] = await db.select().from(systemSettings).where(eq(systemSettings.id, "global"));
+      if (settings) return settings;
+      const [created] = await db.insert(systemSettings).values({ id: "global", separationMode: "by_order", updatedAt: new Date().toISOString() }).returning();
+      return created;
+    } catch {
+      // Fallback: column missing (e.g. quick_link_enabled not yet migrated) — use raw SQL to avoid ORM schema mismatch
+      try {
+        const result = await db.execute(sql`SELECT id, separation_mode, updated_at, updated_by FROM system_settings WHERE id = 'global'`);
+        if (result.rows.length > 0) {
+          const row = result.rows[0] as Record<string, unknown>;
+          return {
+            id: row.id as string,
+            separationMode: (row.separation_mode as SeparationMode) ?? "by_order",
+            updatedAt: (row.updated_at as string) ?? new Date().toISOString(),
+            updatedBy: (row.updated_by as string | null) ?? null,
+            quickLinkEnabled: true,
+          };
+        }
+      } catch { /* continue to default */ }
+      return { id: "global", separationMode: "by_order", updatedAt: new Date().toISOString(), updatedBy: null, quickLinkEnabled: true };
+    }
   }
 
   async updateSeparationMode(mode: SeparationMode, updatedBy: string): Promise<SystemSettings> {

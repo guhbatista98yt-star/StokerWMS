@@ -39,9 +39,13 @@ function getUserAgent(req: Request): string | undefined {
 let _sepModeCache: { mode: string; expiry: number } | null = null;
 async function getCachedSeparationMode(): Promise<string> {
   if (_sepModeCache && Date.now() < _sepModeCache.expiry) return _sepModeCache.mode;
-  const settings = await storage.getSystemSettings();
-  _sepModeCache = { mode: settings.separationMode, expiry: Date.now() + 30_000 };
-  return _sepModeCache.mode;
+  try {
+    const settings = await storage.getSystemSettings();
+    _sepModeCache = { mode: settings.separationMode, expiry: Date.now() + 30_000 };
+    return _sepModeCache.mode;
+  } catch {
+    return "by_order"; // fallback seguro — modo padrão
+  }
 }
 export function invalidateSeparationModeCache() { _sepModeCache = null; }
 

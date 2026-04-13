@@ -230,6 +230,10 @@ async function runSafeMigrations() {
     { table: "companies", column: "cnpj", type: "text" },
     // pickup_points — flag de ativo/inativo
     { table: "pickup_points", column: "active", type: "boolean DEFAULT true" },
+    // system_settings — quick_link_enabled adicionado após deploy inicial
+    { table: "system_settings", column: "quick_link_enabled", type: "boolean NOT NULL DEFAULT true" },
+    // users — quick_link_enabled (adicionado por engano em alguns ambientes, sem efeito)
+    { table: "users", column: "quick_link_enabled", type: "boolean NOT NULL DEFAULT true" },
   ];
 
   for (const m of migrations) {
@@ -694,7 +698,8 @@ async function runSafeMigrations() {
       id text PRIMARY KEY DEFAULT 'global',
       separation_mode text NOT NULL DEFAULT 'by_order',
       updated_at text NOT NULL DEFAULT '',
-      updated_by text
+      updated_by text,
+      quick_link_enabled boolean NOT NULL DEFAULT true
     )`,
     `CREATE TABLE IF NOT EXISTS manual_qty_rules (
       id text PRIMARY KEY,
