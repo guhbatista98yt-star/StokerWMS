@@ -1,0 +1,185 @@
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[15:47:17] > DB2 — conectando...
+[15:47:18] + DB2 — conectado em 0.09s
+[15:47:18] + PostgreSQL local — conectado
+[15:47:18] > Produtos — sincronizando lista completa do ERP...
+[15:47:26] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 8.3s
+[15:47:26] > Orçamentos — buscando últimos 31 dias...
+[15:47:45] + Orçamentos — 26116 obtidos · 0 removidos (>=2026-03-12) · 26116 inseridos · 0 erros · 18.8s
+[15:47:48] + Transformação — 4965 pedidos · 0 produtos novos · 0 itens novos · 3.2s
+[15:47:48] > Estoque — sincronizando do ERP...
+3:47:49 PM [express] [Sync] stderr: Traceback (most recent call last):
+  File "C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\sync_db2.py", line 1824, in sync_enderecos_wms
+    cursor.execute("SAVEPOINT sp_addr")
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.InFailedSqlTransaction: ERRO:  transação atual foi interrompida, comandos ignorados até o fim do bloco de transação
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\sync_db2.py", line 2009, in sincronizar
+    sync_enderecos_wms(conn_db2, conn_pg)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\sync_db2.py", line 1843, in sync_enderecos_wms
+    cursor.execute("ROLLBACK TO SAVEPOINT sp_addr")
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.InvalidSavepointSpecification: ERRO:  o ponto de salvamento "sp_addr" não existe
+3:47:50 PM [print] 7 impressora(s) carregada(s) | padrão: "CutePDF Writer (1 redirecionada)"
+[15:47:57] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.9s
+[15:47:57] > Box Barcodes — sincronizando...
+[15:47:59] + Box Barcodes — 530 produtos atualizados · 1.8s
+[15:47:59] > Endereços WMS — sincronizando...
+[15:47:59] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[15:47:59] > NFs Recebimento — sincronizando...
+[15:48:01] + NFs Recebimento — 463 NFs · 0 novas · 463 atualizadas · 4182 itens · 1.8s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=43.3s
+------------------------------------------------------
+
+[15:53:01] > Loop — ciclo #43 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[15:53:01] > DB2 — conectando...
+[15:53:01] + DB2 — conectado em 0.10s
+[15:53:01] + PostgreSQL local — conectado
+[15:53:01] > Produtos — sincronizando lista completa do ERP...
+[15:53:15] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 14.1s
+[15:53:15] > Orçamentos — buscando últimos 31 dias...
+[15:53:33] + Orçamentos — 26114 obtidos · 26116 removidos (>=2026-03-12) · 26114 inseridos · 0 erros · 17.6s
+[15:53:36] ! Remoção ERP — 3 pedido(s) excluído(s): ['475402', '475398', '475399']
+[15:53:36] + Transformação — 4964 pedidos · 0 produtos novos · 9 itens novos · 3.4s
+[15:53:36] > Estoque — sincronizando do ERP...
+[15:53:44] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.1s
+[15:53:44] > Box Barcodes — sincronizando...
+[15:53:46] + Box Barcodes — 530 produtos atualizados · 1.8s
+[15:53:46] > Endereços WMS — sincronizando...
+[15:53:46] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[15:53:46] > NFs Recebimento — sincronizando...
+[15:53:48] + NFs Recebimento — 463 NFs · 0 novas · 463 atualizadas · 4182 itens · 1.9s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=47.3s
+------------------------------------------------------
+
+3:57:08 PM [express] [Auto-Sync] Triggering DB sync...
+3:57:46 PM [express] [Sync] Sincronização concluída.
+3:57:47 PM [print] 7 impressora(s) carregada(s) | padrão: "CutePDF Writer (1 redirecionada)"
+[15:58:48] > Loop — ciclo #44 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[15:58:48] > DB2 — conectando...
+[15:58:48] + DB2 — conectado em 0.11s
+[15:58:48] + PostgreSQL local — conectado
+[15:58:48] > Produtos — sincronizando lista completa do ERP...
+[15:58:57] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 8.2s
+[15:58:57] > Orçamentos — buscando últimos 31 dias...
+[15:59:09] + Orçamentos — 26111 obtidos · 26110 removidos (>=2026-03-12) · 26111 inseridos · 0 erros · 12.1s
+[15:59:12] + Transformação — 4964 pedidos · 0 produtos novos · 1 itens novos · 3.0s
+[15:59:12] > Estoque — sincronizando do ERP...
+[15:59:19] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 7.5s
+[15:59:19] > Box Barcodes — sincronizando...
+[15:59:21] + Box Barcodes — 530 produtos atualizados · 2.0s
+[15:59:21] > Endereços WMS — sincronizando...
+[15:59:21] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.1s
+[15:59:21] > NFs Recebimento — sincronizando...
+[15:59:23] + NFs Recebimento — 463 NFs · 0 novas · 463 atualizadas · 4182 itens · 1.4s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=34.6s
+------------------------------------------------------
+
+[16:04:23] > Loop — ciclo #45 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[16:04:23] > DB2 — conectando...
+[16:04:23] + DB2 — conectado em 0.03s
+[16:04:23] + PostgreSQL local — conectado
+[16:04:23] > Produtos — sincronizando lista completa do ERP...
+[16:04:31] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 8.2s
+[16:04:31] > Orçamentos — buscando últimos 31 dias...
+[16:04:50] + Orçamentos — 26139 obtidos · 26111 removidos (>=2026-03-12) · 26139 inseridos · 0 erros · 18.6s
+[16:04:53] ! Remoção ERP — 1 pedido(s) excluído(s): ['475409']
+[16:04:53] + Transformação — 4968 pedidos · 0 produtos novos · 31 itens novos · 3.5s
+[16:04:53] > Estoque — sincronizando do ERP...
+[16:05:01] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.0s
+[16:05:01] > Box Barcodes — sincronizando...
+[16:05:03] + Box Barcodes — 530 produtos atualizados · 1.9s
+[16:05:03] > Endereços WMS — sincronizando...
+[16:05:03] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[16:05:03] > NFs Recebimento — sincronizando...
+[16:05:05] + NFs Recebimento — 463 NFs · 0 novas · 463 atualizadas · 4182 itens · 1.9s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=42.4s
+------------------------------------------------------
+
+4:07:08 PM [express] [Auto-Sync] Triggering DB sync...
+4:07:59 PM [express] [Sync] Sincronização concluída.
+4:08:00 PM [print] 7 impressora(s) carregada(s) | padrão: "CutePDF Writer (1 redirecionada)"
+[16:10:05] > Loop — ciclo #46 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[16:10:05] > DB2 — conectando...
+[16:10:05] + DB2 — conectado em 0.05s
+[16:10:05] + PostgreSQL local — conectado
+[16:10:05] > Produtos — sincronizando lista completa do ERP...
+[16:10:13] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 8.2s
+[16:10:13] > Orçamentos — buscando últimos 31 dias...
+[16:10:31] + Orçamentos — 26141 obtidos · 26139 removidos (>=2026-03-12) · 26141 inseridos · 0 erros · 17.4s
+[16:10:34] ! Remoção ERP — 1 pedido(s) excluído(s): ['475412']
+[16:10:34] + Transformação — 4968 pedidos · 0 produtos novos · 3 itens novos · 3.3s
+[16:10:34] > Estoque — sincronizando do ERP...
+[16:10:43] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.2s
+[16:10:43] > Box Barcodes — sincronizando...
+[16:10:44] + Box Barcodes — 530 produtos atualizados · 1.6s
+[16:10:44] > Endereços WMS — sincronizando...
+[16:10:44] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.1s
+[16:10:44] > NFs Recebimento — sincronizando...
+[16:10:46] + NFs Recebimento — 463 NFs · 0 novas · 463 atualizadas · 4182 itens · 1.6s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=40.7s
+------------------------------------------------------
+
+[16:15:46] > Loop — ciclo #47 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[16:15:46] > DB2 — conectando...
+[16:15:46] + DB2 — conectado em 0.12s
+[16:15:46] + PostgreSQL local — conectado
+[16:15:46] > Produtos — sincronizando lista completa do ERP...
+[16:15:59] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 13.4s
+[16:15:59] > Orçamentos — buscando últimos 31 dias...
+[16:16:16] + Orçamentos — 26134 obtidos · 26141 removidos (>=2026-03-12) · 26134 inseridos · 0 erros · 16.9s
+[16:16:20] ! Remoção ERP — 3 pedido(s) excluído(s): ['475418', '475415', '475413']
+[16:16:20] + Transformação — 4965 pedidos · 0 produtos novos · 0 itens novos · 3.3s
+[16:16:20] > Estoque — sincronizando do ERP...
+[16:16:28] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.3s
+[16:16:28] > Box Barcodes — sincronizando...
+[16:16:30] + Box Barcodes — 530 produtos atualizados · 1.6s
+[16:16:30] > Endereços WMS — sincronizando...
+[16:16:30] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[16:16:30] > NFs Recebimento — sincronizando...
+[16:16:32] + NFs Recebimento — 463 NFs · 0 novas · 463 atualizadas · 4182 itens · 1.8s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=45.7s
+------------------------------------------------------
+
+4:17:08 PM [express] [Auto-Sync] Triggering DB sync...
+4:17:45 PM [express] [Sync] Sincronização concluída.
+4:17:45 PM [print] 7 impressora(s) carregada(s) | padrão: "CutePDF Writer (1 redirecionada)"
