@@ -1211,7 +1211,7 @@ export class DatabaseStorage implements IStorage {
     for (const wu of confWus) {
       if (wu.status !== "pendente") {
         await db.update(workUnits)
-          .set({ status: "pendente", completedAt: null, lockedBy: null, lockedAt: null })
+          .set({ status: "pendente", completedAt: null, lockedBy: null, lockedAt: null, lockExpiresAt: null })
           .where(eq(workUnits.id, wu.id));
       }
     }
@@ -1437,6 +1437,7 @@ export class DatabaseStorage implements IStorage {
               completedAt: null,
               lockedBy: null,
               lockedAt: null,
+              lockExpiresAt: null,
             })
             .where(eq(workUnits.id, exc.workUnit.id));
         }
@@ -1515,8 +1516,11 @@ export class DatabaseStorage implements IStorage {
     return newLog;
   }
 
-  async getAllAuditLogs(): Promise<(AuditLog & { user: User | null })[]> {
-    const logs = await db.select().from(auditLogs).orderBy(desc(auditLogs.createdAt));
+  async getAllAuditLogs(companyId?: number): Promise<(AuditLog & { user: User | null })[]> {
+    const whereClause = companyId ? eq(auditLogs.companyId, companyId) : undefined;
+    const logs = whereClause
+      ? await db.select().from(auditLogs).where(whereClause).orderBy(desc(auditLogs.createdAt))
+      : await db.select().from(auditLogs).orderBy(desc(auditLogs.createdAt));
     if (logs.length === 0) return [];
 
     const userIds = [...new Set(logs.map(l => l.userId).filter(Boolean))] as string[];
@@ -1568,16 +1572,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Stats
-  async getOrderStats(): Promise<{ pendentes: number; emSeparacao: number; separados: number; conferidos: number; excecoes: number }> {
-    const allOrders = await db.select().from(orders);
-    const allExceptions = await db.select().from(exceptions);
+  async getOrderStats(companyId?: number): Promise<{ pendentes: number; emSeparacao: number; separados: number; conferidos: number; excecoes: number }> {
+    const orderConditions = companyId ? [eq(orders.companyId, companyId)] : [];
+    const allOrders = orderConditions.length > 0
+      ? await db.select().from(orders).where(and(...orderConditions))
+      : await db.select().from(orders);
+
+    const excConditions = companyId
+      ? [eq(workUnits.companyId, companyId)]
+      : [];
+    const excQuery = excConditions.length > 0
+      ? await db.select({ id: exceptions.id }).from(exceptions)
+          .innerJoin(workUnits, eq(exceptions.workUnitId, workUnits.id))
+          .where(and(...excConditions))
+      : await db.select({ id: exceptions.id }).from(exceptions);
 
     return {
       pendentes: allOrders.filter(o => o.status === "pendente").length,
       emSeparacao: allOrders.filter(o => o.status === "em_separacao").length,
       separados: allOrders.filter(o => o.status === "separado").length,
       conferidos: allOrders.filter(o => o.status === "conferido").length,
-      excecoes: allExceptions.length,
+      excecoes: excQuery.length,
     };
   }
 

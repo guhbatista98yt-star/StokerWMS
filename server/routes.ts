@@ -1472,7 +1472,7 @@ export async function registerRoutes(
   // Stats
   app.get("/api/stats", isAuthenticated, requireCompany, async (req: Request, res: Response) => {
     try {
-      const stats = await storage.getOrderStats();
+      const stats = await storage.getOrderStats(req.companyId ?? undefined);
       res.json(stats);
     } catch (error) {
       log(`[Routes] Get stats error: ${error instanceof Error ? error.message : String(error)}`);
@@ -1560,8 +1560,9 @@ export async function registerRoutes(
       const mode = await getCachedSeparationMode();
 
       const affectedOrderIds = new Set<string>();
-      let isConferenciaUnlock = false;
-      
+      // Track per-order whether a conferencia WU was unlocked (to revert order to "separado" not "pendente")
+      const conferenciaUnlockOrderIds = new Set<string>();
+
       for (const wuId of workUnitIds) {
         const wu = await storage.getWorkUnitById(wuId);
         if (!wu) continue;
@@ -1585,18 +1586,17 @@ export async function registerRoutes(
       if (reset) {
         for (const id of workUnitIds) {
           const wu = await storage.getWorkUnitById(id);
-          if (wu?.status === "concluido") continue; // skip actually resetting progress
-          
+          if (wu?.status === "concluido") continue;
+
           if (wu?.type === "conferencia") {
-            isConferenciaUnlock = true;
+            conferenciaUnlockOrderIds.add(wu.orderId);
             await storage.resetConferenciaProgress(id);
           } else if (wu) {
             await storage.resetWorkUnitProgress(id);
           }
         }
         for (const orderId of affectedOrderIds) {
-          // Apenas reverter pedido para separado se tivermos resetado uma conferência válida
-          if (isConferenciaUnlock) {
+          if (conferenciaUnlockOrderIds.has(orderId)) {
             await storage.updateOrder(orderId, { status: "separado" });
           } else {
             await storage.updateOrder(orderId, { status: "pendente" });
@@ -1604,7 +1604,7 @@ export async function registerRoutes(
         }
       }
 
-      if (!isConferenciaUnlock) {
+      if (conferenciaUnlockOrderIds.size === 0) {
         for (const orderId of affectedOrderIds) {
           await storage.recalculateOrderStatus(orderId);
         }
@@ -2280,6 +2280,8 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Existem itens pendentes" });
       }
 
+      broadcastSSE("picking_finished", { workUnitId: req.params.id, orderId: wuCheck.orderId }, req.companyId);
+
       await storage.createAuditLog({
         userId: req.user!.id,
         action: "complete_balcao",
@@ -2507,7 +2509,7 @@ export async function registerRoutes(
   // Audit Logs
   app.get("/api/audit-logs", isAuthenticated, requireCompany, requireRole("supervisor", "administrador"), async (req: Request, res: Response) => {
     try {
-      const logs = await storage.getAllAuditLogs();
+      const logs = await storage.getAllAuditLogs(req.companyId ?? undefined);
       res.json(logs);
     } catch (error) {
       log(`[Routes] Get audit logs error: ${error instanceof Error ? error.message : String(error)}`);
@@ -3876,7 +3878,7 @@ export async function registerRoutes(
         GROUP BY wu.locked_by, u.name, u.username, u.role
       `);
 
-      // 2) Exceções por operador que as registrou
+      // 2) Exceções por operador que as registrou (filtrado por empresa via work_units)
       const excRows = await db.execute(drizzleSql`
         SELECT
           e.reported_by                                              AS user_id,
@@ -3885,7 +3887,9 @@ export async function registerRoutes(
           COUNT(*) FILTER (WHERE e.type = 'avariado')               AS avariado,
           COUNT(*) FILTER (WHERE e.type = 'vencido')                AS vencido
         FROM exceptions e
-        WHERE e.created_at >= ${fromStr}
+        JOIN work_units wu ON wu.id = e.work_unit_id
+        WHERE wu.company_id = ${companyId}
+          AND e.created_at >= ${fromStr}
           AND e.created_at <= ${toStr}
         GROUP BY e.reported_by
       `);

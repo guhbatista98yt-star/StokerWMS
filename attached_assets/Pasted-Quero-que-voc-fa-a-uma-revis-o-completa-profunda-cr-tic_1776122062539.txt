@@ -1,0 +1,426 @@
+Quero que você faça uma revisão completa, profunda, crítica e corretiva da minha aplicação, módulo por módulo, como um programador sênior extremamente experiente, criterioso e exigente.
+
+IMPORTANTE:
+Não quero uma análise superficial.
+Não quero apenas sugestões.
+Não quero apenas um relatório bonito.
+Quero uma auditoria real, com correção dos problemas encontrados, refatoração do que estiver fraco e endurecimento da aplicação para produção.
+
+OBJETIVO:
+Revisar toda a aplicação de ponta a ponta, módulo por módulo, procurando erros, bugs, regressões, fragilidades, inconsistências, problemas de cálculo, problemas de UI/UX, problemas de performance, problemas de responsividade, problemas de concorrência e qualquer ponto que possa atrapalhar, travar ou comprometer a operação.
+
+Quero que você atue exatamente como um programador sênior faria:
+- critique com rigor
+- condene tudo que um sênior não aceitaria
+- explique o motivo técnico e operacional
+- corrija ou refaça o que estiver abaixo do nível profissional
+- melhore o que puder ser melhorado com inteligência
+
+================================================================
+1. POSTURA OBRIGATÓRIA
+================================================================
+
+Assuma o papel de um programador sênior muito criterioso, com mentalidade de produção enterprise.
+
+Quero que você avalie a aplicação como se fosse aprovar ou reprovar a entrada em operação.
+
+Tudo que estiver:
+- improvisado
+- frágil
+- ambíguo
+- inconsistente
+- mal estruturado
+- difícil de manter
+- arriscado para produção
+- sujeito a erro operacional
+- com UX ruim
+- com cálculo inseguro
+- com lógica duvidosa
+- com responsividade ruim
+- com código que um sênior não faria
+
+deve ser:
+- corrigido
+- refatorado
+- reestruturado
+- endurecido
+- ou refeito, se necessário
+
+================================================================
+2. REVISÃO MÓDULO POR MÓDULO
+================================================================
+
+Quero que você revise a aplicação módulo por módulo, sem pular etapas.
+
+Para cada módulo/tela/fluxo, revisar:
+
+- lógica de negócio
+- frontend
+- backend
+- banco de dados
+- integrações
+- formulários
+- validações
+- cálculos
+- filtros
+- estados visuais
+- responsividade
+- mobile
+- performance
+- segurança
+- consistência com os demais módulos
+
+Se houver módulos novos ou funções novas implementadas depois da última revisão, trate com prioridade máxima.
+
+================================================================
+3. O QUE DEVE SER PROCURADO
+================================================================
+
+Quero que você procure e corrija:
+
+- bugs atuais
+- erros silenciosos
+- regressões
+- inconsistências entre telas
+- divergência entre dashboard e relatório
+- divergência entre vendedor, supervisor e admin
+- problemas de campanha, meta e comissão
+- problemas de cards e indicadores
+- problemas de criação/edição de dados
+- problemas de permissões
+- problemas de autenticação e sessão
+- problemas de sincronização e persistência
+- problemas de banco
+- problemas de performance
+- problemas de concorrência
+- estados inválidos
+- duplicidade
+- filtros que não batem
+- dados errados ou arriscados
+- problemas de UI/UX
+- responsividade ruim
+- componentes frágeis
+- código duplicado
+- lógica espalhada
+- hardcode indevido
+- falta de validação
+- risco de travamento operacional
+
+================================================================
+4. REVISÃO DE CÓDIGO
+================================================================
+
+Quero revisão crítica do código procurando:
+
+- funções grandes e confusas
+- componentes gigantes
+- acoplamento excessivo
+- duplicação de lógica
+- nomes ruins
+- falta de tipagem
+- tratamento de erro fraco
+- regras de negócio no lugar errado
+- lógica crítica no frontend quando deveria estar no backend
+- estado mal controlado
+- código morto
+- código improvisado
+- fluxos difíceis de manter
+- dependências mal utilizadas
+- falta de separação de responsabilidades
+- falta de padronização
+
+Tudo que um programador sênior condenaria no código deve ser corrigido, e quero o motivo.
+
+================================================================
+5. REVISÃO DE ARQUITETURA
+================================================================
+
+Quero revisão da arquitetura geral da aplicação.
+
+Corrigir ou refatorar se houver:
+- responsabilidades misturadas
+- regras espalhadas
+- serviços mal definidos
+- rotas confusas
+- dependência excessiva entre módulos
+- falta de centralização de regras críticas
+- endpoints frágeis
+- camada de dados fraca
+- estrutura que dificulte manutenção futura
+
+Quero arquitetura mais robusta, previsível e profissional.
+
+================================================================
+6. CÁLCULOS E DADOS — TOLERÂNCIA ZERO
+================================================================
+
+Todos os dados apresentados precisam ser confiáveis.
+
+Revisar e corrigir qualquer risco de:
+- cálculo errado
+- percentual errado
+- arredondamento errado
+- base de cálculo incorreta
+- comissão errada
+- ranking errado
+- campanha errada
+- meta errada
+- progresso errado
+- memória de cálculo divergente
+- dashboard diferente do relatório
+- filtro alterando resultado incorretamente
+- valor nulo ou zero quebrando lógica
+- divergência entre telas
+
+Não quero nenhuma lógica bonita com resultado errado.
+
+================================================================
+7. MÚLTIPLOS USUÁRIOS E CONCORRÊNCIA
+================================================================
+
+A aplicação será usada por vários usuários ao mesmo tempo.
+
+Procure e trate:
+- clique duplo
+- criação duplicada
+- edição simultânea
+- conflito entre sessões
+- dados desatualizados em tela
+- sobrescrita indevida
+- corrida entre leitura e gravação
+- atualização parcial
+- estados quebrados por uso simultâneo
+- campanhas ou metas alteradas durante uso
+- ações críticas sem proteção
+
+Quero comportamento resiliente em operação real.
+
+================================================================
+8. FORMULÁRIOS E FLUXOS DE CRIAÇÃO
+================================================================
+
+Revisar todos os formulários e fluxos de criação/edição.
+
+Corrigir:
+- validações fracas
+- campos obrigatórios faltando
+- tipos errados
+- placeholders ruins
+- labels ruins
+- erros sem feedback
+- loading ausente
+- submit duplicado
+- gravação parcial
+- criação de dado inválido
+- edição que quebra relacionamento
+- risco de configuração incorreta
+
+================================================================
+9. UX/UI — REVISÃO CRÍTICA
+================================================================
+
+Quero revisão visual e funcional em toda a aplicação.
+
+Corrigir:
+- telas simples demais
+- cards genéricos
+- desalinhamentos
+- hierarquia fraca
+- excesso de informação
+- falta de clareza
+- botões ruins
+- tabelas secas
+- modais mal resolvidos
+- contraste ruim
+- espaços mal distribuídos
+- estados visuais pobres
+- telas que não acompanham o padrão premium do sistema
+- telas difíceis para usuário leigo entender
+
+Quero uma aplicação com aparência profissional, madura, organizada e forte.
+
+================================================================
+10. RESPONSIVIDADE E MOBILE
+================================================================
+
+Revisar toda a aplicação em:
+- desktop grande
+- notebook
+- tablet
+- celular pequeno
+- celular médio
+- celular grande
+
+Corrigir:
+- card saindo da tela
+- texto quebrado
+- botão cortado
+- barra de progresso estourando
+- ranking ilegível
+- tabela ruim no celular
+- filtro quebrado
+- modal grande demais
+- scroll lateral desnecessário
+- layout fora de esquadro
+- elementos sobrepostos
+- toque ruim no mobile
+
+Quero responsividade real, e não superficial.
+
+================================================================
+11. PERFORMANCE
+================================================================
+
+Revisar e melhorar:
+- telas lentas
+- dashboards pesados
+- consultas desnecessárias
+- loops
+- re-render excessivo
+- componentes pesados
+- cálculos repetidos
+- filtros ineficientes
+- carga excessiva
+- gargalos com muitos dados
+- gargalos introduzidos por funções novas
+
+Quero uma aplicação rápida e estável.
+
+================================================================
+12. BANCO DE DADOS E INTEGRIDADE
+================================================================
+
+Revisar a camada de banco procurando:
+- tabela faltando
+- coluna faltando
+- índice faltando
+- migration frágil
+- constraint ausente
+- duplicidade
+- upsert incorreto
+- persistência parcial
+- integridade ruim
+- sincronização fraca
+- risco de dado inconsistente
+
+Quero que o banco suporte a aplicação de forma segura e profissional.
+
+================================================================
+13. PERMISSÕES E SEGURANÇA
+================================================================
+
+Revisar:
+- autenticação
+- sessões
+- expiração
+- proteção de rotas
+- proteção de ações críticas
+- perfis
+- escopos
+- visualização de dados sensíveis
+- edição de campanhas, metas, comissões, usuários e configurações
+- backend bloqueando acesso indevido
+
+Não quero permissão apenas visual no frontend.
+Quero segurança real.
+
+================================================================
+14. RELATÓRIOS, EXPORTAÇÕES E DASHBOARDS
+================================================================
+
+Revisar tudo e corrigir se houver:
+- divergência entre tela e exportação
+- totais errados
+- filtros não respeitados
+- agrupamentos errados
+- colunas erradas
+- dashboards divergentes
+- widgets inconsistentes
+- memória de cálculo errada
+- relatórios pouco confiáveis
+
+Tudo precisa bater.
+
+================================================================
+15. MÓDULOS CRÍTICOS
+================================================================
+
+Dar atenção extra aos módulos mais sensíveis, como:
+- campanhas
+- comissões
+- metas
+- dashboards
+- copiloto de compras
+- fila de pedidos / balcão
+- usuários e permissões
+- relatórios
+- configurações
+- integrações com banco e APIs
+- notificações e alertas
+
+Quero auditoria severa nesses pontos.
+
+================================================================
+16. MELHORIAS INTELIGENTES
+================================================================
+
+Além de corrigir falhas, quero que você implemente melhorias inteligentes onde fizer sentido, desde que:
+- melhorem estabilidade
+- melhorem clareza
+- melhorem manutenibilidade
+- melhorem UX
+- melhorem performance
+- reduzam risco operacional
+
+Não quero mudança aleatória.
+Quero melhoria com critério sênior.
+
+================================================================
+17. O QUE NÃO ACEITO
+================================================================
+
+Não quero:
+- revisão superficial
+- só comentários
+- só estética
+- resposta vaga
+- “aparentemente funciona”
+- cálculo frágil
+- tela bonita mas errada
+- código improvisado
+- regra ambígua
+- comportamento imprevisível
+- falsa sensação de estabilidade
+- pontos condenáveis por um programador sênior permanecendo no projeto
+
+================================================================
+18. ENTREGA ESPERADA
+================================================================
+
+Quero que você:
+1. revise toda a aplicação módulo por módulo
+2. encontre erros, bugs e fragilidades reais
+3. corrija os problemas encontrados
+4. refatore o que estiver abaixo do nível profissional
+5. endureça a aplicação para produção
+6. implemente melhorias inteligentes
+7. explique o motivo das correções sob visão sênior
+8. condene explicitamente o que um programador sênior não faria e por quê
+9. deixe a aplicação no nível que um programador sênior respeitaria
+
+================================================================
+19. FORMATO FINAL DA RESPOSTA
+================================================================
+
+No final, me devolva o resultado organizado nestes blocos:
+
+1. Problemas encontrados
+2. O que um programador sênior condenaria e o motivo
+3. Correções aplicadas
+4. Melhorias implementadas
+5. Pontos que ainda exigem atenção imediata
+
+IMPORTANTE:
+Se houver muitos pontos, seja objetivo.
+Quero correção real e resumo claro.
+Não quero só um relatório enorme sem ação.
