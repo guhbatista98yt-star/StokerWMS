@@ -69,7 +69,12 @@ export default function SeparationSettingsPage() {
 
   const changeMutation = useMutation({
     mutationFn: async ({ mode, force }: { mode: SeparationMode; force?: boolean }) => {
-      const res = await apiRequest("PATCH", "/api/system-settings/separation-mode", { mode, force });
+      const res = await fetch("/api/system-settings/separation-mode", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ mode, force }),
+      });
       const data = await res.json();
       if (!res.ok) {
         if (res.status === 409) {

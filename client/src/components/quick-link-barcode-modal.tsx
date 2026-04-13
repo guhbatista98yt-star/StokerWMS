@@ -37,8 +37,14 @@ export function QuickLinkBarcodeModal({ open, onClose, prefilledProduct }: Quick
   const unitInputRef = useRef<HTMLInputElement>(null);
   const packageInputRef = useRef<HTMLInputElement>(null);
 
+  const prevOpenRef = useRef(false);
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      prevOpenRef.current = false;
+      return;
+    }
+    if (prevOpenRef.current) return;
+    prevOpenRef.current = true;
     setPackageBarcode("");
     setCustomQty("");
     setLastSaved(null);

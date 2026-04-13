@@ -1,0 +1,410 @@
+Quero refazer a lógica e a interface do módulo **Fila de Pedidos — Balcão** para deixá-lo realmente funcional, organizado, claro para cliente leigo e adequado para exibição em uma TV de 48 polegadas em tempo real.
+
+IMPORTANTE:
+Não quero apenas ajustar textos ou mudar detalhes visuais.
+Quero uma revisão completa da lógica da fila, da ordenação, dos estados dos cards e da experiência visual da tela.
+
+Essa tela será usada para acompanhamento público em tempo real, então precisa ser:
+- extremamente clara
+- muito organizada
+- fácil de entender em poucos segundos
+- visualmente forte
+- com pouquíssima poluição
+- com destaque total para o número do pedido e status
+- sem informações desnecessárias quando o pedido ainda nem começou a ser separado
+
+Quero que você trate isso como uma tela operacional pública, feita para cliente leigo acompanhar a separação no balcão.
+
+================================================================
+1. OBJETIVO DA TELA
+================================================================
+
+A tela “Fila de Pedidos — Balcão” deve mostrar ao cliente, em tempo real:
+- quais pedidos estão aguardando início da separação
+- quais pedidos já estão sendo separados
+- quais pedidos acabaram de ser separados/finalizados
+- status financeiro correto do pedido
+- de forma limpa, organizada e muito fácil de entender
+
+A lógica precisa refletir o fluxo real do balcão.
+
+================================================================
+2. REGRAS GERAIS DE COMPORTAMENTO
+================================================================
+
+Quero que a tela funcione com estes estados:
+
+1. AGUARDANDO INÍCIO DA SEPARAÇÃO
+- pedido entrou na fila do balcão
+- ainda não foi iniciado pelo operador
+
+2. EM SEPARAÇÃO
+- operador iniciou a separação no módulo balcão
+- somente nesse momento começa o cronômetro
+
+3. FINALIZADO / SEPARADO RECENTEMENTE
+- pedido foi separado/concluído
+- continua na tela por apenas 5 minutos
+- depois some da tela principal
+
+4. OCULTO / FILA ESCONDIDA
+- pedidos que passaram de 2 dias sem início de separação saem da tela principal
+- ficam disponíveis em uma fila escondida acessível por botão com ícone de olho
+- se algum desses pedidos ocultos voltar a ter ação (ex.: operador inicia separação), ele volta para a tela principal automaticamente
+
+================================================================
+3. CRONÔMETRO — REGRA OBRIGATÓRIA
+================================================================
+
+A contagem de tempo NÃO deve mostrar “tempo na fila”.
+
+Quero a regra correta assim:
+
+- o cronômetro só começa quando o operador inicia a separação no balcão
+- antes disso, não mostrar tempo na fila
+- pedidos que ainda não começaram devem ficar sem cronômetro
+- se o operador abandonar a separação, o status do cronômetro deve ser zerado
+- ao abandonar, o pedido volta ao estado correto de aguardando início
+- se reiniciar a separação depois, o cronômetro começa novamente do zero
+
+Ou seja:
+o cronômetro representa apenas o tempo de separação em andamento, e não o tempo em espera.
+
+================================================================
+4. STATUS FINANCEIRO — REGRA OBRIGATÓRIA
+================================================================
+
+Hoje todos estão aparecendo como “Não Pago”, mas isso está errado para esses pedidos.
+
+Quero corrigir a origem/mapeamento do status financeiro para usar a mesma lógica da lista de pedidos, exibindo corretamente estados como:
+
+- Liberado
+- Pendente
+- Bloqueado
+- ou qualquer outro status financeiro correto já existente no sistema/lista de pedidos
+
+Não quero status genérico errado.
+Quero que a tela do balcão use a fonte correta e confiável do financeiro.
+
+Se necessário:
+- revisar backend
+- revisar query
+- revisar mapeamento
+- revisar nomes de campo
+- revisar transformação
+- revisar origem do dado
+
+Mas o resultado final precisa bater com a lista de pedidos.
+
+================================================================
+5. ORDENAÇÃO DOS PEDIDOS
+================================================================
+
+Quero a seguinte lógica de ordenação:
+
+A. PEDIDOS EM SEPARAÇÃO
+- devem ter prioridade máxima na tela
+- devem subir para o topo quando o operador iniciar a separação
+- devem aparecer primeiro visualmente
+- podem ser ordenados por horário de início da separação ou prioridade definida, mas sempre na frente dos que ainda estão aguardando
+
+B. PEDIDOS AGUARDANDO INÍCIO
+- devem aparecer abaixo dos que estão em separação
+- devem ser ordenados do mais recente para o mais antigo
+- devem ficar na tela principal por até 2 dias
+
+C. PEDIDOS FINALIZADOS
+- após conclusão, ficam na tela por 5 minutos
+- depois somem da tela principal
+
+D. PEDIDOS COM MAIS DE 2 DIAS SEM INÍCIO
+- saem da tela principal
+- vão para fila escondida
+- continuam acessíveis pelo botão do olho
+- se o operador iniciar a separação depois, voltam para a tela principal imediatamente
+
+================================================================
+6. FILA ESCONDIDA
+================================================================
+
+Quero um botão discreto com ícone de olho para mostrar/ocultar pedidos que saíram da tela principal por terem mais de 2 dias sem início de separação.
+
+Essa fila escondida deve:
+- ficar fora da visualização principal
+- não poluir a tela pública
+- permitir consulta quando necessário
+- manter os pedidos disponíveis
+- permitir que, se o operador iniciar um pedido oculto, ele volte automaticamente para a tela principal e passe a cronometrar
+
+Quero que o botão do olho:
+- seja discreto
+- não roube atenção da tela principal
+- mas seja fácil de encontrar para quem opera
+
+================================================================
+7. CONTEÚDO DOS CARDS — AGUARDANDO INÍCIO
+================================================================
+
+Pedidos que ainda estão aguardando início da separação devem mostrar SOMENTE:
+
+- número do pedido
+- código do cliente
+- nome do cliente
+- status financeiro
+
+Não quero mostrar:
+- cronômetro
+- “tempo na fila”
+- excesso de informação
+- vendedor
+- detalhes longos
+- textos desnecessários
+- informação pequena demais que polui a leitura
+
+Esses cards precisam ser extremamente limpos.
+
+================================================================
+8. CONTEÚDO DOS CARDS — EM SEPARAÇÃO
+================================================================
+
+Pedidos em separação devem mostrar:
+
+- número do pedido em grande destaque
+- código do cliente
+- nome do cliente
+- status financeiro
+- cronômetro da separação
+- status claro de que está em separação
+
+Se fizer sentido, pode mostrar discretamente mais um ou dois dados úteis, mas sem poluir.
+A prioridade continua sendo legibilidade.
+
+================================================================
+9. CONTEÚDO DOS CARDS — FINALIZADOS
+================================================================
+
+Pedidos finalizados/separados recentemente devem mostrar:
+
+- número do pedido
+- código do cliente
+- nome do cliente
+- status financeiro
+- status visual forte de “Separado” / “Pronto” / “Finalizado”
+- permanecer por 5 minutos
+- depois desaparecer automaticamente da tela principal
+
+Quero esse estado visualmente bem claro e positivo.
+
+================================================================
+10. DESTAQUE DO NÚMERO DO PEDIDO
+================================================================
+
+O número do pedido precisa ter MUITO MAIS destaque visual.
+
+Hoje ele não está com destaque suficiente.
+
+Quero:
+- número do pedido em fonte maior
+- peso tipográfico mais forte
+- contraste mais forte
+- posição mais nobre no card
+- leitura imediata mesmo à distância
+- ser o principal elemento visual do card
+
+A TV é de 48 polegadas e a pessoa leiga vai procurar primeiro pelo número do pedido.
+Então isso precisa ser prioridade máxima.
+
+================================================================
+11. UX/UI PARA TV DE 48 POLEGADAS
+================================================================
+
+Essa tela precisa ser pensada para exibição em TV grande.
+
+Quero:
+- cards maiores
+- espaçamento melhor
+- grid muito organizado
+- excelente contraste
+- tipografia maior
+- leitura à distância
+- poucos elementos por card
+- status visuais bem claros
+- excelente escaneabilidade visual
+- aparência profissional e moderna
+- organização impecável
+
+Não quero:
+- excesso de texto
+- campos pequenos
+- cronômetro em pedidos que ainda não começaram
+- cards confusos
+- informações técnicas demais
+- poluição visual
+
+================================================================
+12. LAYOUT RECOMENDADO
+================================================================
+
+Quero a tela organizada por seções visuais claras, por exemplo:
+
+SEÇÃO 1 — Em separação agora
+- cards em destaque no topo
+- poucos, grandes, bem visíveis
+- cronômetro ativo
+
+SEÇÃO 2 — Aguardando início
+- pedidos ainda não iniciados
+- cards mais limpos
+- ordenados do mais recente para o mais antigo
+- sem cronômetro
+
+SEÇÃO 3 — Finalizados recentemente
+- cards com destaque positivo
+- visíveis por 5 minutos
+
+SEÇÃO 4 — Ocultos
+- acessados pelo botão com ícone de olho
+- não aparecem na tela principal por padrão
+
+Se fizer sentido, pode implementar essas seções com blocos ou tabs visuais discretas.
+Mas a tela precisa continuar limpa.
+
+================================================================
+13. ESTADOS VISUAIS DOS CARDS
+================================================================
+
+Quero estados bem definidos:
+
+- Aguardando início
+- Em separação
+- Finalizado recentemente
+- Oculto
+- Abandonado / reiniciado, se aplicável
+
+Cada estado deve ter:
+- cor coerente
+- badge/status claro
+- visual fácil de identificar
+- sem exageros
+
+================================================================
+14. COMPORTAMENTO DE ABANDONO
+================================================================
+
+Se o operador abandonar a separação de um pedido do balcão:
+
+- zerar o status do cronômetro
+- remover o estado de “em separação”
+- voltar o pedido para aguardando início
+- manter a ordem correta da fila
+- se ele já estiver fora dos 2 dias e estiver oculto, avaliar a regra correta:
+  - se estava oculto e foi iniciado, ele sobe para principal
+  - se abandonou de novo e continua antigo, ele pode retornar para a fila escondida conforme a regra de idade
+
+Quero essa lógica muito bem tratada, sem bugs de estado.
+
+================================================================
+15. REGRAS DE TEMPO
+================================================================
+
+Quero implementar explicitamente:
+
+- pedidos aguardando início permanecem na tela principal por até 2 dias
+- depois disso, vão para a fila escondida
+- pedidos em separação aparecem no topo enquanto estiverem ativos
+- pedidos finalizados ficam 5 minutos visíveis e depois desaparecem
+- cronômetro só existe em pedido em separação
+- se reiniciar separação, cronômetro reinicia corretamente
+
+================================================================
+16. DADOS E BACKEND
+================================================================
+
+Quero revisar o backend e a origem dos dados para garantir:
+
+- status financeiro correto
+- identificação correta do momento de início da separação
+- identificação correta de abandono
+- identificação correta de conclusão
+- identificação correta da idade do pedido na fila
+- lógica confiável para ocultar após 2 dias
+- lógica confiável para mostrar finalizado por 5 minutos
+- sem divergência entre lista de pedidos e fila do balcão
+- sem status errado
+- sem cronômetro indevido
+- sem pedidos presos em estado errado
+
+================================================================
+17. MELHORIAS INTELIGENTES QUE PODE IMPLEMENTAR
+================================================================
+
+Se fizer sentido, quero que você proponha e implemente melhorias úteis, como:
+
+- animação discreta quando um pedido sobe para “em separação”
+- animação discreta quando um pedido é finalizado
+- destaque visual temporário quando muda de estado
+- badge de status financeiro bem claro
+- badge de “Em separação”
+- badge de “Pronto”
+- melhor agrupamento visual
+- contadores mais úteis no topo
+- eventual som discreto para início/finalização, apenas se fizer sentido e não poluir
+- atualização em tempo real confiável
+
+Mas sem exagerar.
+Quero elegância e clareza.
+
+================================================================
+18. O QUE NÃO QUERO
+================================================================
+
+Não quero:
+- cronômetro para pedido ainda na fila
+- “tempo na fila” visível
+- status financeiro errado
+- cards poluídos
+- excesso de texto
+- dados pequenos
+- tela difícil de entender
+- grid bagunçado
+- estados confusos
+- pedidos finalizados poluindo a tela por muito tempo
+- pedidos antigos ocupando espaço da fila principal
+- lógica fraca para abandono/início/conclusão
+
+================================================================
+19. ENTREGA ESPERADA
+================================================================
+
+Quero que você:
+1. refaça a lógica da fila do balcão
+2. corrija o status financeiro para bater com a lista de pedidos
+3. faça o cronômetro iniciar somente quando o operador iniciar a separação
+4. remova a exibição de tempo na fila
+5. reorganize os cards para TV de 48"
+6. destaque muito mais o número do pedido
+7. deixe os cards de aguardando início minimalistas
+8. faça pedidos em separação subirem para o topo
+9. faça pedidos finalizados sumirem após 5 minutos
+10. crie a fila escondida para pedidos com mais de 2 dias
+11. trate abandono reiniciando o cronômetro corretamente
+12. melhore a UX/UI para cliente leigo acompanhar em tempo real
+
+================================================================
+20. CHECKLIST FINAL
+================================================================
+
+Antes de considerar concluído, valide se:
+- cronômetro só aparece quando a separação inicia
+- não existe mais “tempo na fila”
+- status financeiro está correto
+- número do pedido está muito mais destacado
+- cards em espera mostram só o essencial
+- pedidos em separação sobem para o topo
+- pedidos finalizados desaparecem após 5 minutos
+- pedidos antigos somem da tela principal após 2 dias
+- botão de olho mostra a fila escondida
+- pedido oculto volta se a separação iniciar
+- abandono zera o cronômetro
+- a tela ficou clara para cliente leigo
+- a visualização na TV ficou organizada, forte e profissional
