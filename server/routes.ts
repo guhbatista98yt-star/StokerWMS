@@ -1563,36 +1563,43 @@ export async function registerRoutes(
       // Track per-order whether a conferencia WU was unlocked (to revert order to "separado" not "pendente")
       const conferenciaUnlockOrderIds = new Set<string>();
 
+      // Batch fetch all WUs at once to eliminate N+1 queries
+      const rawWUs = await storage.getWorkUnitsByIdsRaw(workUnitIds);
+      const wuMap = new Map(rawWUs.map(wu => [wu.id, wu]));
+
+      const isSupervisor = req.user!.role === "supervisor" || req.user!.role === "administrador";
+
       for (const wuId of workUnitIds) {
-        const wu = await storage.getWorkUnitById(wuId);
+        const wu = wuMap.get(wuId);
         if (!wu) continue;
         const authWU = authorizeWorkUnit(wu, req, mode);
         if (!authWU.allowed) return res.status(403).json({ error: authWU.reason });
+        // Operators may only unlock their own WUs; supervisors/admins can unlock any
+        if (!isSupervisor && wu.lockedBy && wu.lockedBy !== userId) {
+          return res.status(403).json({ error: "Você não pode desbloquear unidades de outro operador" });
+        }
         if (reset && wu.status === "concluido") continue;
         if (wu.orderId) affectedOrderIds.add(wu.orderId);
       }
 
       await storage.unlockWorkUnits(workUnitIds);
 
-      for (const wuId of workUnitIds) {
-        const wu = await storage.getWorkUnitById(wuId);
-        if (wu) {
-          const sessionConds: any[] = [eq(pickingSessions.orderId, wu.orderId)];
-          if (wu.section) sessionConds.push(eq(pickingSessions.sectionId, wu.section));
-          await db.delete(pickingSessions).where(and(...sessionConds));
-        }
+      // Re-use already-fetched WU map for session cleanup (no extra DB hits)
+      for (const wu of rawWUs) {
+        const sessionConds: any[] = [eq(pickingSessions.orderId, wu.orderId)];
+        if (wu.section) sessionConds.push(eq(pickingSessions.sectionId, wu.section));
+        await db.delete(pickingSessions).where(and(...sessionConds));
       }
 
       if (reset) {
-        for (const id of workUnitIds) {
-          const wu = await storage.getWorkUnitById(id);
-          if (wu?.status === "concluido") continue;
+        for (const wu of rawWUs) {
+          if (wu.status === "concluido") continue;
 
-          if (wu?.type === "conferencia") {
+          if (wu.type === "conferencia") {
             conferenciaUnlockOrderIds.add(wu.orderId);
-            await storage.resetConferenciaProgress(id);
-          } else if (wu) {
-            await storage.resetWorkUnitProgress(id);
+            await storage.resetConferenciaProgress(wu.id);
+          } else {
+            await storage.resetWorkUnitProgress(wu.id);
           }
         }
         for (const orderId of affectedOrderIds) {

@@ -30,10 +30,8 @@ export function useSSE(url: string, eventTypes: string[], onMessage: (type: stri
             listeners.push({ type, listener });
         });
 
-        eventSource.onerror = (error) => {
-            console.error('SSE error:', error);
-            if (eventSource.readyState === EventSource.CLOSED) {
-            }
+        eventSource.onerror = () => {
+            // EventSource reconnects automatically; nothing to do here
         };
 
         return () => {

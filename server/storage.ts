@@ -1067,6 +1067,11 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
+  async getWorkUnitsByIdsRaw(ids: string[]): Promise<WorkUnit[]> {
+    if (ids.length === 0) return [];
+    return db.select().from(workUnits).where(inArray(workUnits.id, ids));
+  }
+
   async getWorkUnitById(id: string): Promise<(WorkUnit & { order: Order; items: (OrderItem & { product: Product; exceptionQty?: number })[] }) | undefined> {
     const [wu] = await db.select().from(workUnits).where(eq(workUnits.id, id));
     if (!wu) return undefined;

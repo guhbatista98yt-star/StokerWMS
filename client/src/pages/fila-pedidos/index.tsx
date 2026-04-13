@@ -341,6 +341,7 @@ export default function FilaPedidosPage() {
     "exception_created", "orders_launched", "orders_relaunched",
     "work_units_unlocked", "orders_launch_cancelled", "picking_started",
     "conference_started", "conference_finished", "work_unit_created", "item_picked",
+    "orders_status_forced",
   ], handleSSEMessage);
 
   const { separando, aguardando, finalizados, ocultos } = useMemo(() => {
