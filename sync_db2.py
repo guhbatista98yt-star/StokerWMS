@@ -1774,6 +1774,10 @@ def sync_box_barcodes(conn_db2, conn_pg):
         log(f"Box Barcodes — {len(updates)} produtos atualizados · {elapsed:.1f}s", "ok")
 
     except Exception as e:
+        try:
+            conn_pg.rollback()
+        except Exception:
+            pass
         log(f"Box Barcodes — erro: {e}", "erro")
 
 
@@ -1803,6 +1807,13 @@ def sync_enderecos_wms(conn_db2, conn_pg):
     if not dados:
         log("Endereços WMS — nenhum registro retornado", "warn")
         return
+
+    # Garante que a conexão não está em estado de transação abortada
+    # (pode ocorrer se uma função anterior capturou exceção sem fazer rollback)
+    try:
+        conn_pg.rollback()
+    except Exception:
+        pass
 
     cursor   = conn_pg.cursor()
     inseridos = 0
@@ -1840,7 +1851,16 @@ def sync_enderecos_wms(conn_db2, conn_pg):
             inseridos += 1
 
         except Exception as e:
-            cursor.execute("ROLLBACK TO SAVEPOINT sp_addr")
+            try:
+                cursor.execute("ROLLBACK TO SAVEPOINT sp_addr")
+            except Exception:
+                # SAVEPOINT não foi criado (ex: transação já estava abortada)
+                # Faz rollback completo e recria o cursor para continuar o loop
+                try:
+                    conn_pg.rollback()
+                except Exception:
+                    pass
+                cursor = conn_pg.cursor()
             log(f"Endereços WMS — erro ao inserir {code}: {e}", "erro")
 
     conn_pg.commit()
