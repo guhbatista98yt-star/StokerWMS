@@ -38,7 +38,9 @@ import {
   Keyboard,
   Pause,
   Trash2,
+  Link2,
 } from "lucide-react";
+import { QuickLinkBarcodeModal } from "@/components/quick-link-barcode-modal";
 import {
   Dialog,
   DialogContent,
@@ -162,6 +164,9 @@ export default function SeparacaoPage() {
 
   // S1-03: revisão de scans expirados
   const [ignorarTarget, setIgnorarTarget] = useState<{ id: string; barcode: string; timestamp: number } | null>(null);
+
+  // Vínculo rápido de embalagem
+  const [showQuickLinkModal, setShowQuickLinkModal] = useState(false);
 
   // Consulta de estoque
   const [showStockModal, setShowStockModal] = useState(false);
@@ -1177,7 +1182,7 @@ export default function SeparacaoPage() {
     }
   }, [step, handleScanItem]);
 
-  useBarcodeScanner(globalScanHandler, step === "picking" && !showStockModal);
+  useBarcodeScanner(globalScanHandler, step === "picking" && !showStockModal && !showQuickLinkModal);
 
   const handleConfirmQtyModal = useCallback(() => {
     const modal = qtyModalRef.current;
@@ -1577,6 +1582,16 @@ export default function SeparacaoPage() {
                 {allMyUnits.map(wu => wu.order.erpOrderId).filter((v, i, a) => a.indexOf(v) === i).join(", ")}
               </span>
               <div className="flex items-center gap-1.5">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowQuickLinkModal(true)}
+                  title="Vínculo rápido de embalagem"
+                  data-testid="button-quick-link-separacao"
+                >
+                  <Link2 className="h-3.5 w-3.5" />
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -2080,6 +2095,15 @@ export default function SeparacaoPage() {
         type={resultDialogConfig.type}
         title={resultDialogConfig.title}
         message={resultDialogConfig.message}
+      />
+
+      {/* Modal de Vínculo Rápido de Embalagem */}
+      <QuickLinkBarcodeModal
+        open={showQuickLinkModal}
+        onClose={() => setShowQuickLinkModal(false)}
+        prefilledProduct={currentProduct?.product
+          ? { barcode: currentProduct.product.barcode, name: currentProduct.product.name, erpCode: currentProduct.product.erpCode ?? "" }
+          : undefined}
       />
 
       {/* Modal de Consulta de Estoque */}

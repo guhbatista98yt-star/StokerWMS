@@ -40,8 +40,10 @@ import {
   Keyboard,
   Pause,
   Trash2,
+  Link2,
 } from "lucide-react";
 import { beep, getSoundEnabled, setSoundEnabled as persistSoundEnabled } from "@/lib/audio-feedback";
+import { QuickLinkBarcodeModal } from "@/components/quick-link-barcode-modal";
 import { VolumeModal } from "@/components/conferencia/VolumeModal";
 import { ScanQuantityModal } from "@/components/ui/scan-quantity-modal";
 import { BarcodeDisplay } from "@/components/ui/barcode-display";
@@ -155,6 +157,7 @@ export default function ConferenciaPage() {
   const [pendingExceptions, setPendingExceptions] = useState<any[]>([]);
 
   const [abandonConfirmOpen, setAbandonConfirmOpen] = useState(false);
+  const [showQuickLinkModal, setShowQuickLinkModal] = useState(false);
   const [showStockModal, setShowStockModal] = useState(false);
   const [stockQuery, setStockQuery] = useState("");
   const [stockDebouncedQuery, setStockDebouncedQuery] = useState("");
@@ -1039,7 +1042,7 @@ export default function ConferenciaPage() {
     }
   }, [step, handleScanItem]);
 
-  useBarcodeScanner(globalScanHandler, step === "checking" && !showStockModal);
+  useBarcodeScanner(globalScanHandler, step === "checking" && !showStockModal && !showQuickLinkModal);
 
   const handleConfirmQtyModal = useCallback(() => {
     const modal = qtyModalRef.current;
@@ -1391,6 +1394,16 @@ export default function ConferenciaPage() {
                 <Button
                   variant="ghost"
                   size="icon"
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowQuickLinkModal(true)}
+                  title="Vínculo rápido de embalagem"
+                  data-testid="button-quick-link-conferencia"
+                >
+                  <Link2 className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="h-6 w-6"
                   onClick={() => { setSoundOn(s => { const next = !s; persistSoundEnabled(next); return next; }); }}
                   data-testid="button-toggle-sound-conferencia"
@@ -1737,6 +1750,15 @@ export default function ConferenciaPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Modal de Vínculo Rápido de Embalagem */}
+      <QuickLinkBarcodeModal
+        open={showQuickLinkModal}
+        onClose={() => setShowQuickLinkModal(false)}
+        prefilledProduct={currentProduct?.product
+          ? { barcode: currentProduct.product.barcode, name: currentProduct.product.name, erpCode: currentProduct.product.erpCode ?? "" }
+          : undefined}
+      />
 
       <Dialog open={showStockModal} onOpenChange={v => {
         setShowStockModal(v);
