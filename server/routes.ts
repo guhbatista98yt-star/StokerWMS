@@ -52,8 +52,9 @@ function authorizeWorkUnit(wu: { companyId: number; section: string | null }, re
     return { allowed: false, reason: "Acesso negado: empresa diferente" };
   }
   if (user?.role === "separacao") {
-    // Em modo por_pedido o separador acessa o pedido inteiro — sem restrição de seção
-    if (mode === "by_order") return { allowed: true };
+    // Em modo by_section (Por Pedido/Rota) o separador recebe um pedido inteiro — sem restrição de seção
+    if (mode === "by_section") return { allowed: true };
+    // Em modo by_order (Por Seção, padrão) filtra pelas seções do operador
     const userSections: string[] = (user.sections as string[]) || [];
     if (userSections.length === 0) {
       return { allowed: false, reason: "Acesso negado: sem seções atribuídas" };
@@ -1484,11 +1485,11 @@ export async function registerRoutes(
       if (requestingUser?.role === "separacao") {
         const mode = await getCachedSeparationMode();
 
-        if (mode === "by_order") {
-          // Modo Por Pedido: separador vê o pedido inteiro — sem filtro de seção
+        if (mode === "by_section") {
+          // Modo Por Pedido/Rota (by_section): separador recebe pedido inteiro — sem filtro de seção
           // Nenhuma filtragem adicional (todos os work units lançados são visíveis)
         } else {
-          // Modo Por Seção (padrão): separador vê apenas as seções do seu perfil
+          // Modo Por Seção (by_order, padrão): separador vê apenas os itens das suas seções
           const userSections: string[] = (requestingUser.sections as string[]) || [];
           if (userSections.length === 0) {
             launched = [];
@@ -1605,8 +1606,8 @@ export async function registerRoutes(
         const authWU = authorizeWorkUnit(wu, req, mode);
         if (!authWU.allowed) return res.status(403).json({ error: authWU.reason });
 
-        // Modo Por Pedido: garantir exclusividade por pedido inteiro
-        if (mode === "by_order" && req.user?.role === "separacao") {
+        // Modo Por Pedido/Rota (by_section): garantir exclusividade por pedido inteiro
+        if (mode === "by_section" && req.user?.role === "separacao") {
           const orderWUs = await storage.getWorkUnitsByOrderId(wu.orderId);
           const conflict = orderWUs.find(owu =>
             owu.lockedBy && owu.lockedBy !== userId &&
