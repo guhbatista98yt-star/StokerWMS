@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth, useSessionQueryKey } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -8,150 +8,279 @@ import { useSSE } from "@/hooks/use-sse";
 import {
   ClipboardList,
   LogOut,
-  User,
-  Package,
-  Timer,
-  DollarSign,
   RefreshCw,
-  Clock,
   CheckCircle2,
-  Hourglass,
   PlayCircle,
+  Hourglass,
+  Eye,
+  EyeOff,
+  Timer,
 } from "lucide-react";
+
+const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
+const FIVE_MIN_MS = 5 * 60 * 1000;
 
 interface QueueOrder {
   orderId: string;
   erpOrderId: string;
   customerCode: string | null;
   customerName: string;
-  vendedor: string | null;
   totalProducts: number;
-  financialStatus: string;
+  financialStatus: string | null;
   status: string;
   isLaunched: boolean;
   operatorName: string | null;
-  startedAt: string | null;
   lockedAt: string | null;
+  startedAt: string | null;
   completedAt: string | null;
   queuedAt: string | null;
   launchedAt: string | null;
 }
 
-function ElapsedTimer({ startedAt, stopped, label }: { startedAt: string | null; stopped?: boolean; label?: string }) {
+const FINANCIAL_MAP: Record<string, { label: string; bg: string; text: string; border: string }> = {
+  faturado:  { label: "Liberado",  bg: "bg-emerald-100", text: "text-emerald-700", border: "border-emerald-300" },
+  liberado:  { label: "Liberado",  bg: "bg-emerald-100", text: "text-emerald-700", border: "border-emerald-300" },
+  pago:      { label: "Pago",      bg: "bg-emerald-100", text: "text-emerald-700", border: "border-emerald-300" },
+  pendente:  { label: "Pendente",  bg: "bg-amber-100",   text: "text-amber-700",   border: "border-amber-300"   },
+  bloqueado: { label: "Bloqueado", bg: "bg-red-100",     text: "text-red-700",     border: "border-red-300"     },
+};
+
+function getFinancial(raw: string | null) {
+  const key = (raw || "").toLowerCase().trim();
+  return FINANCIAL_MAP[key] ?? {
+    label: raw ? raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase() : "—",
+    bg: "bg-slate-100", text: "text-slate-600", border: "border-slate-300",
+  };
+}
+
+function FinancialBadge({ raw, large }: { raw: string | null; large?: boolean }) {
+  const f = getFinancial(raw);
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border font-semibold ${f.bg} ${f.text} ${f.border} ${large ? "text-sm px-3 py-1" : "text-xs px-2.5 py-0.5"}`}
+      data-testid="badge-financial-status"
+    >
+      {f.label}
+    </span>
+  );
+}
+
+function ElapsedTimer({ startedAt }: { startedAt: string }) {
   const [elapsed, setElapsed] = useState("00:00:00");
 
   useEffect(() => {
-    if (!startedAt) {
-      setElapsed("--:--:--");
-      return;
-    }
-
-    const startTime = new Date(startedAt).getTime();
-
-    const update = () => {
-      const diff = Math.max(0, Date.now() - startTime);
-      const hours = Math.floor(diff / 3600000);
-      const mins = Math.floor((diff % 3600000) / 60000);
-      const secs = Math.floor((diff % 60000) / 1000);
-      setElapsed(
-        `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
-      );
+    const startMs = new Date(startedAt).getTime();
+    const tick = () => {
+      const diff = Math.max(0, Date.now() - startMs);
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setElapsed(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`);
     };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [startedAt]);
 
-    update();
-    if (stopped) return;
-    const interval = setInterval(update, 1000);
-    return () => clearInterval(interval);
-  }, [startedAt, stopped]);
-
-  return (
-    <div className="flex flex-col items-center">
-      {label && <span className="text-[10px] text-muted-foreground mb-0.5">{label}</span>}
-      <span className="font-mono text-lg font-bold tabular-nums">{elapsed}</span>
-    </div>
-  );
+  return <span className="font-mono tabular-nums">{elapsed}</span>;
 }
 
-function StaticDuration({ from, to }: { from: string | null; to: string | null }) {
-  if (!from || !to) return <span className="font-mono text-lg font-bold tabular-nums">--:--:--</span>;
+function StaticDuration({ from, to }: { from: string; to: string }) {
   const diff = Math.max(0, new Date(to).getTime() - new Date(from).getTime());
-  const hours = Math.floor(diff / 3600000);
-  const mins = Math.floor((diff % 3600000) / 60000);
-  const secs = Math.floor((diff % 60000) / 1000);
-  const str = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
   return (
-    <div className="flex flex-col items-center">
-      <span className="text-[10px] text-muted-foreground mb-0.5">Separação concluída em</span>
-      <span className="font-mono text-lg font-bold tabular-nums">{str}</span>
+    <span className="font-mono tabular-nums">
+      {`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`}
+    </span>
+  );
+}
+
+function SeparandoCard({ order }: { order: QueueOrder }) {
+  const timerStart = order.lockedAt || order.startedAt;
+
+  return (
+    <div
+      data-testid={`card-order-${order.orderId}`}
+      className="bg-white dark:bg-slate-800 rounded-2xl border-2 border-amber-400 dark:border-amber-500 shadow-xl overflow-hidden"
+    >
+      <div className="bg-amber-500 px-5 py-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse shrink-0" />
+          <span className="text-white font-bold text-sm uppercase tracking-wider">Em Separação</span>
+        </div>
+        {order.operatorName && (
+          <span className="text-amber-100 text-xs font-medium truncate max-w-[120px]" data-testid="text-operator-name">
+            {order.operatorName}
+          </span>
+        )}
+      </div>
+
+      <div className="px-5 pt-5 pb-3">
+        <p className="text-[11px] text-slate-400 font-semibold uppercase tracking-widest mb-1">Pedido</p>
+        <p
+          className="text-6xl font-black text-slate-900 dark:text-white leading-none tracking-tight"
+          data-testid="text-order-number"
+        >
+          #{order.erpOrderId}
+        </p>
+      </div>
+
+      <div className="px-5 pb-4">
+        {order.customerCode && (
+          <p className="text-sm font-mono text-slate-400 mb-0.5" data-testid="text-customer-code">
+            {order.customerCode}
+          </p>
+        )}
+        <p className="text-xl font-bold text-slate-800 dark:text-slate-100 leading-snug" data-testid="text-customer-name">
+          {order.customerName}
+        </p>
+      </div>
+
+      <div className="mx-5 mb-5 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-4 py-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <Timer className="h-5 w-5 text-amber-600 shrink-0" />
+          <div>
+            <p className="text-[10px] text-amber-600 uppercase font-bold tracking-wide">Separando há</p>
+            <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">
+              {timerStart ? <ElapsedTimer startedAt={timerStart} /> : "--:--:--"}
+            </div>
+          </div>
+        </div>
+        <FinancialBadge raw={order.financialStatus} large />
+      </div>
     </div>
   );
 }
 
-const STATUS_CONFIG: Record<string, {
-  label: string;
-  headerBg: string;
-  timerBg: string;
-  timerText: string;
-  icon: React.ComponentType<{ className?: string }>;
-  badgeCn: string;
-}> = {
-  aguardando: {
-    label: "Aguardando Lançamento",
-    headerBg: "bg-slate-400",
-    timerBg: "bg-slate-50 dark:bg-slate-700/50",
-    timerText: "text-slate-500",
-    icon: Hourglass,
-    badgeCn: "bg-slate-100 text-slate-600 border-slate-300",
-  },
-  em_fila: {
-    label: "Na Fila",
-    headerBg: "bg-blue-500",
-    timerBg: "bg-blue-50 dark:bg-blue-900/30",
-    timerText: "text-blue-500",
-    icon: Clock,
-    badgeCn: "bg-blue-100 text-blue-700 border-blue-300",
-  },
-  em_andamento: {
-    label: "Em Separação",
-    headerBg: "bg-amber-500",
-    timerBg: "bg-amber-50 dark:bg-amber-900/20",
-    timerText: "text-amber-500",
-    icon: PlayCircle,
-    badgeCn: "bg-amber-100 text-amber-700 border-amber-300",
-  },
-  concluido: {
-    label: "Concluído",
-    headerBg: "bg-green-500",
-    timerBg: "bg-green-50 dark:bg-green-900/20",
-    timerText: "text-green-500",
-    icon: CheckCircle2,
-    badgeCn: "bg-green-100 text-green-700 border-green-300",
-  },
-};
+function AguardandoCard({ order }: { order: QueueOrder }) {
+  const isInQueue = order.status === "em_fila";
 
-function getTimerProps(order: QueueOrder): { startedAt: string | null; label: string; stopped?: boolean; staticFrom?: string | null; staticTo?: string | null } {
-  switch (order.status) {
-    case "aguardando":
-      return { startedAt: order.queuedAt, label: "Na fila há" };
-    case "em_fila":
-      return { startedAt: order.launchedAt || order.queuedAt, label: "Aguardando operador há" };
-    case "em_andamento":
-      return { startedAt: order.lockedAt || order.startedAt, label: "Separando há" };
-    case "concluido":
-      return { startedAt: null, label: "", staticFrom: order.lockedAt || order.startedAt, staticTo: order.completedAt, stopped: true };
-    default:
-      return { startedAt: null, label: "" };
-  }
+  return (
+    <div
+      data-testid={`card-order-${order.orderId}`}
+      className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"
+    >
+      <div className="bg-slate-100 dark:bg-slate-700/60 px-4 py-2.5 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          <Hourglass className="h-3.5 w-3.5 text-slate-500" />
+          <span className="text-slate-600 dark:text-slate-300 font-semibold text-xs uppercase tracking-wide">
+            {isInQueue ? "Na fila" : "Aguardando"}
+          </span>
+        </div>
+        <FinancialBadge raw={order.financialStatus} />
+      </div>
+
+      <div className="px-4 pt-4 pb-5">
+        <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mb-1">Pedido</p>
+        <p
+          className="text-4xl font-black text-slate-900 dark:text-white leading-none mb-3"
+          data-testid="text-order-number"
+        >
+          #{order.erpOrderId}
+        </p>
+        {order.customerCode && (
+          <p className="text-xs font-mono text-slate-400 mb-0.5" data-testid="text-customer-code">
+            {order.customerCode}
+          </p>
+        )}
+        <p className="text-base font-bold text-slate-700 dark:text-slate-200 leading-snug" data-testid="text-customer-name">
+          {order.customerName}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function FinalizadoCard({ order }: { order: QueueOrder }) {
+  const timerStart = order.lockedAt || order.startedAt;
+
+  return (
+    <div
+      data-testid={`card-order-${order.orderId}`}
+      className="bg-white dark:bg-slate-800 rounded-2xl border-2 border-green-400 dark:border-green-500 shadow-md overflow-hidden"
+    >
+      <div className="bg-green-500 px-4 py-2.5 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4 text-white" />
+          <span className="text-white font-bold text-sm uppercase tracking-wide">Separado</span>
+        </div>
+        <FinancialBadge raw={order.financialStatus} />
+      </div>
+
+      <div className="px-4 pt-4 pb-4">
+        <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mb-1">Pedido</p>
+        <p
+          className="text-4xl font-black text-green-700 dark:text-green-400 leading-none mb-2"
+          data-testid="text-order-number"
+        >
+          #{order.erpOrderId}
+        </p>
+        {order.customerCode && (
+          <p className="text-xs font-mono text-slate-400 mb-0.5" data-testid="text-customer-code">
+            {order.customerCode}
+          </p>
+        )}
+        <p className="text-base font-bold text-slate-700 dark:text-slate-200 leading-snug mb-3" data-testid="text-customer-name">
+          {order.customerName}
+        </p>
+        {timerStart && order.completedAt && (
+          <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 font-medium">
+            <Timer className="h-3.5 w-3.5 shrink-0" />
+            <span>Separado em <StaticDuration from={timerStart} to={order.completedAt} /></span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function OcultoCard({ order }: { order: QueueOrder }) {
+  return (
+    <div
+      data-testid={`card-order-${order.orderId}`}
+      className="bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 shadow-none overflow-hidden"
+    >
+      <div className="px-4 py-3 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-2xl font-black text-slate-500 dark:text-slate-400 leading-none" data-testid="text-order-number">
+            #{order.erpOrderId}
+          </p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 truncate mt-0.5" data-testid="text-customer-name">
+            {order.customerName}
+          </p>
+        </div>
+        <FinancialBadge raw={order.financialStatus} />
+      </div>
+    </div>
+  );
+}
+
+function SectionTitle({ label, count, colorClass }: { label: string; count: number; colorClass: string }) {
+  return (
+    <div className="flex items-center gap-3 mb-4">
+      <h2 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest">{label}</h2>
+      <span className={`text-xs font-bold rounded-full px-2.5 py-0.5 border ${colorClass}`}>{count}</span>
+      <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+    </div>
+  );
 }
 
 export default function FilaPedidosPage() {
   const { user, logout } = useAuth();
   const queryClient = useQueryClient();
-  const [hideCompleted, setHideCompleted] = useState(false);
+  const [showHidden, setShowHidden] = useState(false);
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   const queueQueryKey = useSessionQueryKey(["/api/queue/balcao"]);
 
-  const { data: queueOrders, isLoading } = useQuery<QueueOrder[]>({
+  const { data: rawOrders, isLoading } = useQuery<QueueOrder[]>({
     queryKey: queueQueryKey,
     refetchInterval: 5000,
   });
@@ -164,201 +293,214 @@ export default function FilaPedidosPage() {
   );
 
   useSSE("/api/sse", [
-    "picking_update",
-    "lock_acquired",
-    "lock_released",
-    "picking_finished",
-    "exception_created",
-    "orders_launched",
-    "orders_relaunched",
-    "work_units_unlocked",
-    "orders_launch_cancelled",
-    "picking_started",
-    "conference_started",
-    "conference_finished",
-    "work_unit_created",
-    "item_picked",
+    "picking_update", "lock_acquired", "lock_released", "picking_finished",
+    "exception_created", "orders_launched", "orders_relaunched",
+    "work_units_unlocked", "orders_launch_cancelled", "picking_started",
+    "conference_started", "conference_finished", "work_unit_created", "item_picked",
   ], handleSSEMessage);
 
-  const filteredOrders = hideCompleted
-    ? (queueOrders || []).filter(o => o.status !== "concluido")
-    : (queueOrders || []);
+  const { separando, aguardando, finalizados, ocultos } = useMemo(() => {
+    const now = Date.now();
+    const orders = rawOrders || [];
+    const separando: QueueOrder[] = [];
+    const aguardando: QueueOrder[] = [];
+    const finalizados: QueueOrder[] = [];
+    const ocultos: QueueOrder[] = [];
 
-  const counts = {
-    aguardando: queueOrders?.filter(o => o.status === "aguardando").length || 0,
-    em_fila: queueOrders?.filter(o => o.status === "em_fila").length || 0,
-    em_andamento: queueOrders?.filter(o => o.status === "em_andamento").length || 0,
-    concluido: queueOrders?.filter(o => o.status === "concluido").length || 0,
-  };
+    for (const o of orders) {
+      if (o.status === "em_andamento") {
+        separando.push(o);
+      } else if (o.status === "concluido") {
+        if (!o.completedAt) continue;
+        const age = now - new Date(o.completedAt).getTime();
+        if (age <= FIVE_MIN_MS) finalizados.push(o);
+      } else {
+        const entryTime = o.launchedAt || o.queuedAt;
+        const age = entryTime ? now - new Date(entryTime).getTime() : 0;
+        if (age > TWO_DAYS_MS) {
+          ocultos.push(o);
+        } else {
+          aguardando.push(o);
+        }
+      }
+    }
+
+    separando.sort((a, b) => {
+      const aT = new Date(a.lockedAt || a.startedAt || 0).getTime();
+      const bT = new Date(b.lockedAt || b.startedAt || 0).getTime();
+      return aT - bT;
+    });
+
+    aguardando.sort((a, b) => {
+      const aT = new Date(a.launchedAt || a.queuedAt || 0).getTime();
+      const bT = new Date(b.launchedAt || b.queuedAt || 0).getTime();
+      return bT - aT;
+    });
+
+    finalizados.sort((a, b) => {
+      const aT = new Date(a.completedAt || 0).getTime();
+      const bT = new Date(b.completedAt || 0).getTime();
+      return bT - aT;
+    });
+
+    ocultos.sort((a, b) => {
+      const aT = new Date(a.launchedAt || a.queuedAt || 0).getTime();
+      const bT = new Date(b.launchedAt || b.queuedAt || 0).getTime();
+      return bT - aT;
+    });
+
+    return { separando, aguardando, finalizados, ocultos };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawOrders, tick]);
+
+  const totalVisible = separando.length + aguardando.length + finalizados.length;
+  const isEmpty = totalVisible === 0 && ocultos.length === 0;
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="flex items-center justify-between gap-3 px-3 py-2.5 border-b border-border bg-card shrink-0">
-        <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <header className="sticky top-0 z-20 flex items-center justify-between gap-2 px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+        <div className="flex items-center gap-3 min-w-0">
           <ClipboardList className="h-5 w-5 text-amber-500 shrink-0" />
-          <div>
-            <h1 className="text-base font-semibold text-foreground leading-tight">Fila de Pedidos — Balcão</h1>
-            <p className="text-xs text-muted-foreground">Acompanhamento em tempo real</p>
+          <div className="min-w-0">
+            <h1 className="text-base font-bold text-slate-900 dark:text-white leading-tight truncate">
+              Fila de Pedidos — Balcão
+            </h1>
+            <p className="text-xs text-slate-500 hidden sm:block">Acompanhamento em tempo real</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{user?.name}</span>
+
+        <div className="flex items-center gap-2 shrink-0">
+          {separando.length > 0 && (
+            <Badge className="bg-amber-500 text-white border-0 gap-1 text-xs" data-testid="badge-count-separando">
+              <PlayCircle className="h-3 w-3" />
+              {separando.length} em separação
+            </Badge>
+          )}
+          {aguardando.length > 0 && (
+            <Badge variant="outline" className="bg-slate-100 text-slate-600 border-slate-300 gap-1 text-xs hidden sm:flex" data-testid="badge-count-aguardando">
+              <Hourglass className="h-3 w-3" />
+              {aguardando.length} aguardando
+            </Badge>
+          )}
+          {finalizados.length > 0 && (
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 gap-1 text-xs hidden md:flex" data-testid="badge-count-finalizados">
+              <CheckCircle2 className="h-3 w-3" />
+              {finalizados.length} separados
+            </Badge>
+          )}
+
+          {ocultos.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowHidden(v => !v)}
+              className="gap-1.5 text-slate-500 border-slate-300 h-8 px-3 text-xs hidden sm:flex"
+              data-testid="button-toggle-hidden"
+            >
+              {showHidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              {ocultos.length}
+            </Button>
+          )}
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => queryClient.invalidateQueries({ queryKey: queueQueryKey })}
+            data-testid="button-refresh"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+
+          <span className="text-xs text-slate-500 hidden lg:block">{user?.name}</span>
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={logout} data-testid="button-logout">
             <LogOut className="h-4 w-4" />
           </Button>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
-          <div className="flex flex-wrap items-center gap-2">
-            {counts.em_andamento > 0 && (
-              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                <PlayCircle className="h-3 w-3 mr-1" />
-                {counts.em_andamento} em separação
-              </Badge>
-            )}
-            {counts.em_fila > 0 && (
-              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                <Clock className="h-3 w-3 mr-1" />
-                {counts.em_fila} na fila
-              </Badge>
-            )}
-            {counts.aguardando > 0 && (
-              <Badge variant="outline" className="bg-slate-100 text-slate-600 border-slate-200">
-                <Hourglass className="h-3 w-3 mr-1" />
-                {counts.aguardando} aguardando
-              </Badge>
-            )}
-            {counts.concluido > 0 && (
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                <CheckCircle2 className="h-3 w-3 mr-1" />
-                {counts.concluido} concluídos
-              </Badge>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            {counts.concluido > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setHideCompleted(v => !v)}
-                data-testid="button-toggle-completed"
-              >
-                {hideCompleted ? "Mostrar concluídos" : "Ocultar concluídos"}
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => queryClient.invalidateQueries({ queryKey: queueQueryKey })}
-              data-testid="button-refresh"
-            >
-              <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-              Atualizar
-            </Button>
-          </div>
-        </div>
-
+      <main className="max-w-screen-2xl mx-auto px-4 py-6 space-y-10">
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-52 rounded-xl" />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-56 rounded-2xl" />
             ))}
           </div>
-        ) : filteredOrders.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredOrders.map((order) => {
-              const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.aguardando;
-              const StatusIcon = cfg.icon;
-              const timerProps = getTimerProps(order);
-
-              return (
-                <div
-                  key={order.orderId}
-                  data-testid={`card-order-${order.orderId}`}
-                  className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"
-                >
-                  <div className={`${cfg.headerBg} px-4 py-2 flex items-center justify-between`}>
-                    <span className="font-mono font-bold text-white text-sm">
-                      #{order.erpOrderId}
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <Badge
-                        variant="secondary"
-                        className={`text-[10px] font-semibold ${
-                          order.financialStatus === "pago"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        <DollarSign className="h-3 w-3 mr-0.5" />
-                        {order.financialStatus === "pago" ? "Pago" : "Não Pago"}
-                      </Badge>
-                      <Badge variant="secondary" className={`text-[10px] font-semibold border ${cfg.badgeCn}`}>
-                        <StatusIcon className="h-3 w-3 mr-0.5" />
-                        {cfg.label}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="p-4 space-y-3">
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <User className="h-3.5 w-3.5 text-slate-400" />
-                        <span className="text-xs text-slate-500">Cliente</span>
-                      </div>
-                      <div>
-                        {order.customerCode && (
-                          <span className="text-xs font-mono text-slate-400 mr-1.5">{order.customerCode}</span>
-                        )}
-                        <span className="text-sm font-medium text-slate-900 dark:text-white">{order.customerName}</span>
-                      </div>
-                    </div>
-
-                    {order.vendedor && (
-                      <div className="flex items-center gap-2 text-xs text-slate-500">
-                        <span>Vendedor:</span>
-                        <span className="font-medium text-slate-700 dark:text-slate-300">{order.vendedor}</span>
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <Package className="h-3.5 w-3.5 text-slate-400" />
-                        <span className="text-sm font-medium">
-                          {order.totalProducts > 0 ? `${order.totalProducts} produto(s)` : "—"}
-                        </span>
-                      </div>
-                      {order.operatorName && (
-                        <span className="text-xs text-amber-600 font-medium">
-                          {order.operatorName}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className={`flex items-center justify-center gap-2 py-2 ${cfg.timerBg} rounded-lg`}>
-                      <Timer className={`h-4 w-4 ${cfg.timerText}`} />
-                      {order.status === "concluido" ? (
-                        <StaticDuration from={timerProps.staticFrom || null} to={timerProps.staticTo || null} />
-                      ) : (
-                        <ElapsedTimer startedAt={timerProps.startedAt} label={timerProps.label} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="text-center py-20">
-            <ClipboardList className="h-16 w-16 mx-auto mb-4 text-slate-300" />
-            <h3 className="text-lg font-medium text-slate-500">Nenhum pedido na fila</h3>
-            <p className="text-sm text-slate-400 mt-1">
+        ) : isEmpty ? (
+          <div className="flex flex-col items-center justify-center py-32 text-center">
+            <ClipboardList className="h-24 w-24 mx-auto mb-6 text-slate-200 dark:text-slate-700" />
+            <h3 className="text-3xl font-bold text-slate-400 dark:text-slate-500">Nenhum pedido na fila</h3>
+            <p className="text-lg text-slate-400 dark:text-slate-600 mt-2 max-w-sm">
               Os pedidos de balcão aparecerão aqui conforme chegarem no sistema
             </p>
           </div>
+        ) : (
+          <>
+            {separando.length > 0 && (
+              <section data-testid="section-separando">
+                <SectionTitle
+                  label="Em Separação Agora"
+                  count={separando.length}
+                  colorClass="bg-amber-50 text-amber-700 border-amber-300"
+                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {separando.map(o => <SeparandoCard key={o.orderId} order={o} />)}
+                </div>
+              </section>
+            )}
+
+            {aguardando.length > 0 && (
+              <section data-testid="section-aguardando">
+                <SectionTitle
+                  label="Aguardando Início"
+                  count={aguardando.length}
+                  colorClass="bg-slate-100 text-slate-600 border-slate-300"
+                />
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  {aguardando.map(o => <AguardandoCard key={o.orderId} order={o} />)}
+                </div>
+              </section>
+            )}
+
+            {finalizados.length > 0 && (
+              <section data-testid="section-finalizados">
+                <SectionTitle
+                  label="Separados Recentemente"
+                  count={finalizados.length}
+                  colorClass="bg-green-50 text-green-700 border-green-300"
+                />
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  {finalizados.map(o => <FinalizadoCard key={o.orderId} order={o} />)}
+                </div>
+              </section>
+            )}
+
+            {ocultos.length > 0 && (
+              <section data-testid="section-ocultos">
+                <button
+                  className="flex items-center gap-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors text-sm mb-4 group"
+                  onClick={() => setShowHidden(v => !v)}
+                  data-testid="button-toggle-hidden-section"
+                >
+                  {showHidden
+                    ? <EyeOff className="h-4 w-4 group-hover:text-slate-600" />
+                    : <Eye className="h-4 w-4 group-hover:text-slate-600" />
+                  }
+                  <span className="font-medium">
+                    {showHidden ? "Ocultar" : "Mostrar"} fila escondida
+                    <span className="ml-1 text-slate-400">
+                      ({ocultos.length} pedido{ocultos.length !== 1 ? "s" : ""} com mais de 2 dias)
+                    </span>
+                  </span>
+                </button>
+                {showHidden && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                    {ocultos.map(o => <OcultoCard key={o.orderId} order={o} />)}
+                  </div>
+                )}
+              </section>
+            )}
+          </>
         )}
       </main>
     </div>
