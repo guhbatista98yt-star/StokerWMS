@@ -81,6 +81,7 @@ interface SessionData {
   tab: CheckingTab;
   productIndex: number;
   workUnitIds: string[];
+  orderIds?: string[];
 }
 
 interface ItemWithProduct extends OrderItem {
@@ -435,12 +436,20 @@ export default function ConferenciaPage() {
       const saved = loadSession();
       if (saved && saved.workUnitIds.length > 0) {
         const nowConf = new Date();
-        const stillLockedIds = saved.workUnitIds.filter(id => {
+        let stillLockedIds = saved.workUnitIds.filter(id => {
           const wu = workUnits.find(w => w.id === id);
           if (!wu || wu.lockedBy !== user.id) return false;
           if (wu.lockExpiresAt && new Date(wu.lockExpiresAt) <= nowConf) return false;
           return true;
         });
+        // Validate order IDs: only restore WUs that belong to the same orders
+        // saved in the session — prevents mixing WUs from different orders after crashes.
+        if (saved.orderIds && saved.orderIds.length > 0) {
+          stillLockedIds = stillLockedIds.filter(id => {
+            const wu = workUnits.find(w => w.id === id);
+            return wu && saved.orderIds!.includes(wu.orderId);
+          });
+        }
         if (stillLockedIds.length > 0) {
           setStep("checking");
           setCheckingTab(saved.tab);
@@ -452,6 +461,8 @@ export default function ConferenciaPage() {
         }
       }
 
+      // Fallback: auto-detect WUs locked by this operator without a saved session.
+      // Only restore WUs from the same order as the first found unit to avoid mixing.
       const nowConf2 = new Date();
       const myUnit = workUnits.find(wu =>
         wu.lockedBy === user.id &&
@@ -459,7 +470,13 @@ export default function ConferenciaPage() {
         (!wu.lockExpiresAt || new Date(wu.lockExpiresAt) > nowConf2)
       );
       if (myUnit) {
-        const myIds = workUnits.filter(wu => wu.lockedBy === user.id).map(wu => wu.id);
+        const myIds = workUnits
+          .filter(wu =>
+            wu.lockedBy === user.id &&
+            wu.orderId === myUnit.orderId &&
+            (!wu.lockExpiresAt || new Date(wu.lockExpiresAt) > nowConf2)
+          )
+          .map(wu => wu.id);
         setStep("checking");
         setSelectedWorkUnits(myIds);
       }
@@ -472,6 +489,7 @@ export default function ConferenciaPage() {
         tab: checkingTab,
         productIndex: currentProductIndex,
         workUnitIds: allMyUnits.map(wu => wu.id),
+        orderIds: [...new Set(allMyUnits.map(wu => wu.orderId).filter(Boolean))],
       });
     }
   }, [step, checkingTab, currentProductIndex, allMyUnits]);
