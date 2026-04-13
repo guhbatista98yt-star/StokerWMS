@@ -1,0 +1,609 @@
+
+===================================================================
+  STOKER SYNC  |  2026-04-13 16:40:51  |  modo=serve · SO=Windows
+===================================================================
+
+
+------------------------------------------------------
+  VERIFICANDO SCHEMA DO BANCO
+------------------------------------------------------
+[16:40:52] -   Todas as 33 tabelas já existem
+[16:40:52] -   Todas as colunas verificadas — nada a adicionar
+[16:40:52] -   Índices verificados
+[16:40:52] + Schema verificado com sucesso
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[16:40:52] > DB2 — conectando...
+[16:40:52] + DB2 — conectado em 0.14s
+[16:40:52] + PostgreSQL local — conectado
+[16:40:52] > Produtos — sincronizando lista completa do ERP...
+[16:41:02] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 10.2s
+[16:41:02] > Orçamentos — buscando últimos 31 dias...
+[16:41:21] + Orçamentos — 26138 obtidos · 26134 removidos (>=2026-03-12) · 26138 inseridos · 0 erros · 19.0s
+[16:41:25] ! Remoção ERP — 2 pedido(s) excluído(s): ['475421', '475422']
+[16:41:25] + Transformação — 4970 pedidos · 0 produtos novos · 13 itens novos · 3.3s
+[16:41:25] > Estoque — sincronizando do ERP...
+[16:41:25] ! [STOCK-DEBUG] Produto 66 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 200 | qtd final: 200.0
+[16:41:28] ! [STOCK-DEBUG] Produto 14855 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 51 | qtd final: 51.0
+[16:41:31] ! [STOCK-DEBUG] Produto 66 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 192 | qtd final: 192.0
+[16:41:32] ! [STOCK-DEBUG] Produto 14855 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 17 | qtd final: 17.0
+[16:41:33] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.3s
+[16:41:33] > Box Barcodes — sincronizando...
+[16:41:35] + Box Barcodes — 530 produtos atualizados · 1.7s
+[16:41:35] > Endereços WMS — sincronizando...
+[16:41:35] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[16:41:35] > NFs Recebimento — sincronizando...
+[16:41:37] + NFs Recebimento — 463 NFs · 0 novas · 463 atualizadas · 4182 itens · 2.3s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=45.4s
+------------------------------------------------------
+
+[16:41:37] + Loop de sync em background (300s)
+
+------------------------------------------------------
+  INICIANDO SERVIDOR WEB
+------------------------------------------------------
+[16:41:37] + Servidor disponível em → http://localhost:411
+Seeding database...
+4:41:40 PM [express] Seeding error (non-critical): coluna "quick_link_enabled" não existe
+4:41:40 PM [express] [Routes] Registering routes...
+4:41:40 PM [print] [agent] WebSocket server iniciado em /ws/print-agent
+4:41:40 PM [express] [scanning-ws] WebSocket scanning server iniciado em /ws/scanning
+4:41:41 PM [express] Servidor iniciado na porta 411
+4:41:41 PM [print] 1 impressora(s) carregada(s) | padrão: "Microsoft Print to PDF"
+4:41:45 PM [express] [Auto-Sync] Triggering DB sync...
+4:42:27 PM [express] [Sync] Sincronização concluída.
+4:42:27 PM [print] 1 impressora(s) carregada(s) | padrão: "Microsoft Print to PDF"
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+4:44:40 PM [express] [Routes] Get separation mode error: coluna "quick_link_enabled" não existe
+4:44:40 PM [express] GET /api/system-settings/separation-mode 500 in 19ms :: {"error":"Erro interno"}
+4:44:40 PM [express] [Routes] Get features error: coluna "quick_link_enabled" não existe
+4:44:40 PM [express] GET /api/system-settings/features 500 in 61ms :: {"error":"Erro interno"}
+4:46:35 PM [express] [Auto-Sync] Triggering DB sync...
+[16:46:37] > Loop — ciclo #1 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[16:46:37] > DB2 — conectando...
+[16:46:37] + DB2 — conectado em 0.09s
+[16:46:37] + PostgreSQL local — conectado
+[16:46:37] > Produtos — sincronizando lista completa do ERP...
+[16:46:51] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 14.2s
+[16:46:51] > Orçamentos — buscando últimos 31 dias...
+[16:47:15] + Orçamentos — 26136 obtidos · 0 removidos (>=2026-03-12) · 26136 inseridos · 0 erros · 23.5s
+[16:47:18] + Transformação — 4969 pedidos · 0 produtos novos · 0 itens novos · 3.4s
+[16:47:18] > Estoque — sincronizando do ERP...
+[16:47:19] ! [STOCK-DEBUG] Produto 66 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 200 | qtd final: 200.0
+[16:47:22] ! [STOCK-DEBUG] Produto 14855 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 51 | qtd final: 51.0
+4:47:23 PM [express] [Sync] Sincronização concluída.
+4:47:24 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+4:47:26 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[16:47:26] ! [STOCK-DEBUG] Produto 66 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 192 | qtd final: 192.0
+[16:47:27] ! [STOCK-DEBUG] Produto 14855 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 17 | qtd final: 17.0
+[16:47:27] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 9.0s
+[16:47:27] > Box Barcodes — sincronizando...
+[16:47:29] + Box Barcodes — 530 produtos atualizados · 1.8s
+[16:47:29] > Endereços WMS — sincronizando...
+[16:47:29] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.1s
+[16:47:29] > NFs Recebimento — sincronizando...
+[16:47:31] + NFs Recebimento — 464 NFs · 0 novas · 464 atualizadas · 4187 itens · 1.7s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=53.9s
+------------------------------------------------------
+
+4:51:40 PM [express] [Auto-Sync] Triggering DB sync...
+4:52:22 PM [express] [Sync] Sincronização concluída.
+4:52:23 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+4:52:25 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[16:52:31] > Loop — ciclo #2 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[16:52:31] > DB2 — conectando...
+[16:52:31] + DB2 — conectado em 0.11s
+[16:52:31] + PostgreSQL local — conectado
+[16:52:31] > Produtos — sincronizando lista completa do ERP...
+[16:52:40] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 9.0s
+[16:52:40] > Orçamentos — buscando últimos 31 dias...
+[16:52:54] + Orçamentos — 26141 obtidos · 26141 removidos (>=2026-03-12) · 26141 inseridos · 0 erros · 13.8s
+[16:52:58] + Transformação — 4971 pedidos · 0 produtos novos · 0 itens novos · 3.4s
+[16:52:58] > Estoque — sincronizando do ERP...
+[16:52:58] ! [STOCK-DEBUG] Produto 66 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 200 | qtd final: 200.0
+[16:53:01] ! [STOCK-DEBUG] Produto 14855 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 51 | qtd final: 51.0
+[16:53:04] ! [STOCK-DEBUG] Produto 66 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 192 | qtd final: 192.0
+[16:53:05] ! [STOCK-DEBUG] Produto 14855 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 17 | qtd final: 17.0
+[16:53:06] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.1s
+[16:53:06] > Box Barcodes — sincronizando...
+[16:53:07] + Box Barcodes — 530 produtos atualizados · 1.8s
+[16:53:07] > Endereços WMS — sincronizando...
+[16:53:08] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[16:53:08] > NFs Recebimento — sincronizando...
+[16:53:10] + NFs Recebimento — 464 NFs · 0 novas · 464 atualizadas · 4187 itens · 2.2s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=38.7s
+------------------------------------------------------
+
+[16:58:10] > Loop — ciclo #3 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[16:58:10] > DB2 — conectando...
+[16:58:10] + DB2 — conectado em 0.14s
+[16:58:10] + PostgreSQL local — conectado
+[16:58:10] > Produtos — sincronizando lista completa do ERP...
+[16:58:18] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 7.9s
+[16:58:18] > Orçamentos — buscando últimos 31 dias...
+[16:58:36] + Orçamentos — 26141 obtidos · 26141 removidos (>=2026-03-12) · 26141 inseridos · 0 erros · 18.2s
+[16:58:39] + Transformação — 4971 pedidos · 0 produtos novos · 0 itens novos · 3.1s
+[16:58:39] > Estoque — sincronizando do ERP...
+[16:58:39] ! [STOCK-DEBUG] Produto 66 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 200 | qtd final: 200.0
+[16:58:42] ! [STOCK-DEBUG] Produto 14855 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 51 | qtd final: 51.0
+[16:58:46] ! [STOCK-DEBUG] Produto 66 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 192 | qtd final: 192.0
+[16:58:46] ! [STOCK-DEBUG] Produto 14855 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 17 | qtd final: 17.0
+[16:58:47] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 7.7s
+[16:58:47] > Box Barcodes — sincronizando...
+[16:58:49] + Box Barcodes — 530 produtos atualizados · 1.7s
+[16:58:49] > Endereços WMS — sincronizando...
+[16:58:49] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.1s
+[16:58:49] > NFs Recebimento — sincronizando...
+[16:58:51] + NFs Recebimento — 464 NFs · 0 novas · 464 atualizadas · 4187 itens · 2.1s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=41.1s
+------------------------------------------------------
+
+5:01:40 PM [express] [Auto-Sync] Triggering DB sync...
+5:02:20 PM [express] [Sync] Sincronização concluída.
+5:02:21 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+5:02:23 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[17:03:51] > Loop — ciclo #4 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[17:03:51] > DB2 — conectando...
+[17:03:51] + DB2 — conectado em 0.20s
+[17:03:51] + PostgreSQL local — conectado
+[17:03:51] > Produtos — sincronizando lista completa do ERP...
+[17:04:03] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 11.7s
+[17:04:03] > Orçamentos — buscando últimos 31 dias...
+[17:04:19] + Orçamentos — 26140 obtidos · 26141 removidos (>=2026-03-12) · 26140 inseridos · 0 erros · 15.8s
+[17:04:22] ! Remoção ERP — 1 pedido(s) excluído(s): ['475432']
+[17:04:22] + Transformação — 4970 pedidos · 0 produtos novos · 0 itens novos · 3.4s
+[17:04:22] > Estoque — sincronizando do ERP...
+[17:04:22] ! [STOCK-DEBUG] Produto 66 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 200 | qtd final: 200.0
+[17:04:25] ! [STOCK-DEBUG] Produto 14855 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 51 | qtd final: 51.0
+[17:04:29] ! [STOCK-DEBUG] Produto 66 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 192 | qtd final: 192.0
+[17:04:29] ! [STOCK-DEBUG] Produto 14855 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 17 | qtd final: 17.0
+[17:04:30] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.0s
+[17:04:30] > Box Barcodes — sincronizando...
+[17:04:32] + Box Barcodes — 530 produtos atualizados · 1.8s
+[17:04:32] > Endereços WMS — sincronizando...
+[17:04:32] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[17:04:32] > NFs Recebimento — sincronizando...
+[17:04:34] + NFs Recebimento — 464 NFs · 0 novas · 464 atualizadas · 4187 itens · 1.9s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=43.1s
+------------------------------------------------------
+
+[17:09:34] > Loop — ciclo #5 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[17:09:34] > DB2 — conectando...
+[17:09:34] + DB2 — conectado em 0.12s
+[17:09:34] + PostgreSQL local — conectado
+[17:09:34] > Produtos — sincronizando lista completa do ERP...
+[17:09:50] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 15.7s
+[17:09:50] > Orçamentos — buscando últimos 31 dias...
+[17:10:06] + Orçamentos — 26140 obtidos · 26140 removidos (>=2026-03-12) · 26140 inseridos · 0 erros · 16.2s
+[17:10:09] + Transformação — 4970 pedidos · 0 produtos novos · 0 itens novos · 3.3s
+[17:10:09] > Estoque — sincronizando do ERP...
+[17:10:10] ! [STOCK-DEBUG] Produto 66 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 200 | qtd final: 200.0
+[17:10:13] ! [STOCK-DEBUG] Produto 14855 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 51 | qtd final: 51.0
+[17:10:16] ! [STOCK-DEBUG] Produto 66 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 192 | qtd final: 192.0
+[17:10:17] ! [STOCK-DEBUG] Produto 14855 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 17 | qtd final: 17.0
+[17:10:18] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.6s
+[17:10:18] > Box Barcodes — sincronizando...
+[17:10:20] + Box Barcodes — 530 produtos atualizados · 1.8s
+[17:10:20] > Endereços WMS — sincronizando...
+[17:10:20] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[17:10:20] > NFs Recebimento — sincronizando...
+[17:10:22] + NFs Recebimento — 464 NFs · 0 novas · 464 atualizadas · 4187 itens · 2.0s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=48.0s
+------------------------------------------------------
+
+5:11:40 PM [express] [Auto-Sync] Triggering DB sync...
+5:12:15 PM [express] [Sync] Sincronização concluída.
+5:12:16 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+5:12:17 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[17:15:22] > Loop — ciclo #6 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[17:15:22] > DB2 — conectando...
+[17:15:22] + DB2 — conectado em 0.10s
+[17:15:22] + PostgreSQL local — conectado
+[17:15:22] > Produtos — sincronizando lista completa do ERP...
+[17:15:32] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 10.1s
+[17:15:32] > Orçamentos — buscando últimos 31 dias...
+[17:15:50] + Orçamentos — 26139 obtidos · 26139 removidos (>=2026-03-12) · 26139 inseridos · 0 erros · 17.5s
+[17:15:53] + Transformação — 4970 pedidos · 0 produtos novos · 0 itens novos · 3.2s
+[17:15:53] > Estoque — sincronizando do ERP...
+[17:15:53] ! [STOCK-DEBUG] Produto 66 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 200 | qtd final: 200.0
+[17:15:56] ! [STOCK-DEBUG] Produto 14855 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 51 | qtd final: 51.0
+[17:16:00] ! [STOCK-DEBUG] Produto 66 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 192 | qtd final: 192.0
+[17:16:00] ! [STOCK-DEBUG] Produto 14855 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 17 | qtd final: 17.0
+[17:16:01] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 7.9s
+[17:16:01] > Box Barcodes — sincronizando...
+[17:16:03] + Box Barcodes — 530 produtos atualizados · 1.8s
+[17:16:03] > Endereços WMS — sincronizando...
+[17:16:03] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[17:16:03] > NFs Recebimento — sincronizando...
+[17:16:05] + NFs Recebimento — 464 NFs · 0 novas · 464 atualizadas · 4187 itens · 1.8s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=42.8s
+------------------------------------------------------
+
+5:19:58 PM [express] [Launch] Preparing to launch order e0eaf24e-ea55-4fd9-8b39-06d9cb30ac7e, current status: pendente
+5:19:58 PM [express] [Launch] Preparing to launch order 27f7eb99-c62b-4d46-8c25-3230e567339f, current status: pendente
+[17:21:05] > Loop — ciclo #7 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[17:21:05] > DB2 — conectando...
+[17:21:05] + DB2 — conectado em 0.14s
+[17:21:05] + PostgreSQL local — conectado
+[17:21:05] > Produtos — sincronizando lista completa do ERP...
+[17:21:19] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 14.1s
+[17:21:19] > Orçamentos — buscando últimos 31 dias...
+[17:21:36] + Orçamentos — 26133 obtidos · 26139 removidos (>=2026-03-12) · 26133 inseridos · 0 erros · 17.4s
+[17:21:40] ! Remoção ERP — 1 pedido(s) excluído(s): ['475437']
+[17:21:40] + Transformação — 4970 pedidos · 0 produtos novos · 3 itens novos · 3.2s
+[17:21:40] > Estoque — sincronizando do ERP...
+[17:21:40] ! [STOCK-DEBUG] Produto 66 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 200 | qtd final: 200.0
+5:21:40 PM [express] [Auto-Sync] Triggering DB sync...
+[17:21:43] ! [STOCK-DEBUG] Produto 14855 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 51 | qtd final: 51.0
+[17:21:46] ! [STOCK-DEBUG] Produto 66 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 192 | qtd final: 192.0
+[17:21:47] ! [STOCK-DEBUG] Produto 14855 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 17 | qtd final: 17.0
+[17:21:48] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 7.9s
+[17:21:48] > Box Barcodes — sincronizando...
+[17:21:50] X Box Barcodes — erro: ERRO:  impasse detectado
+DETAIL:  Processo 1856 espera por ShareLock em transação 317722081; bloqueado pelo processo 21144.
+Processo 21144 espera por ShareLock em transação 317722524; bloqueado pelo processo 1856.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto atualizava tupla (409,8) na relação "products"
+
+[17:21:50] > Endereços WMS — sincronizando...
+[17:21:51] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[17:21:51] > NFs Recebimento — sincronizando...
+[17:21:52] + NFs Recebimento — 464 NFs · 0 novas · 464 atualizadas · 4187 itens · 1.8s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=47.5s
+------------------------------------------------------
+
+5:22:25 PM [express] [Sync] Sincronização concluída.
+5:22:26 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+5:22:27 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+5:22:55 PM [express] [Routes] Get features error: coluna "quick_link_enabled" não existe
+5:22:55 PM [express] GET /api/system-settings/features 500 in 158ms :: {"error":"Erro interno"}
+5:22:55 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:22:55 PM [express] GET /api/work-units 500 in 294ms :: {"error":"Erro interno"}
+5:23:00 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:23:00 PM [express] GET /api/work-units 500 in 258ms :: {"error":"Erro interno"}
+5:23:06 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:23:06 PM [express] GET /api/work-units 500 in 259ms :: {"error":"Erro interno"}
+5:23:11 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:23:11 PM [express] GET /api/work-units 500 in 239ms :: {"error":"Erro interno"}
+5:23:16 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:23:16 PM [express] GET /api/work-units 500 in 267ms :: {"error":"Erro interno"}
+5:24:01 PM [express] [Launch] Preparing to launch order 57d14097-a097-475e-98ac-14a5b4690e8c, current status: pendente
+5:24:10 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:24:10 PM [express] GET /api/work-units 500 in 239ms :: {"error":"Erro interno"}
+5:24:12 PM [express] [Routes] Get features error: coluna "quick_link_enabled" não existe
+5:24:12 PM [express] GET /api/system-settings/features 500 in 91ms :: {"error":"Erro interno"}
+5:24:12 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:24:12 PM [express] GET /api/work-units 500 in 265ms :: {"error":"Erro interno"}
+5:24:15 PM [express] [Routes] Get features error: coluna "quick_link_enabled" não existe
+5:24:15 PM [express] GET /api/system-settings/features 500 in 4ms :: {"error":"Erro interno"}
+5:24:15 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:24:15 PM [express] GET /api/work-units 500 in 253ms :: {"error":"Erro interno"}
+5:24:20 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:24:20 PM [express] GET /api/work-units 500 in 241ms :: {"error":"Erro interno"}
+5:24:25 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:24:25 PM [express] GET /api/work-units 500 in 247ms :: {"error":"Erro interno"}
+5:24:31 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:24:31 PM [express] GET /api/work-units 500 in 264ms :: {"error":"Erro interno"}
+5:24:33 PM [express] [Routes] Get features error: coluna "quick_link_enabled" não existe
+5:24:33 PM [express] GET /api/system-settings/features 500 in 84ms :: {"error":"Erro interno"}
+5:24:33 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:24:33 PM [express] GET /api/work-units 500 in 265ms :: {"error":"Erro interno"}
+5:24:38 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:24:38 PM [express] GET /api/work-units 500 in 248ms :: {"error":"Erro interno"}
+5:24:44 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:24:44 PM [express] GET /api/work-units 500 in 359ms :: {"error":"Erro interno"}
+5:24:49 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:24:49 PM [express] GET /api/work-units 500 in 280ms :: {"error":"Erro interno"}
+5:24:51 PM [express] [Launch] Preparing to launch order bc79f954-47a8-47a5-9b2b-37ccbad943df, current status: pendente
+5:24:51 PM [express] [Launch] Preparing to launch order dc185f0d-580b-46e8-87f3-2ba1c6640b25, current status: pendente
+5:24:51 PM [express] [Launch] Preparing to launch order 7be4f693-4dc5-47d8-92b9-192b25b38ffa, current status: pendente
+5:24:51 PM [express] [Launch] Preparing to launch order 18e787dc-d3cf-4a17-8362-8fa7ba1d025e, current status: pendente
+5:24:54 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:24:54 PM [express] GET /api/work-units 500 in 236ms :: {"error":"Erro interno"}
+5:24:56 PM [express] [Routes] Get features error: coluna "quick_link_enabled" não existe
+5:24:56 PM [express] GET /api/system-settings/features 500 in 4ms :: {"error":"Erro interno"}
+5:24:56 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:24:56 PM [express] GET /api/work-units 500 in 399ms :: {"error":"Erro interno"}
+5:25:01 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:25:01 PM [express] GET /api/work-units 500 in 267ms :: {"error":"Erro interno"}
+5:25:02 PM [express] [Auto-Sync] Triggering DB sync...
+5:25:07 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:25:07 PM [express] GET /api/work-units 500 in 259ms :: {"error":"Erro interno"}
+5:25:12 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:25:12 PM [express] GET /api/work-units 500 in 254ms :: {"error":"Erro interno"}
+5:25:17 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:25:39 PM [express] [Routes] Get features error: coluna "quick_link_enabled" não existe
+5:25:39 PM [express] GET /api/system-settings/features 500 in 57ms :: {"error":"Erro interno"}
+5:25:39 PM [express] [Sync] Sincronização concluída.
+5:25:39 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:25:39 PM [express] GET /api/work-units 500 in 295ms :: {"error":"Erro interno"}
+5:25:40 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+5:25:41 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+5:25:44 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:25:44 PM [express] GET /api/work-units 500 in 251ms :: {"error":"Erro interno"}
+5:25:49 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:25:49 PM [express] GET /api/work-units 500 in 237ms :: {"error":"Erro interno"}
+5:26:17 PM [express] [Routes] Get separation mode error: coluna "quick_link_enabled" não existe
+5:26:17 PM [express] GET /api/system-settings/separation-mode 500 in 3ms :: {"error":"Erro interno"}
+5:26:17 PM [express] [Routes] Get features error: coluna "quick_link_enabled" não existe
+5:26:17 PM [express] GET /api/system-settings/features 500 in 38ms :: {"error":"Erro interno"}
+5:26:19 PM [express] [Routes] Update separation mode error: coluna "quick_link_enabled" não existe
+5:26:19 PM [express] PATCH /api/system-settings/separation-mode 500 in 36ms :: {"error":"Erro interno"}
+[17:26:52] > Loop — ciclo #8 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[17:26:52] > DB2 — conectando...
+[17:26:52] + DB2 — conectado em 0.09s
+[17:26:52] + PostgreSQL local — conectado
+[17:26:52] > Produtos — sincronizando lista completa do ERP...
+[17:27:05] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 13.0s
+[17:27:05] > Orçamentos — buscando últimos 31 dias...
+5:27:13 PM [express] [Routes] Get features error: coluna "quick_link_enabled" não existe
+5:27:13 PM [express] GET /api/system-settings/features 500 in 102ms :: {"error":"Erro interno"}
+[17:27:22] + Orçamentos — 26132 obtidos · 26133 removidos (>=2026-03-12) · 26132 inseridos · 0 erros · 16.6s
+5:27:24 PM [express] [Routes] Lock work units error: coluna "quick_link_enabled" não existe
+5:27:24 PM [express] POST /api/work-units/lock 500 in 3ms :: {"error":"Erro interno"}
+[17:27:25] ! Remoção ERP — 1 pedido(s) excluído(s): ['475438']
+[17:27:25] + Transformação — 4969 pedidos · 0 produtos novos · 0 itens novos · 3.1s
+[17:27:25] > Estoque — sincronizando do ERP...
+[17:27:25] ! [STOCK-DEBUG] Produto 66 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 200 | qtd final: 200.0
+5:27:26 PM [express] [Routes] Lock work units error: coluna "quick_link_enabled" não existe
+5:27:26 PM [express] POST /api/work-units/lock 500 in 3ms :: {"error":"Erro interno"}
+[17:27:28] ! [STOCK-DEBUG] Produto 14855 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 51 | qtd final: 51.0
+5:27:29 PM [express] [Routes] Lock work units error: coluna "quick_link_enabled" não existe
+5:27:29 PM [express] POST /api/work-units/lock 500 in 3ms :: {"error":"Erro interno"}
+[17:27:32] ! [STOCK-DEBUG] Produto 66 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 192 | qtd final: 192.0
+[17:27:32] ! [STOCK-DEBUG] Produto 14855 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 17 | qtd final: 17.0
+[17:27:33] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 7.8s
+[17:27:33] > Box Barcodes — sincronizando...
+[17:27:35] + Box Barcodes — 530 produtos atualizados · 1.9s
+[17:27:35] > Endereços WMS — sincronizando...
+[17:27:35] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.1s
+[17:27:35] > NFs Recebimento — sincronizando...
+[17:27:37] + NFs Recebimento — 464 NFs · 0 novas · 464 atualizadas · 4187 itens · 1.7s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=44.5s
+------------------------------------------------------
+
+5:27:37 PM [express] [Routes] Lock work units error: coluna "quick_link_enabled" não existe
+5:27:37 PM [express] POST /api/work-units/lock 500 in 3ms :: {"error":"Erro interno"}
+5:30:54 PM [express] [Routes] Get features error: coluna "quick_link_enabled" não existe
+5:30:54 PM [express] GET /api/system-settings/features 500 in 4ms :: {"error":"Erro interno"}
+5:30:54 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:30:54 PM [express] GET /api/work-units 500 in 385ms :: {"error":"Erro interno"}
+5:31:00 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:31:00 PM [express] GET /api/work-units 500 in 313ms :: {"error":"Erro interno"}
+5:31:05 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:31:05 PM [express] GET /api/work-units 500 in 289ms :: {"error":"Erro interno"}
+5:31:05 PM [express] [Routes] Get separation mode error: coluna "quick_link_enabled" não existe
+5:31:05 PM [express] GET /api/system-settings/separation-mode 500 in 3ms :: {"error":"Erro interno"}
+5:31:05 PM [express] [Routes] Get features error: coluna "quick_link_enabled" não existe
+5:31:05 PM [express] GET /api/system-settings/features 500 in 42ms :: {"error":"Erro interno"}
+5:31:10 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:31:10 PM [express] GET /api/work-units 500 in 382ms :: {"error":"Erro interno"}
+5:31:10 PM [express] [Routes] Update separation mode error: coluna "quick_link_enabled" não existe
+5:31:10 PM [express] PATCH /api/system-settings/separation-mode 500 in 140ms :: {"error":"Erro interno"}
+5:31:14 PM [express] [Routes] Update separation mode error: coluna "quick_link_enabled" não existe
+5:31:14 PM [express] PATCH /api/system-settings/separation-mode 500 in 186ms :: {"error":"Erro interno"}
+5:31:16 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:31:16 PM [express] GET /api/work-units 500 in 291ms :: {"error":"Erro interno"}
+5:31:21 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:31:21 PM [express] GET /api/work-units 500 in 403ms :: {"error":"Erro interno"}
+5:31:40 PM [express] [Auto-Sync] Triggering DB sync...
+5:32:20 PM [express] [Sync] Sincronização concluída.
+5:32:20 PM [print] 2 impressora(s) carregada(s) | padrão: "HP LaserJet Professional P 1102w (1 redirecionada)"
+5:32:27 PM [express] [Routes] Company: 3 | Orders: 8 | PP filter: ["60","61"] | Items in report: 56 | PPs in result: [60,61]
+[17:32:37] > Loop — ciclo #9 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[17:32:37] > DB2 — conectando...
+[17:32:37] + DB2 — conectado em 0.11s
+[17:32:37] + PostgreSQL local — conectado
+[17:32:37] > Produtos — sincronizando lista completa do ERP...
+[17:32:47] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 9.8s
+[17:32:47] > Orçamentos — buscando últimos 31 dias...
+[17:33:03] + Orçamentos — 26132 obtidos · 26132 removidos (>=2026-03-12) · 26132 inseridos · 0 erros · 15.9s
+[17:33:06] + Transformação — 4969 pedidos · 0 produtos novos · 0 itens novos · 3.2s
+[17:33:06] > Estoque — sincronizando do ERP...
+[17:33:06] ! [STOCK-DEBUG] Produto 66 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 200 | qtd final: 200.0
+[17:33:09] ! [STOCK-DEBUG] Produto 14855 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 51 | qtd final: 51.0
+[17:33:12] ! [STOCK-DEBUG] Produto 66 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 192 | qtd final: 192.0
+[17:33:13] ! [STOCK-DEBUG] Produto 14855 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 17 | qtd final: 17.0
+[17:33:14] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 7.8s
+[17:33:14] > Box Barcodes — sincronizando...
+[17:33:15] + Box Barcodes — 530 produtos atualizados · 1.8s
+[17:33:15] > Endereços WMS — sincronizando...
+[17:33:16] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.1s
+[17:33:16] > NFs Recebimento — sincronizando...
+[17:33:17] + NFs Recebimento — 464 NFs · 0 novas · 464 atualizadas · 4187 itens · 1.5s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=40.3s
+------------------------------------------------------
+
+5:38:04 PM [express] [Routes] Get features error: coluna "quick_link_enabled" não existe
+5:38:04 PM [express] GET /api/system-settings/features 500 in 7ms :: {"error":"Erro interno"}
+[17:38:17] > Loop — ciclo #10 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[17:38:17] > DB2 — conectando...
+[17:38:17] + DB2 — conectado em 0.09s
+[17:38:17] + PostgreSQL local — conectado
+[17:38:17] > Produtos — sincronizando lista completa do ERP...
+[17:38:30] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 12.4s
+[17:38:30] > Orçamentos — buscando últimos 31 dias...
+[17:38:46] + Orçamentos — 26132 obtidos · 26132 removidos (>=2026-03-12) · 26132 inseridos · 0 erros · 16.2s
+[17:38:49] + Transformação — 4969 pedidos · 0 produtos novos · 0 itens novos · 3.0s
+[17:38:49] > Estoque — sincronizando do ERP...
+[17:38:49] ! [STOCK-DEBUG] Produto 66 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 200 | qtd final: 200.0
+[17:38:52] ! [STOCK-DEBUG] Produto 14855 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 51 | qtd final: 51.0
+[17:38:55] ! [STOCK-DEBUG] Produto 66 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 192 | qtd final: 192.0
+[17:38:56] ! [STOCK-DEBUG] Produto 14855 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 17 | qtd final: 17.0
+[17:38:56] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 7.5s
+[17:38:57] > Box Barcodes — sincronizando...
+[17:38:58] + Box Barcodes — 530 produtos atualizados · 1.7s
+[17:38:58] > Endereços WMS — sincronizando...
+[17:38:58] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[17:38:58] > NFs Recebimento — sincronizando...
+[17:39:00] + NFs Recebimento — 464 NFs · 0 novas · 464 atualizadas · 4187 itens · 1.7s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=42.9s
+------------------------------------------------------
+
+5:39:52 PM [express] [Routes] Company: 3 | Orders: 8 | PP filter: ["60","61"] | Items in report: 106 | PPs in result: [60,61]
+5:40:34 PM [express] [Routes] Get work units error: coluna "quick_link_enabled" não existe
+5:40:34 PM [express] GET /api/work-units 500 in 327ms :: {"error":"Erro interno"}
+5:41:40 PM [express] [Auto-Sync] Triggering DB sync...
+5:42:19 PM [express] [Sync] Sincronização concluída.
+5:42:20 PM [print] 7 impressora(s) carregada(s) | padrão: "CutePDF Writer (1 redirecionada)"
+[17:44:00] > Loop — ciclo #11 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[17:44:00] > DB2 — conectando...
+[17:44:00] + DB2 — conectado em 0.11s
+[17:44:00] + PostgreSQL local — conectado
+[17:44:00] > Produtos — sincronizando lista completa do ERP...
+[17:44:12] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 11.5s
+[17:44:12] > Orçamentos — buscando últimos 31 dias...
+[17:44:28] + Orçamentos — 26132 obtidos · 26132 removidos (>=2026-03-12) · 26132 inseridos · 0 erros · 16.2s
+[17:44:31] + Transformação — 4969 pedidos · 0 produtos novos · 0 itens novos · 3.1s
+[17:44:31] > Estoque — sincronizando do ERP...
+[17:44:31] ! [STOCK-DEBUG] Produto 66 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 200 | qtd final: 200.0
+[17:44:34] ! [STOCK-DEBUG] Produto 14855 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 51 | qtd final: 51.0
+[17:44:37] ! [STOCK-DEBUG] Produto 66 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 192 | qtd final: 192.0
+[17:44:38] ! [STOCK-DEBUG] Produto 14855 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 17 | qtd final: 17.0
+[17:44:39] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.0s
+[17:44:39] > Box Barcodes — sincronizando...
+[17:44:41] + Box Barcodes — 530 produtos atualizados · 1.7s
+[17:44:41] > Endereços WMS — sincronizando...
+[17:44:41] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[17:44:41] > NFs Recebimento — sincronizando...
+[17:44:43] + NFs Recebimento — 464 NFs · 0 novas · 464 atualizadas · 4187 itens · 2.2s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=43.2s
+------------------------------------------------------
+
+5:45:31 PM [express] [Routes] Company: 3 | Orders: 8 | PP filter: ["60","61"] | Items in report: 51 | PPs in result: [60,61]
+5:48:33 PM [express] [Routes] Company: 3 | Orders: 1 | PP filter: ["60","61"] | Items in report: 36 | PPs in result: [61]
+[17:49:43] > Loop — ciclo #12 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[17:49:43] > DB2 — conectando...
+[17:49:43] + DB2 — conectado em 0.10s
+[17:49:43] + PostgreSQL local — conectado
+[17:49:43] > Produtos — sincronizando lista completa do ERP...
+[17:49:57] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 13.5s
+[17:49:57] > Orçamentos — buscando últimos 31 dias...
+[17:50:13] + Orçamentos — 26132 obtidos · 26132 removidos (>=2026-03-12) · 26132 inseridos · 0 erros · 16.5s
+[17:50:17] + Transformação — 4969 pedidos · 0 produtos novos · 0 itens novos · 3.4s
+[17:50:17] > Estoque — sincronizando do ERP...
+[17:50:17] ! [STOCK-DEBUG] Produto 66 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 200 | qtd final: 200.0
+[17:50:20] ! [STOCK-DEBUG] Produto 14855 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 51 | qtd final: 51.0
+[17:50:24] ! [STOCK-DEBUG] Produto 66 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 192 | qtd final: 192.0
+[17:50:25] ! [STOCK-DEBUG] Produto 14855 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 17 | qtd final: 17.0
+[17:50:25] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.6s
+[17:50:25] > Box Barcodes — sincronizando...
+[17:50:27] + Box Barcodes — 530 produtos atualizados · 1.5s
+[17:50:27] > Endereços WMS — sincronizando...
+[17:50:27] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[17:50:27] > NFs Recebimento — sincronizando...
+[17:50:29] + NFs Recebimento — 464 NFs · 0 novas · 464 atualizadas · 4187 itens · 2.0s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=45.8s
+------------------------------------------------------
+
+5:51:10 PM [express] [Routes] Company: 3 | Orders: 2 | PP filter: ["60","61"] | Items in report: 76 | PPs in result: [60,61]
+5:51:40 PM [express] [Auto-Sync] Triggering DB sync...
+5:52:17 PM [express] [Sync] Sincronização concluída.
+5:52:18 PM [print] 7 impressora(s) carregada(s) | padrão: "CutePDF Writer (1 redirecionada)"
+5:54:45 PM [express] [Routes] Company: 3 | Orders: 2 | PP filter: ["60","61"] | Items in report: 30 | PPs in result: [60,61]
+[17:55:29] > Loop — ciclo #13 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[17:55:29] > DB2 — conectando...
+[17:55:29] + DB2 — conectado em 0.11s
+[17:55:29] + PostgreSQL local — conectado
+[17:55:29] > Produtos — sincronizando lista completa do ERP...
+[17:55:43] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 13.2s
+[17:55:43] > Orçamentos — buscando últimos 31 dias...
+[17:55:59] + Orçamentos — 26132 obtidos · 26132 removidos (>=2026-03-12) · 26132 inseridos · 0 erros · 16.3s
+[17:56:02] + Transformação — 4969 pedidos · 0 produtos novos · 0 itens novos · 3.2s
+[17:56:02] > Estoque — sincronizando do ERP...
+[17:56:02] ! [STOCK-DEBUG] Produto 66 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 200 | qtd final: 200.0
+[17:56:05] ! [STOCK-DEBUG] Produto 14855 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 51 | qtd final: 51.0
+[17:56:09] ! [STOCK-DEBUG] Produto 66 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 192 | qtd final: 192.0
+[17:56:10] ! [STOCK-DEBUG] Produto 14855 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 17 | qtd final: 17.0
+[17:56:11] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.4s
+[17:56:11] > Box Barcodes — sincronizando...
+[17:56:12] + Box Barcodes — 530 produtos atualizados · 1.6s
+[17:56:12] > Endereços WMS — sincronizando...
+[17:56:12] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[17:56:12] > NFs Recebimento — sincronizando...
+[17:56:14] + NFs Recebimento — 464 NFs · 0 novas · 464 atualizadas · 4187 itens · 2.0s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=45.2s
+------------------------------------------------------
