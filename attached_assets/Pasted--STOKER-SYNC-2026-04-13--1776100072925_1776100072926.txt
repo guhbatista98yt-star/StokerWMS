@@ -1,0 +1,1018 @@
+
+===================================================================
+  STOKER SYNC  |  2026-04-13 11:46:18  |  modo=serve · SO=Windows
+===================================================================
+
+
+------------------------------------------------------
+  VERIFICANDO SCHEMA DO BANCO
+------------------------------------------------------
+[11:46:18] -   Todas as 33 tabelas já existem
+[11:46:18] -   Todas as colunas verificadas — nada a adicionar
+[11:46:18] -   Índices verificados
+[11:46:18] + Schema verificado com sucesso
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[11:46:18] > DB2 — conectando...
+[11:46:18] + DB2 — conectado em 0.08s
+[11:46:18] + PostgreSQL local — conectado
+[11:46:18] > Produtos — sincronizando lista completa do ERP...
+[11:46:28] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 9.4s
+[11:46:28] > Orçamentos — buscando últimos 31 dias...
+[11:46:47] + Orçamentos — 25977 obtidos · 25971 removidos (>=2026-03-12) · 25977 inseridos · 0 erros · 19.6s
+[11:46:51] ! Remoção ERP — 1 pedido(s) excluído(s): ['475282']
+[11:46:51] + Transformação — 4951 pedidos · 0 produtos novos · 7 itens novos · 3.2s
+[11:46:51] > Estoque — sincronizando do ERP...
+[11:46:59] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.1s
+[11:46:59] > Box Barcodes — sincronizando...
+[11:47:01] + Box Barcodes — 530 produtos atualizados · 2.1s
+[11:47:01] > Endereços WMS — sincronizando...
+[11:47:01] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[11:47:01] > NFs Recebimento — sincronizando...
+[11:47:04] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 2.6s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=45.5s
+------------------------------------------------------
+
+[11:47:04] + Loop de sync em background (300s)
+
+------------------------------------------------------
+  INICIANDO SERVIDOR WEB
+------------------------------------------------------
+[11:47:05] + Servidor disponível em → http://localhost:411
+Seeding database...
+Checking for existing users...
+Existing users count: 14
+Database already seeded
+11:47:07 AM [express] [Routes] Registering routes...
+11:47:07 AM [print] [agent] WebSocket server iniciado em /ws/print-agent
+11:47:07 AM [express] [scanning-ws] WebSocket scanning server iniciado em /ws/scanning
+11:47:08 AM [express] Servidor iniciado na porta 411
+11:47:09 AM [print] 1 impressora(s) carregada(s) | padrão: "Microsoft Print to PDF"
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+11:47:13 AM [express] [Auto-Sync] Triggering DB sync...
+11:47:19 AM [express] [scanning-ws] Ruan conectado
+11:47:19 AM [express] [scanning-ws] Vinicius conectado
+11:47:22 AM [express] [scanning-ws] Victor conectado
+11:47:27 AM [express] [scanning-ws] Victor desconectado
+11:47:30 AM [express] [scanning-ws] Victor conectado
+11:47:57 AM [express] [Sync] Sincronização concluída.
+11:47:57 AM [print] 1 impressora(s) carregada(s) | padrão: "Microsoft Print to PDF"
+11:48:43 AM [express] [scanning-ws] Victor desconectado
+11:49:07 AM [express] [scanning-ws] Victor conectado
+[11:52:04] > Loop — ciclo #1 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[11:52:04] > DB2 — conectando...
+[11:52:04] + DB2 — conectado em 0.11s
+[11:52:04] + PostgreSQL local — conectado
+[11:52:04] > Produtos — sincronizando lista completa do ERP...
+[11:52:17] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 13.3s
+[11:52:17] > Orçamentos — buscando últimos 31 dias...
+[11:52:35] + Orçamentos — 26068 obtidos · 25977 removidos (>=2026-03-12) · 26068 inseridos · 0 erros · 17.7s
+11:52:36 AM [express] [scanning-ws] Vinicius desconectado
+[11:52:38] ! Remoção ERP — 1 pedido(s) excluído(s): ['475284']
+[11:52:38] + Transformação — 4959 pedidos · 0 produtos novos · 93 itens novos · 3.3s
+[11:52:38] > Estoque — sincronizando do ERP...
+11:52:44 AM [express] [scanning-ws] Vinicius conectado
+[11:52:46] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.3s
+[11:52:46] > Box Barcodes — sincronizando...
+[11:52:48] + Box Barcodes — 530 produtos atualizados · 1.7s
+[11:52:48] > Endereços WMS — sincronizando...
+[11:52:48] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[11:52:48] > NFs Recebimento — sincronizando...
+[11:52:51] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 2.3s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=47.0s
+------------------------------------------------------
+
+11:55:18 AM [express] [scanning-ws] Vinicius desconectado
+11:55:25 AM [express] [scanning-ws] Vinicius conectado
+11:56:00 AM [express] [scanning-ws] Victor desconectado
+11:56:08 AM [express] [scanning-ws] Vinicius desconectado
+11:57:07 AM [express] [Auto-Sync] Triggering DB sync...
+11:57:47 AM [express] [Sync] Sincronização concluída.
+11:57:48 AM [print] 1 impressora(s) carregada(s) | padrão: "Microsoft Print to PDF"
+[11:57:51] > Loop — ciclo #2 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[11:57:51] > DB2 — conectando...
+[11:57:51] + DB2 — conectado em 0.12s
+[11:57:51] + PostgreSQL local — conectado
+[11:57:51] > Produtos — sincronizando lista completa do ERP...
+[11:57:59] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 7.9s
+[11:57:59] > Orçamentos — buscando últimos 31 dias...
+[11:58:11] + Orçamentos — 26070 obtidos · 26070 removidos (>=2026-03-12) · 26070 inseridos · 0 erros · 12.7s
+[11:58:14] + Transformação — 4959 pedidos · 0 produtos novos · 0 itens novos · 3.0s
+[11:58:15] > Estoque — sincronizando do ERP...
+[11:58:22] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 7.7s
+[11:58:22] > Box Barcodes — sincronizando...
+[11:58:24] + Box Barcodes — 530 produtos atualizados · 1.8s
+[11:58:24] > Endereços WMS — sincronizando...
+[11:58:24] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.1s
+[11:58:24] > NFs Recebimento — sincronizando...
+[11:58:27] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 2.4s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=36.0s
+------------------------------------------------------
+
+12:00:08 PM [express] [scanning-ws] Ruan conectado
+12:01:10 PM [express] [Launch] Preparing to launch order 29a594f1-24aa-4e07-b09f-e1877c4ba586, current status: pendente
+12:01:10 PM [express] [Launch] Preparing to launch order 25d5ef6b-0f81-4580-a1ac-daccee1f8325, current status: pendente
+12:01:58 PM [express] [Routes] Company: 3 | Orders: 2 | PP filter: ["60","61"] | Items in report: 22 | PPs in result: [60]
+[12:03:27] > Loop — ciclo #3 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[12:03:27] > DB2 — conectando...
+[12:03:27] + DB2 — conectado em 0.11s
+[12:03:27] + PostgreSQL local — conectado
+[12:03:27] > Produtos — sincronizando lista completa do ERP...
+[12:03:36] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 9.2s
+[12:03:36] > Orçamentos — buscando últimos 31 dias...
+12:03:53 PM [express] [Launch] Preparing to launch order 4f21cd6d-4599-4cb8-8db0-207d414d1471, current status: pendente
+[12:03:57] + Orçamentos — 26101 obtidos · 26070 removidos (>=2026-03-12) · 26101 inseridos · 0 erros · 20.6s
+[12:04:00] ! Remoção ERP — 2 pedido(s) excluído(s): ['475283', '475287']
+[12:04:00] + Transformação — 4959 pedidos · 0 produtos novos · 39 itens novos · 3.4s
+[12:04:00] > Estoque — sincronizando do ERP...
+[12:04:08] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.3s
+[12:04:08] > Box Barcodes — sincronizando...
+[12:04:10] + Box Barcodes — 530 produtos atualizados · 1.4s
+[12:04:10] > Endereços WMS — sincronizando...
+[12:04:10] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[12:04:10] > NFs Recebimento — sincronizando...
+[12:04:13] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 2.8s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=46.2s
+------------------------------------------------------
+
+12:04:44 PM [express] [Routes] Company: 3 | Orders: 1 | PP filter: ["60","61"] | Items in report: 4 | PPs in result: [60]
+12:07:07 PM [express] [Auto-Sync] Triggering DB sync...
+12:07:16 PM [express] [Routes] Company: 3 | Orders: 1 | PP filter: ["60","61"] | Items in report: 1 | PPs in result: [61]
+12:07:53 PM [express] [Sync] Sincronização concluída.
+12:07:54 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+12:07:56 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[12:09:13] > Loop — ciclo #4 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[12:09:13] > DB2 — conectando...
+[12:09:13] + DB2 — conectado em 0.05s
+[12:09:13] + PostgreSQL local — conectado
+[12:09:13] > Produtos — sincronizando lista completa do ERP...
+[12:09:21] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 8.4s
+[12:09:21] > Orçamentos — buscando últimos 31 dias...
+[12:09:35] + Orçamentos — 26098 obtidos · 26098 removidos (>=2026-03-12) · 26098 inseridos · 0 erros · 13.4s
+[12:09:38] + Transformação — 4958 pedidos · 0 produtos novos · 2 itens novos · 3.3s
+[12:09:38] > Estoque — sincronizando do ERP...
+[12:09:46] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.3s
+[12:09:46] > Box Barcodes — sincronizando...
+[12:09:48] + Box Barcodes — 530 produtos atualizados · 1.3s
+[12:09:48] > Endereços WMS — sincronizando...
+[12:09:48] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[12:09:48] > NFs Recebimento — sincronizando...
+[12:09:50] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 2.5s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=37.5s
+------------------------------------------------------
+
+[12:14:50] > Loop — ciclo #5 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[12:14:50] > DB2 — conectando...
+[12:14:50] + DB2 — conectado em 0.10s
+[12:14:50] + PostgreSQL local — conectado
+[12:14:50] > Produtos — sincronizando lista completa do ERP...
+[12:15:00] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 9.6s
+[12:15:00] > Orçamentos — buscando últimos 31 dias...
+[12:15:19] + Orçamentos — 26132 obtidos · 26098 removidos (>=2026-03-12) · 26132 inseridos · 0 erros · 18.7s
+[12:15:23] ! Remoção ERP — 5 pedido(s) excluído(s): ['475293', '475295', '475292', '475294', '475291']
+[12:15:23] + Transformação — 4956 pedidos · 0 produtos novos · 44 itens novos · 3.9s
+[12:15:23] > Estoque — sincronizando do ERP...
+[12:15:32] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 9.3s
+[12:15:32] > Box Barcodes — sincronizando...
+[12:15:34] + Box Barcodes — 530 produtos atualizados · 1.8s
+[12:15:34] > Endereços WMS — sincronizando...
+[12:15:34] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[12:15:34] > NFs Recebimento — sincronizando...
+[12:15:37] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 3.0s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=46.6s
+------------------------------------------------------
+
+12:17:07 PM [express] [Auto-Sync] Triggering DB sync...
+12:17:50 PM [express] [Sync] Sincronização concluída.
+12:17:51 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+12:17:52 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[12:20:37] > Loop — ciclo #6 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[12:20:37] > DB2 — conectando...
+[12:20:37] + DB2 — conectado em 0.10s
+[12:20:37] + PostgreSQL local — conectado
+[12:20:37] > Produtos — sincronizando lista completa do ERP...
+[12:20:47] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 9.6s
+[12:20:47] > Orçamentos — buscando últimos 31 dias...
+[12:21:01] + Orçamentos — 26093 obtidos · 26131 removidos (>=2026-03-12) · 26093 inseridos · 0 erros · 14.3s
+[12:21:04] ! Remoção ERP — 2 pedido(s) excluído(s): ['475299', '475296']
+[12:21:04] + Transformação — 4953 pedidos · 0 produtos novos · 0 itens novos · 3.4s
+[12:21:04] > Estoque — sincronizando do ERP...
+[12:21:13] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.1s
+[12:21:13] > Box Barcodes — sincronizando...
+[12:21:14] + Box Barcodes — 530 produtos atualizados · 1.0s
+[12:21:14] > Endereços WMS — sincronizando...
+[12:21:14] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[12:21:14] > NFs Recebimento — sincronizando...
+[12:21:16] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 2.3s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=39.2s
+------------------------------------------------------
+
+[12:26:16] > Loop — ciclo #7 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[12:26:16] > DB2 — conectando...
+[12:26:16] + DB2 — conectado em 0.09s
+[12:26:16] + PostgreSQL local — conectado
+[12:26:16] > Produtos — sincronizando lista completa do ERP...
+[12:26:28] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 11.8s
+[12:26:28] > Orçamentos — buscando últimos 31 dias...
+[12:26:47] + Orçamentos — 26093 obtidos · 26093 removidos (>=2026-03-12) · 26093 inseridos · 0 erros · 19.0s
+[12:26:50] ! Remoção ERP — 2 pedido(s) excluído(s): ['475303', '475300']
+[12:26:50] + Transformação — 4952 pedidos · 0 produtos novos · 4 itens novos · 3.2s
+[12:26:50] > Estoque — sincronizando do ERP...
+[12:26:58] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.1s
+[12:26:58] > Box Barcodes — sincronizando...
+[12:26:59] + Box Barcodes — 530 produtos atualizados · 1.0s
+[12:26:59] > Endereços WMS — sincronizando...
+[12:26:59] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.1s
+[12:26:59] > NFs Recebimento — sincronizando...
+[12:27:02] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 2.3s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=45.7s
+------------------------------------------------------
+
+12:27:07 PM [express] [Auto-Sync] Triggering DB sync...
+12:27:44 PM [express] [Sync] Sincronização concluída.
+12:27:45 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+12:27:47 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[12:32:02] > Loop — ciclo #8 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[12:32:02] > DB2 — conectando...
+[12:32:02] + DB2 — conectado em 0.21s
+[12:32:02] + PostgreSQL local — conectado
+[12:32:02] > Produtos — sincronizando lista completa do ERP...
+[12:32:11] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 8.8s
+[12:32:11] > Orçamentos — buscando últimos 31 dias...
+[12:32:26] + Orçamentos — 26105 obtidos · 26093 removidos (>=2026-03-12) · 26105 inseridos · 0 erros · 15.3s
+[12:32:30] + Transformação — 4954 pedidos · 0 produtos novos · 12 itens novos · 3.4s
+[12:32:30] > Estoque — sincronizando do ERP...
+[12:32:38] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.1s
+[12:32:38] > Box Barcodes — sincronizando...
+[12:32:40] + Box Barcodes — 530 produtos atualizados · 1.8s
+[12:32:40] > Endereços WMS — sincronizando...
+[12:32:40] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[12:32:40] > NFs Recebimento — sincronizando...
+[12:32:42] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 2.5s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=40.4s
+------------------------------------------------------
+
+12:37:07 PM [express] [Auto-Sync] Triggering DB sync...
+[12:37:42] > Loop — ciclo #9 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[12:37:42] > DB2 — conectando...
+[12:37:42] + DB2 — conectado em 0.12s
+[12:37:42] + PostgreSQL local — conectado
+[12:37:42] > Produtos — sincronizando lista completa do ERP...
+12:37:51 PM [express] [Sync] stderr: Traceback (most recent call last):
+  File "C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\sync_db2.py", line 1819, in sync_enderecos_wms
+    cursor.execute("SAVEPOINT sp_addr")
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.InFailedSqlTransaction: ERRO:  transação atual foi interrompida, comandos ignorados até o fim do bloco de transação
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\sync_db2.py", line 2004, in sincronizar
+    sync_enderecos_wms(conn_db2, conn_pg)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\sync_db2.py", line 1838, in sync_enderecos_wms
+    cursor.execute("ROLLBACK TO SAVEPOINT sp_addr")
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.InvalidSavepointSpecification: ERRO:  o ponto de salvamento "sp_addr" não existe
+12:37:52 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+12:37:53 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[12:37:55] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 12.9s
+[12:37:55] > Orçamentos — buscando últimos 31 dias...
+[12:38:09] + Orçamentos — 26107 obtidos · 26107 removidos (>=2026-03-12) · 26107 inseridos · 0 erros · 13.3s
+[12:38:12] + Transformação — 4955 pedidos · 0 produtos novos · 0 itens novos · 3.1s
+[12:38:12] > Estoque — sincronizando do ERP...
+[12:38:20] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 7.9s
+[12:38:20] > Box Barcodes — sincronizando...
+[12:38:22] + Box Barcodes — 530 produtos atualizados · 1.9s
+[12:38:22] > Endereços WMS — sincronizando...
+[12:38:22] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.1s
+[12:38:22] > NFs Recebimento — sincronizando...
+[12:38:24] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 2.1s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=41.6s
+------------------------------------------------------
+
+[12:43:24] > Loop — ciclo #10 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[12:43:24] > DB2 — conectando...
+[12:43:24] + DB2 — conectado em 0.13s
+[12:43:24] + PostgreSQL local — conectado
+[12:43:24] > Produtos — sincronizando lista completa do ERP...
+[12:43:34] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 10.0s
+[12:43:34] > Orçamentos — buscando últimos 31 dias...
+[12:43:53] + Orçamentos — 26109 obtidos · 26107 removidos (>=2026-03-12) · 26109 inseridos · 0 erros · 19.5s
+[12:43:57] + Transformação — 4956 pedidos · 0 produtos novos · 2 itens novos · 3.1s
+[12:43:57] > Estoque — sincronizando do ERP...
+[12:44:04] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 7.8s
+[12:44:04] > Box Barcodes — sincronizando...
+[12:44:06] + Box Barcodes — 530 produtos atualizados · 1.5s
+[12:44:06] > Endereços WMS — sincronizando...
+[12:44:06] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[12:44:06] > NFs Recebimento — sincronizando...
+[12:44:08] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 1.8s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=44.0s
+------------------------------------------------------
+
+12:47:07 PM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+12:47:07 PM [express] [Auto-Sync] Triggering DB sync...
+12:47:53 PM [express] [Sync] Sincronização concluída.
+12:47:54 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+12:47:55 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[12:49:08] > Loop — ciclo #11 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[12:49:08] > DB2 — conectando...
+[12:49:08] + DB2 — conectado em 0.04s
+[12:49:08] + PostgreSQL local — conectado
+[12:49:08] > Produtos — sincronizando lista completa do ERP...
+[12:49:17] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 9.0s
+[12:49:17] > Orçamentos — buscando últimos 31 dias...
+[12:49:35] + Orçamentos — 26107 obtidos · 26107 removidos (>=2026-03-12) · 26107 inseridos · 0 erros · 18.1s
+[12:49:38] + Transformação — 4957 pedidos · 0 produtos novos · 0 itens novos · 3.4s
+[12:49:38] > Estoque — sincronizando do ERP...
+[12:49:47] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.5s
+[12:49:47] > Box Barcodes — sincronizando...
+[12:49:48] + Box Barcodes — 530 produtos atualizados · 1.5s
+[12:49:48] > Endereços WMS — sincronizando...
+[12:49:49] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[12:49:49] > NFs Recebimento — sincronizando...
+[12:49:51] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 2.3s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=43.1s
+------------------------------------------------------
+
+[12:54:51] > Loop — ciclo #12 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[12:54:51] > DB2 — conectando...
+[12:54:51] + DB2 — conectado em 0.10s
+[12:54:51] + PostgreSQL local — conectado
+[12:54:51] > Produtos — sincronizando lista completa do ERP...
+[12:55:06] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 14.6s
+[12:55:06] > Orçamentos — buscando últimos 31 dias...
+[12:55:26] + Orçamentos — 26106 obtidos · 26107 removidos (>=2026-03-12) · 26106 inseridos · 0 erros · 20.5s
+[12:55:29] ! Remoção ERP — 2 pedido(s) excluído(s): ['475314', '475312']
+[12:55:29] + Transformação — 4956 pedidos · 0 produtos novos · 4 itens novos · 3.3s
+[12:55:30] > Estoque — sincronizando do ERP...
+[12:55:38] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.2s
+[12:55:38] > Box Barcodes — sincronizando...
+[12:55:39] + Box Barcodes — 530 produtos atualizados · 1.5s
+[12:55:39] > Endereços WMS — sincronizando...
+[12:55:39] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[12:55:39] > NFs Recebimento — sincronizando...
+[12:55:41] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 1.8s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=50.3s
+------------------------------------------------------
+
+12:57:08 PM [express] [Auto-Sync] Triggering DB sync...
+12:57:44 PM [express] [Sync] Sincronização concluída.
+12:57:45 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+12:57:46 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[13:00:41] > Loop — ciclo #13 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[13:00:41] > DB2 — conectando...
+[13:00:41] + DB2 — conectado em 0.13s
+[13:00:41] + PostgreSQL local — conectado
+[13:00:41] > Produtos — sincronizando lista completa do ERP...
+[13:00:55] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 13.1s
+[13:00:55] > Orçamentos — buscando últimos 31 dias...
+[13:01:11] + Orçamentos — 26105 obtidos · 26106 removidos (>=2026-03-12) · 26105 inseridos · 0 erros · 16.1s
+[13:01:14] ! Remoção ERP — 1 pedido(s) excluído(s): ['475315']
+[13:01:14] + Transformação — 4955 pedidos · 0 produtos novos · 0 itens novos · 3.4s
+[13:01:14] > Estoque — sincronizando do ERP...
+[13:01:23] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.6s
+[13:01:23] > Box Barcodes — sincronizando...
+[13:01:24] + Box Barcodes — 530 produtos atualizados · 1.8s
+[13:01:24] > Endereços WMS — sincronizando...
+[13:01:25] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[13:01:25] > NFs Recebimento — sincronizando...
+[13:01:26] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 1.8s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=45.2s
+------------------------------------------------------
+
+13:03:51 [vite] (client) page reload index.html
+13:03:51 [vite] (client) page reload public/offline.html
+13:03:51 [vite] (client) hmr update /src/App.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/conferencia/VolumeModal.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/handheld/ItemCard.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/orders/exception-authorization-modal.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/accordion.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/connection-status.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/handheld/PickingLayout.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/handheld/PickingList.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/handheld/PickingSession.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/handheld/ScannerHandler.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/orders/exception-dialog.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/orders/order-details-dialog.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/alert-dialog.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/alert.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css (x2)
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/badge.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css (x2)
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/button.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/calendar.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/card.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css (x2)
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/checkbox.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/command.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/date-range-picker.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/dialog.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css (x2)
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/form.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css (x2)
+13:03:51 [vite] (client) hmr update /src/index.css (x3)
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/input.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/label.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css (x2)
+13:03:51 [vite] (client) hmr update /src/index.css (x3)
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/popover.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/progress.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/radio-group.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/result-dialog.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/scan-input.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/scan-quantity-modal.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/section-card.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/select.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/sheet.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/skeleton.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/wms/address-picker.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/pages/conferencia/index.tsx, /src/pages/wms/codigos-barras.tsx, /src/pages/balcao/index.tsx, /src/pages/separacao/index.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/admin/kpi-dashboard.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/balcao/index.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/conferencia/index.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/fila-pedidos/index.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/handheld/picking.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/print/pallet-label.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/audit.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/reports/badge-generation.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/sortable-table-head.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/status-badge.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/switch.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/table.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/tabs.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/textarea.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/ui/toast.tsx
+13:03:51 [vite] (client) hmr update /src/components/ui/toaster.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css (x2)
+13:03:51 [vite] (client) hmr update /src/components/ui/tooltip.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css, /src/components/wms/product-stock-info.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) page reload src/main.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css (x2)
+13:03:51 [vite] (client) hmr update /src/index.css, /src/lib/auth.tsx, /src/pages/wms/recebimento.tsx, /src/pages/supervisor/print-settings.tsx, /src/components/conferencia/VolumeModal.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/pages/wms/transferencia.tsx, /src/pages/wms/checkin.tsx, /src/pages/wms/recebimento.tsx, /src/pages/conferencia/index.tsx, /src/pages/balcao/index.tsx, /src/pages/separacao/index.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/pages/conferencia/index.tsx, /src/pages/balcao/index.tsx, /src/pages/separacao/index.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/pages/supervisor/orders.tsx, /src/pages/fila-pedidos/index.tsx, /src/pages/conferencia/index.tsx, /src/pages/balcao/index.tsx, /src/pages/separacao/index.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/pages/supervisor/separation-settings.tsx, /src/pages/supervisor/reports/loading-map.tsx, /src/pages/company-select.tsx, /src/pages/wms/contagem.tsx, /src/pages/supervisor/routes.tsx, /src/pages/supervisor/reports/order-volumes.tsx, /src/pages/wms/transferencia.tsx, /src/pages/admin/limpeza.tsx, /src/pages/login.tsx, /src/pages/supervisor/mapping-studio.tsx, /src/pages/supervisor/exceptions.tsx, /src/pages/supervisor/orders.tsx, /src/pages/supervisor/barcode-management.tsx, /src/pages/admin/permissoes.tsx, /src/components/ui/toaster.tsx, /src/pages/wms/checkin.tsx, /src/pages/supervisor/reports/loading-map-products.tsx, /src/pages/wms/retirada.tsx, /src/pages/admin/print-agents.tsx, /src/pages/supervisor/product-addresses.tsx, /src/pages/wms/recebimento.tsx, /src/pages/supervisor/print-settings.tsx, /src/pages/supervisor/route-orders.tsx, /src/pages/wms/enderecos.tsx, /src/pages/supervisor/users.tsx, /src/pages/conferencia/index.tsx, /src/pages/wms/codigos-barras.tsx, /src/pages/supervisor/reports/picking-list.tsx, /src/pages/balcao/index.tsx, /src/pages/separacao/index.tsx, /src/lib/auth.tsx, /src/components/conferencia/VolumeModal.tsx, /src/components/handheld/PickingSession.tsx, /src/components/handheld/PickingList.tsx, /src/components/orders/exception-authorization-modal.tsx, /src/components/handheld/ScannerHandler.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/pages/conferencia/index.tsx, /src/pages/wms/codigos-barras.tsx, /src/pages/balcao/index.tsx, /src/pages/separacao/index.tsx
+13:03:51 [vite] (client) hmr update /src/lib/auth.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css, /src/pages/supervisor/orders.tsx, /src/pages/supervisor/route-orders.tsx, /src/pages/conferencia/index.tsx, /src/pages/supervisor/reports/picking-list.tsx, /src/pages/balcao/index.tsx, /src/pages/separacao/index.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/pages/conferencia/index.tsx, /src/pages/balcao/index.tsx, /src/pages/separacao/index.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/pages/handheld/picking.tsx, /src/components/handheld/PickingSession.tsx, /src/components/handheld/PickingList.tsx
+13:03:51 [vite] (client) hmr update /src/index.css, /src/pages/supervisor/print-settings.tsx
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/App.tsx, /src/pages/supervisor/separation-settings.tsx, /src/lib/auth.tsx, /src/pages/supervisor/reports/loading-map.tsx, /src/pages/wms/contagem.tsx, /src/pages/supervisor/routes.tsx, /src/pages/wms/transferencia.tsx, /src/pages/admin/limpeza.tsx, /src/pages/supervisor/mapping-studio.tsx, /src/pages/supervisor/exceptions.tsx, /src/pages/supervisor/orders.tsx, /src/pages/wms/produtos.tsx, /src/pages/supervisor/barcode-management.tsx, /src/pages/admin/permissoes.tsx, /src/pages/supervisor/reports/pallet-movements.tsx, /src/pages/wms/checkin.tsx, /src/pages/supervisor/reports/loading-map-products.tsx, /src/pages/supervisor/reports/wms-addresses.tsx, /src/pages/wms/retirada.tsx, /src/pages/supervisor/reports/stock-discrepancy.tsx, /src/pages/admin/print-agents.tsx, /src/pages/supervisor/reports/counting-cycles.tsx, /src/pages/supervisor/product-addresses.tsx, /src/pages/wms/recebimento.tsx, /src/pages/supervisor/print-settings.tsx, /src/pages/supervisor/route-orders.tsx, /src/pages/wms/enderecos.tsx, /src/pages/supervisor/users.tsx, /src/pages/conferencia/index.tsx, /src/pages/wms/codigos-barras.tsx, /src/pages/supervisor/reports/picking-list.tsx, /src/pages/balcao/index.tsx, /src/pages/separacao/index.tsx, /src/components/conferencia/VolumeModal.tsx, /src/components/handheld/PickingSession.tsx, /src/components/handheld/PickingList.tsx, /src/components/orders/exception-authorization-modal.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/lib/theme.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css, /src/pages/home.tsx, /src/components/ui/tooltip.tsx, /src/pages/wms/codigos-barras.tsx, /src/components/ui/badge.tsx, /src/components/ui/skeleton.tsx, /src/components/ui/section-card.tsx, /src/components/ui/alert-dialog.tsx, /src/components/ui/button.tsx, /src/components/ui/checkbox.tsx, /src/components/ui/switch.tsx, /src/components/ui/select.tsx, /src/components/ui/textarea.tsx, /src/components/ui/tabs.tsx, /src/components/ui/input.tsx, /src/components/ui/card.tsx, /src/components/ui/dialog.tsx, /src/components/ui/table.tsx, /src/components/ui/form.tsx, /src/components/ui/progress.tsx, /src/components/ui/status-badge.tsx, /src/components/ui/sortable-table-head.tsx, /src/components/handheld/PickingLayout.tsx, /src/components/ui/date-range-picker.tsx, /src/components/ui/toast.tsx, /src/components/ui/command.tsx, /src/components/ui/label.tsx, /src/components/ui/result-dialog.tsx, /src/components/ui/scan-input.tsx, /src/components/ui/radio-group.tsx, /src/components/ui/popover.tsx, /src/components/ui/alert.tsx, /src/components/ui/accordion.tsx, /src/components/ui/calendar.tsx, /src/components/ui/sheet.tsx
+13:03:51 [vite] (client) hmr update /src/pages/company-select.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/home.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/login.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/not-found.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/admin/limpeza.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/admin/permissoes.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/admin/print-agents.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/print/volume-label.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/separacao/index.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/barcode-management.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/exceptions.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/mapping-studio.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/orders.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/print-settings.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/product-addresses.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/reports.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/route-orders.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/routes.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/separation-settings.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/users.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/reports/counting-cycles.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/reports/loading-map-products.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/reports/loading-map.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/reports/order-volumes.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/reports/pallet-movements.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/reports/picking-list.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/reports/stock-discrepancy.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/supervisor/reports/wms-addresses.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/wms/checkin.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/wms/codigos-barras.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/wms/contagem.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/wms/enderecos.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/wms/produtos.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/wms/recebimento.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/wms/retirada.tsx, /src/index.css
+13:03:51 [vite] (client) hmr update /src/pages/wms/transferencia.tsx, /src/index.css
+13:03:52 [vite] (client) hmr update /src/pages/login.tsx
+13:03:52 [vite] changed tsconfig file detected: C:/Users/SERVIDOR03/Desktop/GLA_WMS_Test/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+13:03:52 [vite] (client) hmr update /src/index.css
+1:03:54 PM [express] [scanning-ws] Ruan desconectado
+1:04:00 PM [express] [scanning-ws] Ruan conectado
+1:04:55 PM [express] [scanning-ws] Ruan desconectado
+1:05:17 PM [express] [scanning-ws] rafael conectado
+[13:06:26] > Loop — ciclo #14 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[13:06:26] > DB2 — conectando...
+[13:06:26] + DB2 — conectado em 0.05s
+[13:06:27] + PostgreSQL local — conectado
+[13:06:27] > Produtos — sincronizando lista completa do ERP...
+[13:06:42] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 15.8s
+[13:06:42] > Orçamentos — buscando últimos 31 dias...
+[13:07:00] + Orçamentos — 26108 obtidos · 26105 removidos (>=2026-03-12) · 26108 inseridos · 0 erros · 18.0s
+[13:07:04] ! Remoção ERP — 1 pedido(s) excluído(s): ['475316']
+[13:07:04] + Transformação — 4956 pedidos · 0 produtos novos · 4 itens novos · 3.5s
+[13:07:04] > Estoque — sincronizando do ERP...
+1:07:08 PM [express] [Auto-Sync] Triggering DB sync...
+[13:07:13] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.8s
+[13:07:13] > Box Barcodes — sincronizando...
+[13:07:15] X Box Barcodes — erro: ERRO:  impasse detectado
+DETAIL:  Processo 22588 espera por ShareLock em transação 312451928; bloqueado pelo processo 8780.
+Processo 8780 espera por ShareLock em transação 312451975; bloqueado pelo processo 22588.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto atualizava tupla (497,37) na relação "products"
+
+[13:07:15] > Endereços WMS — sincronizando...
+[13:07:15] X Erro inesperado no ciclo de sync: ERRO:  o ponto de salvamento "sp_addr" não existe
+
+Traceback (most recent call last):
+  File "C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\sync_db2.py", line 1819, in sync_enderecos_wms
+    ignorados += 1
+psycopg2.errors.InFailedSqlTransaction: ERRO:  transação atual foi interrompida, comandos ignorados até o fim do bloco de transação
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\sync_db2.py", line 2004, in sincronizar
+    sync_product_list(conn_db2, conn_pg)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\sync_db2.py", line 1838, in sync_enderecos_wms
+    """, (str(uuid.uuid4()), empresa, bairro, rua, bloco, nivel, code))
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.InvalidSavepointSpecification: ERRO:  o ponto de salvamento "sp_addr" não existe
+
+[13:07:15] X Sync terminou com erros em 48.9s
+1:07:51 PM [express] [Sync] Sincronização concluída.
+1:07:52 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+1:07:53 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[13:12:15] > Loop — ciclo #15 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[13:12:15] > DB2 — conectando...
+[13:12:15] + DB2 — conectado em 0.09s
+[13:12:15] + PostgreSQL local — conectado
+[13:12:15] > Produtos — sincronizando lista completa do ERP...
+[13:12:28] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 12.8s
+[13:12:28] > Orçamentos — buscando últimos 31 dias...
+[13:12:46] + Orçamentos — 26110 obtidos · 26108 removidos (>=2026-03-12) · 26110 inseridos · 0 erros · 18.2s
+[13:12:50] + Transformação — 4957 pedidos · 0 produtos novos · 2 itens novos · 3.5s
+[13:12:50] > Estoque — sincronizando do ERP...
+[13:12:58] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.6s
+[13:12:58] > Box Barcodes — sincronizando...
+[13:13:00] + Box Barcodes — 530 produtos atualizados · 1.4s
+[13:13:00] > Endereços WMS — sincronizando...
+[13:13:00] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[13:13:00] > NFs Recebimento — sincronizando...
+[13:13:02] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 1.8s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=46.6s
+------------------------------------------------------
+
+1:16:02 PM [express] [scanning-ws] rafael desconectado
+1:17:07 PM [express] [scanning-ws] rafael conectado
+1:17:08 PM [express] [Auto-Sync] Triggering DB sync...
+1:17:49 PM [express] [Sync] Sincronização concluída.
+1:17:50 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+1:17:51 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[13:18:02] > Loop — ciclo #16 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[13:18:02] > DB2 — conectando...
+[13:18:02] + DB2 — conectado em 0.10s
+[13:18:02] + PostgreSQL local — conectado
+[13:18:02] > Produtos — sincronizando lista completa do ERP...
+[13:18:11] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 9.2s
+[13:18:11] > Orçamentos — buscando últimos 31 dias...
+[13:18:27] + Orçamentos — 26117 obtidos · 26117 removidos (>=2026-03-12) · 26117 inseridos · 0 erros · 15.2s
+[13:18:30] + Transformação — 4958 pedidos · 0 produtos novos · 0 itens novos · 3.5s
+[13:18:30] > Estoque — sincronizando do ERP...
+[13:18:38] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.2s
+[13:18:38] > Box Barcodes — sincronizando...
+[13:18:40] + Box Barcodes — 530 produtos atualizados · 1.5s
+[13:18:40] > Endereços WMS — sincronizando...
+[13:18:40] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.1s
+[13:18:40] > NFs Recebimento — sincronizando...
+[13:18:42] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 1.7s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=39.7s
+------------------------------------------------------
+
+1:20:10 PM [express] [scanning-ws] rafael desconectado
+1:20:10 PM [express] [scanning-ws] rafael conectado
+[13:23:42] > Loop — ciclo #17 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[13:23:42] > DB2 — conectando...
+[13:23:42] + DB2 — conectado em 0.10s
+[13:23:42] + PostgreSQL local — conectado
+[13:23:42] > Produtos — sincronizando lista completa do ERP...
+[13:23:51] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 8.9s
+[13:23:51] > Orçamentos — buscando últimos 31 dias...
+[13:24:07] + Orçamentos — 26119 obtidos · 26117 removidos (>=2026-03-12) · 26119 inseridos · 0 erros · 16.6s
+[13:24:10] ! Remoção ERP — 1 pedido(s) excluído(s): ['475319']
+[13:24:10] + Transformação — 4959 pedidos · 0 produtos novos · 17 itens novos · 3.0s
+[13:24:10] > Estoque — sincronizando do ERP...
+[13:24:18] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 7.8s
+[13:24:18] > Box Barcodes — sincronizando...
+[13:24:20] + Box Barcodes — 530 produtos atualizados · 1.5s
+[13:24:20] > Endereços WMS — sincronizando...
+[13:24:20] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[13:24:20] > NFs Recebimento — sincronizando...
+[13:24:21] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 1.6s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=39.8s
+------------------------------------------------------
+
+1:26:01 PM [express] [scanning-ws] rafael desconectado
+1:27:08 PM [express] [Auto-Sync] Triggering DB sync...
+1:27:43 PM [express] [Sync] Sincronização concluída.
+1:27:44 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+1:27:45 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[13:29:21] > Loop — ciclo #18 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[13:29:21] > DB2 — conectando...
+[13:29:22] + DB2 — conectado em 0.12s
+[13:29:22] + PostgreSQL local — conectado
+[13:29:22] > Produtos — sincronizando lista completa do ERP...
+[13:29:34] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 12.6s
+[13:29:34] > Orçamentos — buscando últimos 31 dias...
+[13:29:50] + Orçamentos — 26114 obtidos · 26115 removidos (>=2026-03-12) · 26114 inseridos · 0 erros · 15.4s
+[13:29:53] ! Remoção ERP — 1 pedido(s) excluído(s): ['475288']
+[13:29:53] + Transformação — 4958 pedidos · 0 produtos novos · 0 itens novos · 3.0s
+[13:29:53] > Estoque — sincronizando do ERP...
+[13:30:00] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 7.7s
+[13:30:00] > Box Barcodes — sincronizando...
+[13:30:02] + Box Barcodes — 530 produtos atualizados · 1.4s
+[13:30:02] > Endereços WMS — sincronizando...
+[13:30:02] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.1s
+[13:30:02] > NFs Recebimento — sincronizando...
+[13:30:04] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 1.7s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=42.3s
+------------------------------------------------------
+
+[13:35:04] > Loop — ciclo #19 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[13:35:04] > DB2 — conectando...
+[13:35:04] + DB2 — conectado em 0.10s
+[13:35:04] + PostgreSQL local — conectado
+[13:35:04] > Produtos — sincronizando lista completa do ERP...
+[13:35:17] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 13.5s
+[13:35:17] > Orçamentos — buscando últimos 31 dias...
+[13:35:34] + Orçamentos — 26116 obtidos · 26114 removidos (>=2026-03-12) · 26116 inseridos · 0 erros · 17.2s
+[13:35:38] ! Remoção ERP — 3 pedido(s) excluído(s): ['475323', '475324', '475325']
+[13:35:38] + Transformação — 4958 pedidos · 0 produtos novos · 6 itens novos · 3.2s
+[13:35:38] > Estoque — sincronizando do ERP...
+[13:35:45] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 7.8s
+[13:35:45] > Box Barcodes — sincronizando...
+[13:35:47] + Box Barcodes — 530 produtos atualizados · 1.6s
+[13:35:47] > Endereços WMS — sincronizando...
+[13:35:47] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[13:35:47] > NFs Recebimento — sincronizando...
+[13:35:49] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 1.7s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=45.3s
+------------------------------------------------------
+
+1:37:08 PM [express] [Auto-Sync] Triggering DB sync...
+1:37:44 PM [express] [Sync] Sincronização concluída.
+1:37:45 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+1:37:46 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[13:40:49] > Loop — ciclo #20 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[13:40:49] > DB2 — conectando...
+[13:40:49] + DB2 — conectado em 0.10s
+[13:40:49] + PostgreSQL local — conectado
+[13:40:49] > Produtos — sincronizando lista completa do ERP...
+[13:41:03] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 14.0s
+[13:41:03] > Orçamentos — buscando últimos 31 dias...
+[13:41:19] + Orçamentos — 26114 obtidos · 26110 removidos (>=2026-03-12) · 26114 inseridos · 0 erros · 16.3s
+[13:41:22] ! Remoção ERP — 1 pedido(s) excluído(s): ['475326']
+[13:41:22] + Transformação — 4962 pedidos · 0 produtos novos · 6 itens novos · 3.0s
+[13:41:22] > Estoque — sincronizando do ERP...
+[13:41:30] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 7.6s
+[13:41:30] > Box Barcodes — sincronizando...
+[13:41:32] + Box Barcodes — 530 produtos atualizados · 1.7s
+[13:41:32] > Endereços WMS — sincronizando...
+[13:41:32] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[13:41:32] > NFs Recebimento — sincronizando...
+[13:41:34] + NFs Recebimento — 460 NFs · 0 novas · 460 atualizadas · 4068 itens · 1.6s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=44.6s
+------------------------------------------------------
+
+[13:46:34] > Loop — ciclo #21 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[13:46:34] > DB2 — conectando...
+[13:46:34] + DB2 — conectado em 0.11s
+[13:46:34] + PostgreSQL local — conectado
+[13:46:34] > Produtos — sincronizando lista completa do ERP...
+[13:46:48] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 14.5s
+[13:46:48] > Orçamentos — buscando últimos 31 dias...
+1:46:49 PM [express] [scanning-ws] rafael conectado
+[13:47:06] + Orçamentos — 26115 obtidos · 26114 removidos (>=2026-03-12) · 26115 inseridos · 0 erros · 17.4s
+1:47:07 PM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+1:47:08 PM [express] [Auto-Sync] Triggering DB sync...
+[13:47:09] ! Remoção ERP — 3 pedido(s) excluído(s): ['475328', '475327', '475329']
+[13:47:09] + Transformação — 4961 pedidos · 0 produtos novos · 10 itens novos · 3.4s
+[13:47:09] > Estoque — sincronizando do ERP...
+[13:47:12] X Estoque — erro produto 8218: ERRO:  impasse detectado
+DETAIL:  Processo 22972 espera por ShareLock em transação 313260420; bloqueado pelo processo 12060.
+Processo 12060 espera por ShareLock em transação 313257860; bloqueado pelo processo 22972.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto atualizava tupla (1010,2) na relação "products"
+
+[13:47:15] X Estoque — erro produto 16613: ERRO:  impasse detectado
+DETAIL:  Processo 22972 espera por ShareLock em transação 313260420; bloqueado pelo processo 12060.
+Processo 12060 espera por ShareLock em transação 313257860; bloqueado pelo processo 22972.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto atualizava tupla (1043,1) na relação "products"
+
+[13:47:17] X Estoque — erro produto 21397: ERRO:  impasse detectado
+DETAIL:  Processo 22972 espera por ShareLock em transação 313260420; bloqueado pelo processo 12060.
+Processo 12060 espera por ShareLock em transação 313257860; bloqueado pelo processo 22972.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto atualizava tupla (1318,1) na relação "products"
+
+[13:47:18] X Estoque — erro produto 24403: ERRO:  impasse detectado
+DETAIL:  Processo 22972 espera por ShareLock em transação 313260420; bloqueado pelo processo 12060.
+Processo 12060 espera por ShareLock em transação 313257860; bloqueado pelo processo 22972.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto atualizava tupla (753,1) na relação "products"
+
+[13:47:20] X Estoque — erro produto 26076: ERRO:  impasse detectado
+DETAIL:  Processo 22972 espera por ShareLock em transação 313260420; bloqueado pelo processo 12060.
+Processo 12060 espera por ShareLock em transação 313257860; bloqueado pelo processo 22972.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto atualizava tupla (1837,1) na relação "products"
+
+[13:47:21] X Estoque — erro produto 29033: ERRO:  impasse detectado
+DETAIL:  Processo 22972 espera por ShareLock em transação 313260420; bloqueado pelo processo 12060.
+Processo 12060 espera por ShareLock em transação 313257860; bloqueado pelo processo 22972.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto atualizava tupla (744,14) na relação "products"
+
+[13:47:24] X Estoque — erro produto 29174: ERRO:  impasse detectado
+DETAIL:  Processo 22972 espera por ShareLock em transação 313260420; bloqueado pelo processo 12060.
+Processo 12060 espera por ShareLock em transação 313257860; bloqueado pelo processo 22972.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto atualizava tupla (1834,1) na relação "products"
+
+[13:47:25] X Estoque — erro produto 31455: ERRO:  impasse detectado
+DETAIL:  Processo 22972 espera por ShareLock em transação 313260420; bloqueado pelo processo 12060.
+Processo 12060 espera por ShareLock em transação 313257860; bloqueado pelo processo 22972.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto atualizava tupla (1168,1) na relação "products"
+
+[13:47:26] X Estoque — erro produto 31713: ERRO:  impasse detectado
+DETAIL:  Processo 22972 espera por ShareLock em transação 313260420; bloqueado pelo processo 12060.
+Processo 12060 espera por ShareLock em transação 313257860; bloqueado pelo processo 22972.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto atualizava tupla (1851,1) na relação "products"
+
+[13:47:26] ! Estoque — 22014 obtidos · 22005 atualizados · 9 erros · 17.4s
+[13:47:26] > Box Barcodes — sincronizando...
+[13:48:23] + Box Barcodes — 530 produtos atualizados · 56.6s
+[13:48:23] > Endereços WMS — sincronizando...
+[13:48:23] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[13:48:23] > NFs Recebimento — sincronizando...
+[13:48:25] + NFs Recebimento — 461 NFs · 1 novas · 460 atualizadas · 4131 itens · 1.9s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=111.5s
+------------------------------------------------------
+
+1:48:52 PM [express] [Sync] Sincronização concluída.
+1:48:53 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+1:48:54 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[13:53:25] > Loop — ciclo #22 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[13:53:25] > DB2 — conectando...
+[13:53:25] + DB2 — conectado em 0.03s
+[13:53:25] + PostgreSQL local — conectado
+[13:53:25] > Produtos — sincronizando lista completa do ERP...
+[13:53:38] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 13.0s
+[13:53:38] > Orçamentos — buscando últimos 31 dias...
+[13:53:56] + Orçamentos — 26052 obtidos · 26055 removidos (>=2026-03-12) · 26052 inseridos · 0 erros · 17.7s
+[13:53:59] ! Remoção ERP — 2 pedido(s) excluído(s): ['475335', '475333']
+[13:53:59] + Transformação — 4958 pedidos · 0 produtos novos · 1 itens novos · 3.3s
+[13:53:59] > Estoque — sincronizando do ERP...
+[13:54:08] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.9s
+[13:54:08] > Box Barcodes — sincronizando...
+[13:54:10] + Box Barcodes — 530 produtos atualizados · 1.6s
+[13:54:10] > Endereços WMS — sincronizando...
+[13:54:10] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.1s
+[13:54:10] > NFs Recebimento — sincronizando...
+[13:54:12] + NFs Recebimento — 461 NFs · 0 novas · 461 atualizadas · 4131 itens · 1.7s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=46.7s
+------------------------------------------------------
+
+1:56:28 PM [express] [scanning-ws] rafael desconectado
+1:57:08 PM [express] [Auto-Sync] Triggering DB sync...
+1:57:29 PM [express] [scanning-ws] rafael conectado
+1:57:51 PM [express] [Sync] Sincronização concluída.
+1:57:52 PM [print] pdf-to-printer falhou (Cannot read properties of undefined (reading 'match')), tentando fallback PowerShell...
+1:57:53 PM [print] 7 impressora(s) carregada(s) via fallback | padrão: "CutePDF Writer (1 redirecionada)"
+[13:59:12] > Loop — ciclo #23 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[13:59:12] > DB2 — conectando...
+[13:59:12] + DB2 — conectado em 0.06s
+[13:59:12] + PostgreSQL local — conectado
+[13:59:12] > Produtos — sincronizando lista completa do ERP...
+[13:59:20] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 7.9s
+[13:59:20] > Orçamentos — buscando últimos 31 dias...
+[13:59:32] + Orçamentos — 26053 obtidos · 26056 removidos (>=2026-03-12) · 26053 inseridos · 0 erros · 12.1s
+[13:59:35] ! Remoção ERP — 2 pedido(s) excluído(s): ['475340', '475339']
+[13:59:35] + Transformação — 4957 pedidos · 0 produtos novos · 3 itens novos · 3.0s
+[13:59:35] > Estoque — sincronizando do ERP...
+[13:59:43] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 7.6s
+[13:59:43] > Box Barcodes — sincronizando...
+[13:59:45] + Box Barcodes — 530 produtos atualizados · 1.9s
+[13:59:45] > Endereços WMS — sincronizando...
+[13:59:45] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.1s
+[13:59:45] > NFs Recebimento — sincronizando...
+[13:59:46] + NFs Recebimento — 461 NFs · 0 novas · 461 atualizadas · 4131 itens · 1.4s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=34.3s
+------------------------------------------------------
+
+[14:04:46] > Loop — ciclo #24 (a cada 300s)
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[14:04:46] > DB2 — conectando...
+[14:04:46] + DB2 — conectado em 0.09s
+[14:04:46] + PostgreSQL local — conectado
+[14:04:46] > Produtos — sincronizando lista completa do ERP...
+[14:04:55] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 9.0s
+[14:04:55] > Orçamentos — buscando últimos 31 dias...
+[14:05:11] + Orçamentos — 26053 obtidos · 26053 removidos (>=2026-03-12) · 26053 inseridos · 0 erros · 15.9s
+[14:05:15] + Transformação — 4957 pedidos · 0 produtos novos · 0 itens novos · 3.4s
+[14:05:15] > Estoque — sincronizando do ERP...
+[14:05:23] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.3s
+[14:05:23] > Box Barcodes — sincronizando...
+[14:05:25] + Box Barcodes — 530 produtos atualizados · 2.1s
+[14:05:25] > Endereços WMS — sincronizando...
+[14:05:25] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[14:05:25] > NFs Recebimento — sincronizando...
+[14:05:27] + NFs Recebimento — 461 NFs · 0 novas · 461 atualizadas · 4131 itens · 1.8s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=40.8s
+------------------------------------------------------
+
+2:07:08 PM [express] [Auto-Sync] Triggering DB sync...
+
+
+

@@ -8,6 +8,7 @@ import { createServer } from "http";
 import { seedDatabase } from "./seed";
 import { sql } from "drizzle-orm";
 import { db } from "./db";
+import { storage } from "./storage";
 import { setupPrintAgentWS } from "./print-agent";
 import { setupScanningWS } from "./ws-scanning";
 

@@ -14,7 +14,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Link } from "wouter";
-import { ArrowLeft, Settings, Package, Layers, AlertTriangle, CheckCircle2, RefreshCcw } from "lucide-react";
+import { ArrowLeft, Settings, Package, Layers, AlertTriangle, CheckCircle2, RefreshCcw, Link2, ToggleLeft, ToggleRight } from "lucide-react";
 
 type SeparationMode = "by_order" | "by_section";
 
@@ -45,6 +45,26 @@ export default function SeparationSettingsPage() {
 
   const { data: settings, isLoading } = useQuery<SeparationModeData>({
     queryKey: ["/api/system-settings/separation-mode"],
+  });
+
+  const { data: featureSettings, isLoading: featuresLoading } = useQuery<{ quickLinkEnabled: boolean }>({
+    queryKey: ["/api/system-settings/features"],
+  });
+
+  const featureMutation = useMutation({
+    mutationFn: async (quickLinkEnabled: boolean) => {
+      const res = await apiRequest("PATCH", "/api/system-settings/features", { quickLinkEnabled });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao alterar configuração");
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/system-settings/features"] });
+      toast({ description: "Configuração de funcionalidades atualizada." });
+    },
+    onError: (e: Error) => {
+      toast({ variant: "destructive", description: e.message });
+    },
   });
 
   const changeMutation = useMutation({
@@ -213,6 +233,43 @@ export default function SeparationSettingsPage() {
               Se houver separações em andamento, o sistema irá notificar e solicitar confirmação para forçar a troca.
             </p>
           </div>
+        </SectionCard>
+
+        <SectionCard title="Funcionalidades" icon={<Link2 className="h-4 w-4 text-primary" />}>
+          {featuresLoading ? (
+            <div className="flex items-center gap-2 text-muted-foreground py-4">
+              <RefreshCcw className="h-4 w-4 animate-spin" />
+              Carregando configurações...
+            </div>
+          ) : (
+            <div className="py-2">
+              <div className="flex items-center justify-between gap-4 rounded-lg border border-border px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <Link2 className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Vínculo Rápido de Embalagem</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Exibe o botão de vínculo rápido (ícone de corrente) nos módulos de separação, conferência e balcão.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  className="shrink-0 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                  onClick={() => featureMutation.mutate(!(featureSettings?.quickLinkEnabled ?? true))}
+                  disabled={featureMutation.isPending}
+                  data-testid="button-toggle-quick-link"
+                  title={featureSettings?.quickLinkEnabled ? "Desativar vínculo rápido" : "Ativar vínculo rápido"}
+                >
+                  {(featureSettings?.quickLinkEnabled ?? true)
+                    ? <ToggleRight className="h-8 w-8 text-green-600" />
+                    : <ToggleLeft className="h-8 w-8" />
+                  }
+                </button>
+              </div>
+            </div>
+          )}
         </SectionCard>
       </main>
 

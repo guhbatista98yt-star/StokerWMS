@@ -717,6 +717,30 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/system-settings/features", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const settings = await storage.getSystemSettings();
+      res.json({ quickLinkEnabled: settings.quickLinkEnabled ?? true });
+    } catch (error) {
+      log(`[Routes] Get features error: ${error instanceof Error ? error.message : String(error)}`);
+      res.status(500).json({ error: "Erro interno" });
+    }
+  });
+
+  app.patch("/api/system-settings/features", isAuthenticated, requireRole("administrador"), async (req: Request, res: Response) => {
+    try {
+      const { quickLinkEnabled } = req.body;
+      if (typeof quickLinkEnabled !== "boolean") {
+        return res.status(400).json({ error: "quickLinkEnabled deve ser boolean" });
+      }
+      const updated = await storage.updateQuickLinkEnabled(quickLinkEnabled, req.user?.id ?? "unknown");
+      res.json({ quickLinkEnabled: updated.quickLinkEnabled ?? true });
+    } catch (error) {
+      log(`[Routes] Update features error: ${error instanceof Error ? error.message : String(error)}`);
+      res.status(500).json({ error: "Erro interno" });
+    }
+  });
+
   app.patch("/api/system-settings/separation-mode", isAuthenticated, requireRole("supervisor", "administrador"), async (req: Request, res: Response) => {
     try {
       const { mode, force } = req.body;

@@ -214,6 +214,11 @@ export default function ConferenciaPage() {
   const workUnitsQueryKey = useSessionQueryKey(["/api/work-units?type=conferencia"]);
   const routesQueryKey = useSessionQueryKey(["/api/routes"]);
 
+  const { data: featureSettings } = useQuery<{ quickLinkEnabled: boolean }>({
+    queryKey: ["/api/system-settings/features"],
+    staleTime: 60_000,
+  });
+
   const { data: workUnits, isLoading } = useQuery<WorkUnitWithDetails[]>({
     queryKey: workUnitsQueryKey,
     refetchInterval: () =>
@@ -1391,16 +1396,18 @@ export default function ConferenciaPage() {
                 {allMyUnits.map(wu => wu.order.erpOrderId).filter((v, i, a) => a.indexOf(v) === i).join(", ")}
               </span>
               <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                  onClick={() => setShowQuickLinkModal(true)}
-                  title="Vínculo rápido de embalagem"
-                  data-testid="button-quick-link-conferencia"
-                >
-                  <Link2 className="h-3 w-3" />
-                </Button>
+                {(featureSettings?.quickLinkEnabled ?? true) && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowQuickLinkModal(true)}
+                    title="Vínculo rápido de embalagem"
+                    data-testid="button-quick-link-conferencia"
+                  >
+                    <Link2 className="h-3 w-3" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"

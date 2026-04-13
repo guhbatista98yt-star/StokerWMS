@@ -459,6 +459,7 @@ export const nfItems = pgTable("nf_items", {
 export const systemSettings = pgTable("system_settings", {
   id: text("id").primaryKey().default("global"),
   separationMode: text("separation_mode").notNull().default("by_order").$type<SeparationMode>(),
+  quickLinkEnabled: boolean("quick_link_enabled").notNull().default(true),
   updatedAt: text("updated_at").notNull().default(new Date().toISOString()),
   updatedBy: text("updated_by"),
 });

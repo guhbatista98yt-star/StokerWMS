@@ -174,6 +174,7 @@ export interface IStorage {
   // System Settings
   getSystemSettings(): Promise<SystemSettings>;
   updateSeparationMode(mode: SeparationMode, updatedBy: string): Promise<SystemSettings>;
+  updateQuickLinkEnabled(enabled: boolean, updatedBy: string): Promise<SystemSettings>;
   getActiveSeparationConflicts(): Promise<{ activeSessions: number; activeWorkUnits: number; affectedSections: string[]; activeUsers: string[] }>;
   cancelAllPickingSessions(): Promise<void>;
   resetActiveWorkUnits(): Promise<number>;
@@ -2341,6 +2342,16 @@ export class DatabaseStorage implements IStorage {
       .returning();
     if (updated) return updated;
     const [created] = await db.insert(systemSettings).values({ id: "global", separationMode: mode, updatedAt: new Date().toISOString(), updatedBy }).returning();
+    return created;
+  }
+
+  async updateQuickLinkEnabled(enabled: boolean, updatedBy: string): Promise<SystemSettings> {
+    const [updated] = await db.update(systemSettings)
+      .set({ quickLinkEnabled: enabled, updatedAt: new Date().toISOString(), updatedBy })
+      .where(eq(systemSettings.id, "global"))
+      .returning();
+    if (updated) return updated;
+    const [created] = await db.insert(systemSettings).values({ id: "global", separationMode: "by_order", quickLinkEnabled: enabled, updatedAt: new Date().toISOString(), updatedBy }).returning();
     return created;
   }
 
