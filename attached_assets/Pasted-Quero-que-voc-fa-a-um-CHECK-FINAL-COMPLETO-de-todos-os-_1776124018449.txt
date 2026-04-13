@@ -1,0 +1,281 @@
+Quero que você faça um CHECK FINAL COMPLETO de todos os módulos do app web, como última validação antes de operação, com postura de programador sênior extremamente criterioso.
+
+IMPORTANTE:
+Não quero uma revisão superficial.
+Não quero apenas comentários genéricos.
+Não quero apenas melhorias visuais.
+Quero uma revisão final de produção, módulo por módulo, procurando qualquer erro, bug, regressão, inconsistência, falha de cálculo, falha de dados, falha de permissão, falha de responsividade, falha de integração, falha de performance ou qualquer comportamento que possa comprometer a operação real.
+
+Quero que você trate a aplicação como se fosse fazer a aprovação final para produção.
+Tudo que um programador sênior condenaria deve ser:
+- corrigido
+- refatorado
+- endurecido
+- ou sinalizado claramente como risco imediato
+
+============================================================
+1. OBJETIVO
+============================================================
+
+Fazer uma validação final completa do app web inteiro, garantindo que:
+
+- todos os módulos funcionem corretamente
+- os dados exibidos sejam confiáveis
+- não existam bugs que travem ou prejudiquem a operação
+- não existam regressões após as últimas implementações
+- os cálculos estejam corretos
+- os dashboards estejam consistentes
+- as permissões estejam corretas
+- a aplicação esteja estável
+- a UI/UX esteja coerente e profissional
+- a responsividade esteja funcional
+- o sistema esteja pronto para produção
+
+============================================================
+2. REVISÃO MÓDULO POR MÓDULO
+============================================================
+
+Quero revisar todos os módulos/telas/fluxos do app web, incluindo os principais como:
+
+- login
+- dashboard principal
+- campanhas
+- criação de campanhas
+- tela do vendedor
+- dashboard do supervisor
+- comissões
+- metas
+- copiloto de compras
+- configuração de compras
+- usuários e permissões
+- fila de pedidos
+- módulo balcão
+- relatórios
+- exportações
+- configurações gerais
+- notificações
+- qualquer outro módulo existente na aplicação
+
+Não pule nenhum módulo.
+Revisar tudo de ponta a ponta.
+
+============================================================
+3. O QUE DEVE SER VALIDADO EM CADA MÓDULO
+============================================================
+
+Para cada módulo, revisar:
+
+- funcionamento geral
+- navegação
+- carregamento
+- estados de erro
+- estados de loading
+- formulários
+- validações
+- filtros
+- buscas
+- tabelas
+- cards
+- gráficos
+- cálculos
+- persistência
+- atualização em tempo real, se existir
+- permissões
+- comportamento por perfil
+- responsividade
+- mobile
+- consistência visual
+- integração com backend/API
+- consistência com o banco de dados
+
+============================================================
+4. BUGS, ERROS E REGRESSÕES
+============================================================
+
+Quero procurar e corrigir:
+
+- bugs atuais
+- erros silenciosos
+- regressões
+- conflitos entre módulos
+- tela nova quebrando tela antiga
+- filtros inconsistentes
+- resultados divergentes
+- dashboard diferente do relatório
+- card mostrando dado errado
+- cálculo errado
+- comissão errada
+- meta errada
+- campanha errada
+- sugestão errada
+- status incorreto
+- dados antigos em tela
+- travas indevidas
+- permissões falhas
+- estados quebrados
+- comportamento imprevisível
+
+============================================================
+5. CÁLCULOS E DADOS — CRÍTICO
+============================================================
+
+Validar com rigor:
+
+- campanhas
+- metas
+- comissões
+- rankings
+- progresso
+- memória de cálculo
+- dashboards
+- relatórios
+- exportações
+- copiloto de compras
+- status financeiros
+- status operacionais
+- indicadores dos cards
+
+Quero tolerância zero para cálculo inconsistente.
+
+============================================================
+6. MÚLTIPLOS USUÁRIOS E OPERAÇÃO REAL
+============================================================
+
+A aplicação será usada por vários usuários.
+Validar riscos de:
+
+- clique duplo
+- gravação duplicada
+- edição simultânea
+- conflito entre usuários
+- lock inconsistente
+- restore inválido
+- dado divergente entre sessão e banco
+- SSE/polling fora de sincronia
+- estados inválidos em operação real
+
+============================================================
+7. PERMISSÕES E SEGURANÇA
+============================================================
+
+Validar novamente:
+- autenticação
+- sessão
+- proteção de rotas
+- proteção no backend
+- perfis
+- escopos
+- visualização por usuário
+- alteração de campanhas
+- alteração de comissão
+- alteração de metas
+- alteração de usuários
+- exportações
+- logs e auditoria
+
+Ninguém deve ver ou alterar o que não deveria.
+
+============================================================
+8. UX/UI E RESPONSIVIDADE
+============================================================
+
+Quero revisão final visual e funcional em todas as telas.
+
+Corrigir se houver:
+- desalinhamento
+- card ruim
+- texto quebrado
+- botão cortado
+- grid ruim
+- tabela ruim
+- layout fora de esquadro
+- problema em TV, desktop, notebook, tablet e celular
+- hierarquia fraca
+- excesso de informação
+- visual abaixo do padrão premium solicitado
+
+============================================================
+9. PERFORMANCE
+============================================================
+
+Validar:
+- telas lentas
+- dashboards pesados
+- consultas desnecessárias
+- render excessivo
+- filtros ruins
+- gargalos em listas
+- gargalos em gráficos
+- gargalos em módulos novos
+- carregamentos que prejudiquem a operação
+
+============================================================
+10. BANCO E INTEGRIDADE
+============================================================
+
+Verificar:
+- tabelas faltantes
+- colunas faltantes
+- migrations frágeis
+- duplicidade
+- persistência parcial
+- upsert incorreto
+- dados inconsistentes
+- sync ruim
+- integração DB2 → PostgreSQL coerente
+- risco de resultado errado por base inconsistente
+
+============================================================
+11. O QUE UM PROGRAMADOR SÊNIOR CONDENARIA
+============================================================
+
+Quero que você tenha visão crítica real.
+
+Tudo que um programador sênior condenaria, como por exemplo:
+- código improvisado
+- lógica espalhada
+- regra frágil
+- cálculo inseguro
+- comportamento imprevisível
+- UI confusa
+- módulo bonito mas errado
+- backend fraco
+- controle de acesso incompleto
+- dependência arriscada
+- ponto de quebra futuro
+
+deve ser corrigido ou refeito, e quero o motivo técnico.
+
+============================================================
+12. O QUE EU ESPERO COMO ENTREGA
+============================================================
+
+Quero que você:
+
+1. revise todos os módulos do app web
+2. identifique bugs, regressões e fragilidades
+3. corrija os problemas encontrados
+4. refatore pontos fracos
+5. endureça a aplicação para produção
+6. valide dados, cálculos, dashboards e relatórios
+7. valide permissões e segurança
+8. valide responsividade e mobile
+9. valide estabilidade operacional
+10. deixe a aplicação no nível que um programador sênior aprovaria
+
+============================================================
+13. FORMATO FINAL DA RESPOSTA
+============================================================
+
+No final, me responda APENAS com estes blocos, de forma objetiva:
+
+1. Módulos revisados
+2. Problemas encontrados
+3. O que um programador sênior condenaria e por quê
+4. Correções aplicadas
+5. Pontos que ainda exigem atenção imediata
+
+IMPORTANTE:
+Se houver muitos pontos, seja objetivo e direto.
+Não gerar relatório gigante.
+Quero execução real, correções reais e resumo claro.

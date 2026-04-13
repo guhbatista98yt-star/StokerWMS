@@ -491,9 +491,13 @@ export default function SeparacaoPage() {
       setSessionRestored(true);
       const saved = loadSession();
       if (saved && saved.workUnitIds.length > 0) {
-        let stillLockedIds = saved.workUnitIds.filter(id =>
-          workUnits.some(wu => wu.id === id && wu.lockedBy === user.id)
-        );
+        const nowSep = new Date();
+        let stillLockedIds = saved.workUnitIds.filter(id => {
+          const wu = workUnits.find(w => w.id === id);
+          if (!wu || wu.lockedBy !== user.id) return false;
+          if (wu.lockExpiresAt && new Date(wu.lockExpiresAt) <= nowSep) return false;
+          return true;
+        });
         // Validate order IDs: if the session saved orderIds, only restore WUs that
         // belong to those same orders — prevents cross-order session restoration
         // from crashed sessions that had a different order open.

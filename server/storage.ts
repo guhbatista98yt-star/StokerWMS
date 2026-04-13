@@ -102,7 +102,7 @@ export interface IStorage {
   checkAllConferenceUnitsComplete(orderId: string): Promise<boolean>;
 
   // Exceptions
-  getAllExceptions(): Promise<(Exception & { orderItem: OrderItem & { product: Product; order: Order }; reportedByUser: User; workUnit: WorkUnit })[]>;
+  getAllExceptions(companyId?: number): Promise<(Exception & { orderItem: OrderItem & { product: Product; order: Order }; reportedByUser: User; workUnit: WorkUnit })[]>;
 
   createException(exception: InsertException): Promise<Exception>;
   deleteException(id: string): Promise<void>;
@@ -1378,7 +1378,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Exceptions
-  async getAllExceptions(): Promise<(Exception & { orderItem: OrderItem & { product: Product; order: Order }; reportedByUser: User; workUnit: WorkUnit })[]> {
+  async getAllExceptions(companyId?: number): Promise<(Exception & { orderItem: OrderItem & { product: Product; order: Order }; reportedByUser: User; workUnit: WorkUnit })[]> {
+    const conditions = companyId ? [eq(orders.companyId, companyId)] : [];
     const rows = await db
       .select({
         exc: exceptions,
@@ -1394,6 +1395,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(orders, eq(orderItems.orderId, orders.id))
       .innerJoin(users, eq(exceptions.reportedBy, users.id))
       .innerJoin(workUnits, eq(exceptions.workUnitId, workUnits.id))
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(exceptions.createdAt));
 
     return rows.map(r => ({

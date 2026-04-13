@@ -55,7 +55,7 @@ const createUserSchema = z.object({
   username: z.string().min(3, "Mínimo 3 caracteres"),
   password: z.string().min(4, "Mínimo 4 caracteres"),
   name: z.string().min(2, "Nome obrigatório"),
-  role: z.enum(["administrador", "supervisor", "separacao", "conferencia", "balcao"]),
+  role: z.enum(["administrador", "supervisor", "separacao", "conferencia", "balcao", "fila_pedidos", "recebedor", "empilhador", "conferente_wms"]),
   sections: z.array(z.string()).optional(),
   settings: settingsSchema.optional(),
   active: z.boolean().default(true),
@@ -78,6 +78,9 @@ const roleLabels: Record<string, { label: string; color: string }> = {
   conferencia: { label: "Conferência", color: "bg-teal-100 text-teal-700" },
   balcao: { label: "Balcão", color: "bg-orange-100 text-orange-700" },
   fila_pedidos: { label: "Fila de Pedidos", color: "bg-amber-100 text-amber-700" },
+  recebedor: { label: "Recebedor", color: "bg-sky-100 text-sky-700" },
+  empilhador: { label: "Empilhador", color: "bg-indigo-100 text-indigo-700" },
+  conferente_wms: { label: "Conferente WMS", color: "bg-emerald-100 text-emerald-700" },
 };
 
 export default function UsersPage() {
@@ -427,6 +430,9 @@ export default function UsersPage() {
                         <SelectItem value="conferencia">Conferência</SelectItem>
                         <SelectItem value="balcao">Balcão</SelectItem>
                         <SelectItem value="fila_pedidos">Fila de Pedidos</SelectItem>
+                        <SelectItem value="recebedor">Recebedor</SelectItem>
+                        <SelectItem value="empilhador">Empilhador</SelectItem>
+                        <SelectItem value="conferente_wms">Conferente WMS</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -599,6 +605,9 @@ export default function UsersPage() {
                         <SelectItem value="conferencia">Conferência</SelectItem>
                         <SelectItem value="balcao">Balcão</SelectItem>
                         <SelectItem value="fila_pedidos">Fila de Pedidos</SelectItem>
+                        <SelectItem value="recebedor">Recebedor</SelectItem>
+                        <SelectItem value="empilhador">Empilhador</SelectItem>
+                        <SelectItem value="conferente_wms">Conferente WMS</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

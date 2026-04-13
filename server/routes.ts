@@ -2554,7 +2554,7 @@ export async function registerRoutes(
   // Exceptions
   app.get("/api/exceptions", isAuthenticated, requireCompany, async (req: Request, res: Response) => {
     try {
-      const exceptions = await storage.getAllExceptions();
+      const exceptions = await storage.getAllExceptions(req.companyId ?? undefined);
       res.json(exceptions);
     } catch (error) {
       log(`[Routes] Get exceptions error: ${error instanceof Error ? error.message : String(error)}`);
@@ -2620,7 +2620,7 @@ export async function registerRoutes(
   app.delete("/api/exceptions/:id", isAuthenticated, requireCompany, requireRole("administrador"), async (req: Request, res: Response) => {
     try {
       const exceptionId = req.params.id as string;
-      const allExceptions = await storage.getAllExceptions();
+      const allExceptions = await storage.getAllExceptions(req.companyId ?? undefined);
       const exc = allExceptions.find((e: any) => e.id === exceptionId);
       if (!exc) {
         return res.status(404).json({ error: "Exceção não encontrada" });

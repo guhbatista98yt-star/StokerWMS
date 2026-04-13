@@ -434,9 +434,13 @@ export default function ConferenciaPage() {
       setSessionRestored(true);
       const saved = loadSession();
       if (saved && saved.workUnitIds.length > 0) {
-        const stillLockedIds = saved.workUnitIds.filter(id =>
-          workUnits.some(wu => wu.id === id && wu.lockedBy === user.id)
-        );
+        const nowConf = new Date();
+        const stillLockedIds = saved.workUnitIds.filter(id => {
+          const wu = workUnits.find(w => w.id === id);
+          if (!wu || wu.lockedBy !== user.id) return false;
+          if (wu.lockExpiresAt && new Date(wu.lockExpiresAt) <= nowConf) return false;
+          return true;
+        });
         if (stillLockedIds.length > 0) {
           setStep("checking");
           setCheckingTab(saved.tab);
@@ -448,7 +452,12 @@ export default function ConferenciaPage() {
         }
       }
 
-      const myUnit = workUnits.find(wu => wu.lockedBy === user.id && wu.status !== "concluido");
+      const nowConf2 = new Date();
+      const myUnit = workUnits.find(wu =>
+        wu.lockedBy === user.id &&
+        wu.status !== "concluido" &&
+        (!wu.lockExpiresAt || new Date(wu.lockExpiresAt) > nowConf2)
+      );
       if (myUnit) {
         const myIds = workUnits.filter(wu => wu.lockedBy === user.id).map(wu => wu.id);
         setStep("checking");

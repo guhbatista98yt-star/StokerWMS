@@ -120,7 +120,7 @@ export default function OrdersPage() {
   }, [allVolumes]);
 
   // --- SSE REAL-TIME UPDATES ---
-  const handleSSEMessage = useCallback((type: string, _data: unknown) => {
+  const handleSSEMessage = useCallback((type: string, data: unknown) => {
     queryClient.invalidateQueries({ queryKey: ordersQueryKey });
 
     if (type === 'route_updated') {
@@ -128,9 +128,10 @@ export default function OrdersPage() {
     }
 
     if (type === 'exception_created') {
+      const d = data as Record<string, unknown> | null;
       toast({
         title: "Nova Exceção",
-        description: `Exceção registrada no pedido ${data.orderId}`,
+        description: d?.orderId ? `Exceção registrada no pedido ${d.orderId}` : "Nova exceção registrada",
         variant: "destructive"
       });
     }
