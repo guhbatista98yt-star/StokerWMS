@@ -3866,9 +3866,9 @@ export async function registerRoutes(
         FROM work_units wu
         JOIN users u ON wu.locked_by = u.id
         WHERE wu.company_id = ${companyId}
-          AND wu.locked_at IS NOT NULL
-          AND wu.locked_at >= ${fromStr}
-          AND wu.locked_at <= ${toStr}
+          AND wu.locked_by IS NOT NULL
+          AND COALESCE(wu.completed_at, wu.locked_at) >= ${fromStr}
+          AND COALESCE(wu.completed_at, wu.locked_at) <= ${toStr}
         GROUP BY wu.locked_by, u.name, u.username, u.role
       `);
 
@@ -3904,9 +3904,9 @@ export async function registerRoutes(
         WHERE wu.type = 'separacao'
           AND wu.status = 'concluido'
           AND wu.company_id = ${companyId}
-          AND wu.locked_at IS NOT NULL
-          AND wu.locked_at >= ${fromStr}
-          AND wu.locked_at <= ${toStr}
+          AND wu.locked_by IS NOT NULL
+          AND wu.completed_at >= ${fromStr}
+          AND wu.completed_at <= ${toStr}
         GROUP BY wu.locked_by
       `);
 
@@ -3982,9 +3982,9 @@ export async function registerRoutes(
         FROM work_units wu
         WHERE wu.status = 'concluido'
           AND wu.company_id = ${companyId}
-          AND wu.locked_at IS NOT NULL
-          AND wu.locked_at >= ${fromStr}
-          AND wu.locked_at <= ${toStr}
+          AND wu.locked_by IS NOT NULL
+          AND wu.completed_at >= ${fromStr}
+          AND wu.completed_at <= ${toStr}
         GROUP BY wu.locked_by
       `);
 
@@ -4002,12 +4002,11 @@ export async function registerRoutes(
         FROM work_units wu
         WHERE wu.status = 'concluido'
           AND wu.type IN ('separacao', 'conferencia')
-          AND COALESCE(wu.started_at, wu.locked_at) IS NOT NULL
+          AND wu.locked_by IS NOT NULL
           AND wu.completed_at IS NOT NULL
           AND wu.company_id = ${companyId}
-          AND wu.locked_at IS NOT NULL
-          AND wu.locked_at >= ${fromStr}
-          AND wu.locked_at <= ${toStr}
+          AND wu.completed_at >= ${fromStr}
+          AND wu.completed_at <= ${toStr}
         ORDER BY wu.completed_at DESC
         LIMIT 600
       `);
@@ -4027,9 +4026,8 @@ export async function registerRoutes(
         WHERE wu.status = 'concluido'
           AND wu.completed_at IS NOT NULL
           AND wu.company_id = ${companyId}
-          AND wu.locked_at IS NOT NULL
-          AND wu.locked_at >= ${fromStr}
-          AND wu.locked_at <= ${toStr}
+          AND wu.completed_at >= ${fromStr}
+          AND wu.completed_at <= ${toStr}
         GROUP BY LEFT(wu.completed_at, 10)
         ORDER BY dia ASC
       `);

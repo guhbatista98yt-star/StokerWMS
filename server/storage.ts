@@ -767,7 +767,7 @@ export class DatabaseStorage implements IStorage {
 
         if (allComplete) {
           await tx.update(workUnits)
-            .set({ status: "concluido", completedAt: now, lockedBy: null, lockedAt: null })
+            .set({ status: "concluido", completedAt: now, lockExpiresAt: null })
             .where(eq(workUnits.id, wuId));
           completed.push(wuId);
           sseOrders.add(workUnit.orderId);
@@ -1122,6 +1122,7 @@ export class DatabaseStorage implements IStorage {
         })
         .where(and(
           inArray(workUnits.id, workUnitIds),
+          ne(workUnits.status, "concluido"),
           or(
             isNull(workUnits.lockedBy),
             eq(workUnits.lockedBy, userId),
@@ -1247,7 +1248,7 @@ export class DatabaseStorage implements IStorage {
       if (allComplete) {
         if (autoComplete) {
           await tx.update(workUnits)
-            .set({ status: "concluido", completedAt: new Date().toISOString(), lockedBy: null, lockedAt: null })
+            .set({ status: "concluido", completedAt: new Date().toISOString(), lockExpiresAt: null })
             .where(eq(workUnits.id, id));
         }
         if (finalOrderStatus) {
@@ -1895,7 +1896,7 @@ export class DatabaseStorage implements IStorage {
 
       if (allComplete) {
         await tx.update(workUnits)
-          .set({ status: "concluido", completedAt: new Date().toISOString(), lockedBy: null, lockedAt: null })
+          .set({ status: "concluido", completedAt: new Date().toISOString(), lockExpiresAt: null })
           .where(eq(workUnits.id, id));
 
         const [currentOrder] = await tx.select().from(orders).where(eq(orders.id, workUnit.orderId)).limit(1);
