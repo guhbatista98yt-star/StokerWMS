@@ -122,7 +122,7 @@ export default function SeparationSettingsPage() {
     changeMutation.mutate({ mode: targetMode, force: true });
   };
 
-  const modeLabel = (mode: SeparationMode) => mode === "by_order" ? "Por Pedido/Rota" : "Por Seção";
+  const modeLabel = (mode: SeparationMode) => mode === "by_order" ? "Por Seção" : "Por Pedido/Rota";
 
   const currentMode = settings?.separationMode ?? "by_order";
 
@@ -166,7 +166,7 @@ export default function SeparationSettingsPage() {
                 variant="outline"
                 className={currentMode === "by_order" ? "bg-blue-100 text-blue-700 border-0 ml-auto" : "bg-purple-100 text-purple-700 border-0 ml-auto"}
               >
-                {currentMode === "by_order" ? "Por Pedido" : "Por Seção"}
+                {currentMode === "by_order" ? "Por Seção" : "Por Pedido"}
               </Badge>
             </div>
           )}
@@ -189,14 +189,14 @@ export default function SeparationSettingsPage() {
                   <Package className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="font-semibold">Por Pedido / Rota</p>
+                  <p className="font-semibold">Por Seção</p>
                   {currentMode === "by_order" && (
                     <Badge variant="outline" className="bg-blue-100 text-blue-700 border-0 text-xs mt-0.5">Ativo</Badge>
                   )}
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
-                O separador vê o pedido inteiro com todos os produtos. Apenas um operador por pedido — exclusivo.
+                O separador acessa todos os produtos da sua seção em qualquer pedido. Vários operadores podem trabalhar no mesmo pedido ao mesmo tempo.
               </p>
             </button>
 
@@ -215,14 +215,14 @@ export default function SeparationSettingsPage() {
                   <Layers className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
-                  <p className="font-semibold">Por Seção</p>
+                  <p className="font-semibold">Por Pedido / Rota</p>
                   {currentMode === "by_section" && (
                     <Badge variant="outline" className="bg-purple-100 text-purple-700 border-0 text-xs mt-0.5">Ativo</Badge>
                   )}
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
-                O separador vê todos os pedidos, mas coleta apenas os produtos das suas seções. Vários operadores podem entrar no mesmo pedido simultaneamente.
+                O separador recebe um pedido inteiro para separar. Apenas um operador por pedido — exclusivo.
               </p>
             </button>
           </div>
