@@ -1,0 +1,577 @@
+[1G[0K⠙[1G[0KSeeding database...
+Checking for existing users...
+Existing users count: [33m14[39m
+Database already seeded
+6:58:50 PM [express] [Routes] Registering routes...
+6:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:58:50 PM [print] [agent] WebSocket server iniciado em /ws/print-agent
+6:58:50 PM [express] [scanning-ws] WebSocket scanning server iniciado em /ws/scanning
+6:58:52 PM [express] Servidor iniciado na porta 5000
+6:58:57 PM [express] [Auto-Sync] Triggering DB sync...
+6:58:57 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:58:57 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+7:08:50 PM [express] [Auto-Sync] Triggering DB sync...
+7:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:18:50 PM [express] [Auto-Sync] Triggering DB sync...
+7:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:28:50 PM [express] [Auto-Sync] Triggering DB sync...
+7:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:38:50 PM [express] [Auto-Sync] Triggering DB sync...
+7:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:48:50 PM [express] [Auto-Sync] Triggering DB sync...
+7:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:58:50 PM [express] [Auto-Sync] Triggering DB sync...
+7:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:58:50 PM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+8:08:50 PM [express] [Auto-Sync] Triggering DB sync...
+8:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:18:50 PM [express] [Auto-Sync] Triggering DB sync...
+8:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:28:50 PM [express] [Auto-Sync] Triggering DB sync...
+8:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:38:50 PM [express] [Auto-Sync] Triggering DB sync...
+8:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:48:50 PM [express] [Auto-Sync] Triggering DB sync...
+8:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:58:50 PM [express] [Auto-Sync] Triggering DB sync...
+8:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:58:50 PM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+9:08:50 PM [express] [Auto-Sync] Triggering DB sync...
+9:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:18:50 PM [express] [Auto-Sync] Triggering DB sync...
+9:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:28:50 PM [express] [Auto-Sync] Triggering DB sync...
+9:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:38:50 PM [express] [Auto-Sync] Triggering DB sync...
+9:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:48:50 PM [express] [Auto-Sync] Triggering DB sync...
+9:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:58:50 PM [express] [Auto-Sync] Triggering DB sync...
+9:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:58:50 PM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+10:08:50 PM [express] [Auto-Sync] Triggering DB sync...
+10:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m10:12:42 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/supervisor/reports/picking-list.tsx, /src/index.css[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m10:13:18 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/supervisor/reports/picking-list.tsx, /src/index.css[22m [33m(x2)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m10:13:30 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/supervisor/reports/picking-list.tsx, /src/index.css[22m [33m(x3)[39m
+10:18:50 PM [express] [Auto-Sync] Triggering DB sync...
+10:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:22:45 PM [express] [Routes] Company: 3 | Orders: 3 | PP filter: ["60","61"] | Items in report: 41 | PPs in result: [61,60]
+10:23:23 PM [express] [Routes] Company: 3 | Orders: 3 | PP filter: ["60","61"] | Items in report: 41 | PPs in result: [61,60]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m10:25:17 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/supervisor/reports/picking-list.tsx, /src/index.css[22m [33m(x4)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m10:25:33 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/supervisor/reports/picking-list.tsx, /src/index.css[22m [33m(x5)[39m
+10:25:55 PM [express] [Routes] Company: 3 | Orders: 3 | PP filter: ["60","61"] | Items in report: 41 | PPs in result: [61,60]
+10:28:50 PM [express] [Auto-Sync] Triggering DB sync...
+10:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:38:50 PM [express] [Auto-Sync] Triggering DB sync...
+10:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:48:50 PM [express] [Auto-Sync] Triggering DB sync...
+10:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:58:50 PM [express] [Auto-Sync] Triggering DB sync...
+10:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:58:50 PM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+11:08:50 PM [express] [Auto-Sync] Triggering DB sync...
+11:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:18:50 PM [express] [Auto-Sync] Triggering DB sync...
+11:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:28:50 PM [express] [Auto-Sync] Triggering DB sync...
+11:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:38:50 PM [express] [Auto-Sync] Triggering DB sync...
+11:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:48:50 PM [express] [Auto-Sync] Triggering DB sync...
+11:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:58:50 PM [express] [Auto-Sync] Triggering DB sync...
+11:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:58:50 PM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+12:08:50 AM [express] [Auto-Sync] Triggering DB sync...
+12:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:18:50 AM [express] [Auto-Sync] Triggering DB sync...
+12:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:28:50 AM [express] [Auto-Sync] Triggering DB sync...
+12:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:38:50 AM [express] [Auto-Sync] Triggering DB sync...
+12:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:48:50 AM [express] [Auto-Sync] Triggering DB sync...
+12:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:58:50 AM [express] [Auto-Sync] Triggering DB sync...
+12:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:58:50 AM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+1:08:50 AM [express] [Auto-Sync] Triggering DB sync...
+1:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:18:50 AM [express] [Auto-Sync] Triggering DB sync...
+1:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:28:50 AM [express] [Auto-Sync] Triggering DB sync...
+1:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:38:50 AM [express] [Auto-Sync] Triggering DB sync...
+1:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:48:50 AM [express] [Auto-Sync] Triggering DB sync...
+1:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:58:50 AM [express] [Auto-Sync] Triggering DB sync...
+1:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:58:50 AM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+2:08:50 AM [express] [Auto-Sync] Triggering DB sync...
+2:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:18:50 AM [express] [Auto-Sync] Triggering DB sync...
+2:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:28:50 AM [express] [Auto-Sync] Triggering DB sync...
+2:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:38:50 AM [express] [Auto-Sync] Triggering DB sync...
+2:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:48:50 AM [express] [Auto-Sync] Triggering DB sync...
+2:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:58:50 AM [express] [Auto-Sync] Triggering DB sync...
+2:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:58:50 AM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+3:08:50 AM [express] [Auto-Sync] Triggering DB sync...
+3:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:18:50 AM [express] [Auto-Sync] Triggering DB sync...
+3:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:28:50 AM [express] [Auto-Sync] Triggering DB sync...
+3:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:38:50 AM [express] [Auto-Sync] Triggering DB sync...
+3:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:48:50 AM [express] [Auto-Sync] Triggering DB sync...
+3:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:58:50 AM [express] [Auto-Sync] Triggering DB sync...
+3:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:58:50 AM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+4:08:50 AM [express] [Auto-Sync] Triggering DB sync...
+4:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:18:50 AM [express] [Auto-Sync] Triggering DB sync...
+4:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:28:50 AM [express] [Auto-Sync] Triggering DB sync...
+4:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:38:50 AM [express] [Auto-Sync] Triggering DB sync...
+4:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:48:50 AM [express] [Auto-Sync] Triggering DB sync...
+4:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:58:50 AM [express] [Auto-Sync] Triggering DB sync...
+4:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:58:50 AM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+5:08:50 AM [express] [Auto-Sync] Triggering DB sync...
+5:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:18:50 AM [express] [Auto-Sync] Triggering DB sync...
+5:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:28:50 AM [express] [Auto-Sync] Triggering DB sync...
+5:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:38:50 AM [express] [Auto-Sync] Triggering DB sync...
+5:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:48:50 AM [express] [Auto-Sync] Triggering DB sync...
+5:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:58:50 AM [express] [Auto-Sync] Triggering DB sync...
+5:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:58:50 AM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+6:08:50 AM [express] [Auto-Sync] Triggering DB sync...
+6:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:18:50 AM [express] [Auto-Sync] Triggering DB sync...
+6:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:28:50 AM [express] [Auto-Sync] Triggering DB sync...
+6:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:38:50 AM [express] [Auto-Sync] Triggering DB sync...
+6:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:48:50 AM [express] [Auto-Sync] Triggering DB sync...
+6:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:58:50 AM [express] [Auto-Sync] Triggering DB sync...
+6:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:58:50 AM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+7:08:50 AM [express] [Auto-Sync] Triggering DB sync...
+7:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:18:50 AM [express] [Auto-Sync] Triggering DB sync...
+7:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:28:50 AM [express] [Auto-Sync] Triggering DB sync...
+7:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:38:50 AM [express] [Auto-Sync] Triggering DB sync...
+7:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:48:50 AM [express] [Auto-Sync] Triggering DB sync...
+7:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:58:50 AM [express] [Auto-Sync] Triggering DB sync...
+7:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:58:50 AM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+8:08:50 AM [express] [Auto-Sync] Triggering DB sync...
+8:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:18:50 AM [express] [Auto-Sync] Triggering DB sync...
+8:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:28:50 AM [express] [Auto-Sync] Triggering DB sync...
+8:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:38:50 AM [express] [Auto-Sync] Triggering DB sync...
+8:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:48:50 AM [express] [Auto-Sync] Triggering DB sync...
+8:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:58:50 AM [express] [Auto-Sync] Triggering DB sync...
+8:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+8:58:50 AM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+9:08:50 AM [express] [Auto-Sync] Triggering DB sync...
+9:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:18:50 AM [express] [Auto-Sync] Triggering DB sync...
+9:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:28:50 AM [express] [Auto-Sync] Triggering DB sync...
+9:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:38:50 AM [express] [Auto-Sync] Triggering DB sync...
+9:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:48:50 AM [express] [Auto-Sync] Triggering DB sync...
+9:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:58:50 AM [express] [Auto-Sync] Triggering DB sync...
+9:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+9:58:50 AM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+10:08:50 AM [express] [Auto-Sync] Triggering DB sync...
+10:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:18:50 AM [express] [Auto-Sync] Triggering DB sync...
+10:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:28:50 AM [express] [Auto-Sync] Triggering DB sync...
+10:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:38:50 AM [express] [Auto-Sync] Triggering DB sync...
+10:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:48:50 AM [express] [Auto-Sync] Triggering DB sync...
+10:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:58:50 AM [express] [Auto-Sync] Triggering DB sync...
+10:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+10:58:50 AM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+11:08:50 AM [express] [Auto-Sync] Triggering DB sync...
+11:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:08:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:18:50 AM [express] [Auto-Sync] Triggering DB sync...
+11:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:18:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:28:50 AM [express] [Auto-Sync] Triggering DB sync...
+11:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:28:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:38:50 AM [express] [Auto-Sync] Triggering DB sync...
+11:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:38:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:48:50 AM [express] [Auto-Sync] Triggering DB sync...
+11:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:48:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:58:50 AM [express] [Auto-Sync] Triggering DB sync...
+11:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:58:50 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+11:58:50 AM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+12:08:50 PM [express] [Auto-Sync] Triggering DB sync...
+12:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:18:50 PM [express] [Auto-Sync] Triggering DB sync...
+12:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:28:50 PM [express] [Auto-Sync] Triggering DB sync...
+12:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:38:50 PM [express] [Auto-Sync] Triggering DB sync...
+12:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:48:50 PM [express] [Auto-Sync] Triggering DB sync...
+12:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:58:50 PM [express] [Auto-Sync] Triggering DB sync...
+12:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+12:58:50 PM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+1:08:50 PM [express] [Auto-Sync] Triggering DB sync...
+1:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:18:50 PM [express] [Auto-Sync] Triggering DB sync...
+1:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:28:50 PM [express] [Auto-Sync] Triggering DB sync...
+1:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:38:50 PM [express] [Auto-Sync] Triggering DB sync...
+1:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:48:50 PM [express] [Auto-Sync] Triggering DB sync...
+1:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:58:50 PM [express] [Auto-Sync] Triggering DB sync...
+1:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+1:58:50 PM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+2:08:50 PM [express] [Auto-Sync] Triggering DB sync...
+2:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:18:50 PM [express] [Auto-Sync] Triggering DB sync...
+2:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:28:50 PM [express] [Auto-Sync] Triggering DB sync...
+2:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:38:50 PM [express] [Auto-Sync] Triggering DB sync...
+2:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:48:50 PM [express] [Auto-Sync] Triggering DB sync...
+2:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:58:50 PM [express] [Auto-Sync] Triggering DB sync...
+2:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:58:50 PM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+3:08:50 PM [express] [Auto-Sync] Triggering DB sync...
+3:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:18:50 PM [express] [Auto-Sync] Triggering DB sync...
+3:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:28:50 PM [express] [Auto-Sync] Triggering DB sync...
+3:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:38:50 PM [express] [Auto-Sync] Triggering DB sync...
+3:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:48:50 PM [express] [Auto-Sync] Triggering DB sync...
+3:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:58:50 PM [express] [Auto-Sync] Triggering DB sync...
+3:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+3:58:50 PM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+4:08:50 PM [express] [Auto-Sync] Triggering DB sync...
+4:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:18:50 PM [express] [Auto-Sync] Triggering DB sync...
+4:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:28:50 PM [express] [Auto-Sync] Triggering DB sync...
+4:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:38:50 PM [express] [Auto-Sync] Triggering DB sync...
+4:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:48:50 PM [express] [Auto-Sync] Triggering DB sync...
+4:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:58:50 PM [express] [Auto-Sync] Triggering DB sync...
+4:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+4:58:50 PM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+5:08:50 PM [express] [Auto-Sync] Triggering DB sync...
+5:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:18:50 PM [express] [Auto-Sync] Triggering DB sync...
+5:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:18:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:28:50 PM [express] [Auto-Sync] Triggering DB sync...
+5:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:28:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:38:50 PM [express] [Auto-Sync] Triggering DB sync...
+5:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:38:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:48:50 PM [express] [Auto-Sync] Triggering DB sync...
+5:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:48:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:58:50 PM [express] [Auto-Sync] Triggering DB sync...
+5:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:58:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+5:58:50 PM [express] [session-gc] Erro ao limpar sessões: storage is not defined
+6:08:50 PM [express] [Auto-Sync] Triggering DB sync...
+6:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:08:50 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported

@@ -1,0 +1,38 @@
+[1G[0K⠙[1G[0KSeeding database...
+Checking for existing users...
+Existing users count: [33m14[39m
+Database already seeded
+2:36:40 AM [express] [Routes] Registering routes...
+2:36:40 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:36:40 AM [print] [agent] WebSocket server iniciado em /ws/print-agent
+2:36:40 AM [express] [scanning-ws] WebSocket scanning server iniciado em /ws/scanning
+2:36:42 AM [express] Servidor iniciado na porta 5000
+2:36:46 AM [express] [Auto-Sync] Triggering DB sync...
+2:36:46 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+2:36:47 AM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m2:38:13 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/supervisor/reports/counting-cycles.tsx, /src/index.css[22m

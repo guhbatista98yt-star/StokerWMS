@@ -1,0 +1,147 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[1G[0KSeeding database...
+Checking for existing users...
+Existing users count: [33m14[39m
+Database already seeded
+6:44:38 PM [express] [Routes] Registering routes...
+6:44:38 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:44:38 PM [print] [agent] WebSocket server iniciado em /ws/print-agent
+6:44:38 PM [express] [scanning-ws] WebSocket scanning server iniciado em /ws/scanning
+6:44:39 PM [express] Servidor iniciado na porta 5000
+6:44:44 PM [express] [Auto-Sync] Triggering DB sync...
+6:44:44 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:44:44 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+6:54:38 PM [express] [Auto-Sync] Triggering DB sync...
+6:54:38 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+6:54:38 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:04:38 PM [express] [Auto-Sync] Triggering DB sync...
+7:04:38 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:04:38 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m7:12:28 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/supervisor/separation-settings.tsx, /src/index.css[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m7:12:34 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/supervisor/separation-settings.tsx, /src/index.css[22m [33m(x2)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m7:12:39 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/supervisor/separation-settings.tsx, /src/index.css[22m [33m(x3)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m7:12:43 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/supervisor/separation-settings.tsx, /src/index.css[22m [33m(x4)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m7:13:15 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/supervisor/separation-settings.tsx, /src/index.css[22m [33m(x5)[39m
+7:14:38 PM [express] [Auto-Sync] Triggering DB sync...
+7:14:38 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
+7:14:38 PM [print] AVISO: não foi possível listar impressoras — Operating System not supported
