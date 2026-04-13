@@ -1047,25 +1047,83 @@ export default function SeparacaoPage() {
           const addQty = isBoxBarcode ? boxQty : currentModal.multiplier;
           const newAccumulated = currentModal.accumulated + addQty;
           if (newAccumulated > remaining) {
-            setQtyModal(null);
-            usePendingDeltaStore.getState().clearItem("separacao", currentModal.itemId);
-            usePendingDeltaStore.getState().resetBaseline("separacao", currentModal.itemId);
-            queryClient.setQueryData(workUnitsQueryKey, (old: any) => {
-              if (!old) return old;
-              return old.map((wu: any) => ({
-                ...wu,
-                items: wu.items.map((item: any) =>
-                  item.id === currentModal.itemId
-                    ? { ...item, separatedQty: 0, status: "recontagem" }
-                    : item
-                ),
-              }));
+            // Verifica se existem outros itens incompletos do mesmo produto em outras unidades de trabalho
+            const allSameProductEntries = unitsWithProduct.flatMap((wu: any) =>
+              (wu.items as ItemWithProduct[])
+                .filter((i: ItemWithProduct) =>
+                  i.product?.barcode === barcode || i.product?.boxBarcode === barcode ||
+                  (Array.isArray(i.product?.boxBarcodes) && i.product.boxBarcodes.some((bx: any) => bx.code === barcode))
+                )
+                .map((i: ItemWithProduct) => ({ item: i, wu }))
+            );
+            const nextEntry = allSameProductEntries.find(({ item }: { item: ItemWithProduct; wu: any }) => {
+              if (item.id === currentModal.itemId) return false;
+              const ss = Number(item.separatedQty);
+              const d = getDelta("separacao", item.id);
+              const eq = Number(item.exceptionQty || 0);
+              return ss + d + eq < Number(item.quantity);
             });
-            beep("error");
-            toast({ title: "Quantidade excedida", description: "Produto zerado para recontagem. Escaneie novamente.", variant: "destructive" });
-            apiRequest("POST", `/api/work-units/${currentModal.workUnitId}/reset-item-picking`, { itemIds: [currentModal.itemId] })
-              .catch(() => { /* reset optimista — UI atualizada via invalidateQueries */ })
-              .finally(() => queryClient.invalidateQueries({ queryKey: workUnitsQueryKey }));
+
+            if (nextEntry) {
+              // Envia a quantidade restante para o item atual e abre modal para o próximo item
+              const flushQty = remaining;
+              if (flushQty > 0) {
+                usePendingDeltaStore.getState().inc("separacao", currentModal.itemId, flushQty);
+                const flushMsgId = generateMsgId();
+                pendingScanContextRef.current.set(flushMsgId, {
+                  itemId: currentModal.itemId,
+                  qty: flushQty,
+                  barcode: currentModal.barcode,
+                  workUnitId: currentModal.workUnitId,
+                  apItems: [{ id: currentModal.itemId }],
+                  productName: currentModal.productName,
+                  targetQty: currentModal.targetQty,
+                  exceptionQty: currentModal.exceptionQty,
+                });
+                sendScan(currentModal.workUnitId, currentModal.barcode, flushQty, flushMsgId);
+              }
+              const overflow = newAccumulated - remaining;
+              const { item: nextItem, wu: nextWu } = nextEntry as { item: ItemWithProduct; wu: any };
+              const nextSs = Number(nextItem.separatedQty);
+              const nextD = getDelta("separacao", nextItem.id);
+              const nextEq = Number(nextItem.exceptionQty || 0);
+              const nextRemaining = Number(nextItem.quantity) - nextSs - nextD - nextEq;
+              beep("scan");
+              setQtyModal({
+                productId,
+                productName: nextItem.product.name,
+                productCode: nextItem.product.erpCode || String(nextItem.product.id),
+                multiplier: currentModal.multiplier,
+                accumulated: overflow,
+                itemId: nextItem.id,
+                workUnitId: nextWu.id,
+                barcode,
+                maxRemaining: nextRemaining,
+                targetQty: Number(nextItem.quantity) - nextEq,
+                exceptionQty: nextEq,
+              });
+            } else {
+              // Nenhum outro item disponível — overflow real
+              setQtyModal(null);
+              usePendingDeltaStore.getState().clearItem("separacao", currentModal.itemId);
+              usePendingDeltaStore.getState().resetBaseline("separacao", currentModal.itemId);
+              queryClient.setQueryData(workUnitsQueryKey, (old: any) => {
+                if (!old) return old;
+                return old.map((wu: any) => ({
+                  ...wu,
+                  items: wu.items.map((item: any) =>
+                    item.id === currentModal.itemId
+                      ? { ...item, separatedQty: 0, status: "recontagem" }
+                      : item
+                  ),
+                }));
+              });
+              beep("error");
+              toast({ title: "Quantidade excedida", description: "Produto zerado para recontagem. Escaneie novamente.", variant: "destructive" });
+              apiRequest("POST", `/api/work-units/${currentModal.workUnitId}/reset-item-picking`, { itemIds: [currentModal.itemId] })
+                .catch(() => { /* reset optimista — UI atualizada via invalidateQueries */ })
+                .finally(() => queryClient.invalidateQueries({ queryKey: workUnitsQueryKey }));
+            }
           } else {
             beep("scan");
             setQtyModal({ ...currentModal, accumulated: newAccumulated, maxRemaining: remaining });
