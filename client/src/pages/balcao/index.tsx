@@ -408,9 +408,14 @@ export default function BalcaoPage() {
       setSessionRestored(true);
       const saved = loadSession();
       if (saved && saved.workUnitIds.length > 0) {
-        const stillLockedIds = saved.workUnitIds.filter(id =>
-          workUnits.some(wu => wu.id === id && wu.lockedBy === user.id)
-        );
+        const now = new Date();
+        const stillLockedIds = saved.workUnitIds.filter(id => {
+          const wu = workUnits.find(w => w.id === id);
+          if (!wu || wu.lockedBy !== user.id) return false;
+          // Reject expired locks — server would reject scans anyway
+          if (wu.lockExpiresAt && new Date(wu.lockExpiresAt) <= now) return false;
+          return true;
+        });
         if (stillLockedIds.length > 0) {
           // Sync timer from server lockedAt so it survives page reload
           const lockedWUs = stillLockedIds
@@ -433,7 +438,12 @@ export default function BalcaoPage() {
         }
       }
 
-      const myUnit = workUnits.find(wu => wu.lockedBy === user.id && wu.status !== "concluido");
+      const now2 = new Date();
+      const myUnit = workUnits.find(wu =>
+        wu.lockedBy === user.id &&
+        wu.status !== "concluido" &&
+        (!wu.lockExpiresAt || new Date(wu.lockExpiresAt) > now2)
+      );
       if (myUnit) {
         const myIds = workUnits.filter(wu => wu.lockedBy === user.id).map(wu => wu.id);
         // Sync timer from server lockedAt
