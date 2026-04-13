@@ -222,8 +222,13 @@ export default function SeparacaoPage() {
     maxRemaining: number;
     targetQty: number;
     exceptionQty: number;
-    allItems: ModalItemEntry[];
+    allItems?: ModalItemEntry[];
   }
+  // Retorna allItems do modal com fallback seguro para estados anteriores (sem allItems)
+  const resolveModalItems = (modal: QtyModalData): ModalItemEntry[] =>
+    modal.allItems && modal.allItems.length > 0
+      ? modal.allItems
+      : [{ itemId: modal.itemId, workUnitId: modal.workUnitId, remaining: modal.maxRemaining, targetQty: modal.targetQty, exceptionQty: modal.exceptionQty }];
   const [qtyModal, setQtyModal] = useState<QtyModalData | null>(null);
   const qtyModalRef = useRef<QtyModalData | null>(null);
   qtyModalRef.current = qtyModal;
@@ -1056,7 +1061,7 @@ export default function SeparacaoPage() {
         if (currentModal && currentModal.productId !== productId) {
           if (currentModal.accumulated > 0) {
             let leftToFlush = currentModal.accumulated;
-            for (const entry of currentModal.allItems) {
+            for (const entry of resolveModalItems(currentModal)) {
               if (leftToFlush <= 0) break;
               const toSend = Math.min(leftToFlush, entry.remaining);
               if (toSend <= 0) continue;
@@ -1179,7 +1184,7 @@ export default function SeparacaoPage() {
     if (!modal || modal.accumulated <= 0) return;
     // Distribui a quantidade acumulada entre todos os itens do produto em ordem
     let leftToSend = modal.accumulated;
-    for (const entry of modal.allItems) {
+    for (const entry of resolveModalItems(modal)) {
       if (leftToSend <= 0) break;
       const toSend = Math.min(leftToSend, entry.remaining);
       if (toSend <= 0) continue;
@@ -1213,7 +1218,8 @@ export default function SeparacaoPage() {
     const newAccumulated = modal.accumulated + modal.multiplier;
     if (newAccumulated > modal.maxRemaining) {
       setQtyModal(null);
-      const resetIds = modal.allItems.map(e => e.itemId);
+      const resolvedItems = resolveModalItems(modal);
+      const resetIds = resolvedItems.map(e => e.itemId);
       for (const id of resetIds) {
         usePendingDeltaStore.getState().clearItem("separacao", id);
         usePendingDeltaStore.getState().resetBaseline("separacao", id);
@@ -1231,7 +1237,7 @@ export default function SeparacaoPage() {
       beep("error");
       toast({ title: "Quantidade excedida", description: "Produto zerado para recontagem. Escaneie novamente.", variant: "destructive" });
       const byWu: Record<string, string[]> = {};
-      for (const entry of modal.allItems) { (byWu[entry.workUnitId] ??= []).push(entry.itemId); }
+      for (const entry of resolvedItems) { (byWu[entry.workUnitId] ??= []).push(entry.itemId); }
       for (const [wuId, ids] of Object.entries(byWu)) {
         apiRequest("POST", `/api/work-units/${wuId}/reset-item-picking`, { itemIds: ids })
           .catch(() => {})
