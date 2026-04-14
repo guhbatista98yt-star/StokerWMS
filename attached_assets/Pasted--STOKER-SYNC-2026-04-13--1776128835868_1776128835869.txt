@@ -1,0 +1,62 @@
+
+===================================================================
+  STOKER SYNC  |  2026-04-13 22:06:18  |  modo=serve · SO=Windows
+===================================================================
+
+
+------------------------------------------------------
+  VERIFICANDO SCHEMA DO BANCO
+------------------------------------------------------
+[22:06:18] -   Todas as 33 tabelas já existem
+[22:06:19] -   Todas as colunas verificadas — nada a adicionar
+[22:06:19] -   Índices verificados
+[22:06:19] + Schema verificado com sucesso
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[22:06:19] > DB2 — conectando...
+[22:06:19] + DB2 — conectado em 0.14s
+[22:06:19] + PostgreSQL local — conectado
+[22:06:19] > Produtos — sincronizando lista completa do ERP...
+[22:06:28] + Produtos — 26758 obtidos · 0 novos · 26704 atualizados · 0 erros · 9.3s
+[22:06:28] > Orçamentos — buscando últimos 31 dias...
+[22:06:46] + Orçamentos — 26132 obtidos · 26132 removidos (>=2026-03-12) · 26132 inseridos · 0 erros · 17.5s
+[22:06:49] + Transformação — 4969 pedidos · 0 produtos novos · 0 itens novos · 3.4s
+[22:06:49] > Estoque — sincronizando do ERP...
+[22:06:49] ! [STOCK-DEBUG] Produto 66 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 200 | qtd final: 200.0
+[22:06:52] ! [STOCK-DEBUG] Produto 14855 | Empresa 1 | QTDESTOQUE bruto (já /100 no SQL): 51 | qtd final: 51.0
+[22:06:56] ! [STOCK-DEBUG] Produto 66 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 192 | qtd final: 192.0
+[22:06:57] ! [STOCK-DEBUG] Produto 14855 | Empresa 3 | QTDESTOQUE bruto (já /100 no SQL): 17 | qtd final: 17.0
+[22:06:57] + Estoque — 22014 obtidos · 22014 atualizados · 0 erros · 8.5s
+[22:06:57] > Box Barcodes — sincronizando...
+[22:06:59] + Box Barcodes — 530 produtos atualizados · 1.6s
+[22:06:59] > Endereços WMS — sincronizando...
+[22:06:59] + Endereços WMS — 693 obtidos · 0 novos · 693 existentes · 0.2s
+[22:06:59] > NFs Recebimento — sincronizando...
+[22:07:01] + NFs Recebimento — 464 NFs · 0 novas · 464 atualizadas · 4187 itens · 1.9s
+
+------------------------------------------------------
+  SYNC CONCLUÍDO  |  duracao=42.6s
+------------------------------------------------------
+
+[22:07:01] + Loop de sync em background (300s)
+
+------------------------------------------------------
+  INICIANDO SERVIDOR WEB
+------------------------------------------------------
+[22:07:01] + Servidor disponível em → http://localhost:411
+C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\server\db.ts:28
+  throw new Error("DATABASE_URL environment variable is required");
+        ^
+
+Error: DATABASE_URL environment variable is required
+    at <anonymous> (C:\Users\SERVIDOR03\Desktop\GLA_WMS_Test\server\db.ts:28:9)
+    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:654:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v25.4.0
+
+=== Processo encerrado. Pressione qualquer tecla para fechar. ===
+Pressione qualquer tecla para continuar. . .
