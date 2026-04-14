@@ -167,15 +167,21 @@ export async function registerRoutes(
   // Pré-carregar cache de impressoras na inicialização (sem bloquear o servidor)
   refreshPrinterCache().catch(() => {});
 
-  // Schedule auto-sync every 10 minutes (600,000 ms)
-  setInterval(() => {
-    runSync(() => { refreshPrinterCache().catch(() => {}); });
-  }, 10 * 60 * 1000);
+  // Se DISABLE_AUTO_SYNC estiver ativo, o sync é gerenciado externamente
+  // (ex: sync_db2.py --serve) — pular timers para evitar conflito de gravação no banco.
+  if (process.env.DISABLE_AUTO_SYNC === "true") {
+    log("[Auto-Sync] Desativado — sync gerenciado pelo processo Python (--serve).");
+  } else {
+    // Schedule auto-sync every 10 minutes (600,000 ms)
+    setInterval(() => {
+      runSync(() => { refreshPrinterCache().catch(() => {}); });
+    }, 10 * 60 * 1000);
 
-  // Initial sync on startup
-  setTimeout(() => {
-    runSync(() => { refreshPrinterCache().catch(() => {}); });
-  }, 5000);
+    // Initial sync on startup
+    setTimeout(() => {
+      runSync(() => { refreshPrinterCache().catch(() => {}); });
+    }, 5000);
+  }
 
   // Limpeza de sessões expiradas — executa a cada hora
   setInterval(async () => {

@@ -1,0 +1,42 @@
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[22:35:05] > DB2 — conectando...
+[22:35:05] + DB2 — conectado em 0.10s
+[22:35:05] + PostgreSQL local — conectado
+[22:35:05] > Produtos — sincronizando lista completa do ERP...
+[22:35:08] X Produtos — erro ao upsert 26076: ERRO:  impasse detectado
+DETAIL:  Processo 15700 espera por ShareLock em transação 324067883; bloqueado pelo processo 8380.
+Processo 8380 espera por ShareLock em transação 324100461; bloqueado pelo processo 15700.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto inseria tupla de índice (1837,7) na relação "products"
+
+[22:35:09] X Produtos — erro ao upsert 29033: ERRO:  impasse detectado
+DETAIL:  Processo 15700 espera por ShareLock em transação 324067883; bloqueado pelo processo 8380.
+Processo 8380 espera por ShareLock em transação 324100461; bloqueado pelo processo 15700.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto inseria tupla de índice (1051,43) na relação "products"
+
+[22:35:11] X Produtos — erro ao upsert 318: ERRO:  impasse detectado
+DETAIL:  Processo 15700 espera por ShareLock em transação 324101717; bloqueado pelo processo 13488.
+Processo 13488 espera por ShareLock em transação 324100461; bloqueado pelo processo 15700.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto inseria tupla de índice (327,1) na relação "products"
+
+[22:35:14] X Produtos — erro ao upsert 20: ERRO:  impasse detectado
+DETAIL:  Processo 15700 espera por ShareLock em transação 324101717; bloqueado pelo processo 13488.
+Processo 13488 espera por ShareLock em transação 324100461; bloqueado pelo processo 15700.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto inseria tupla de índice (630,21) na relação "products"
+
+[22:35:15] X Produtos — erro ao upsert 23: ERRO:  impasse detectado
+DETAIL:  Processo 15700 espera por ShareLock em transação 324101717; bloqueado pelo processo 13488.
+Processo 13488 espera por ShareLock em transação 324100461; bloqueado pelo processo 15700.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto inseria tupla de índice (1151,4) na relação "products"
+
+[22:35:16] X Produtos — erro ao upsert 25: ERRO:  impasse detectado
+DETAIL:  Processo 15700 espera por ShareLock em transação 324101717; bloqueado pelo processo 13488.
+Processo 13488 espera por ShareLock em transação 324100461; bloqueado pelo processo 15700.
+HINT:  Veja log do servidor para obter detalhes das consultas.
+CONTEXT:  enquanto inseria tupla de índice (1815,22) na relação "products"

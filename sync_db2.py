@@ -2089,6 +2089,10 @@ def iniciar_servidor():
 
     env = os.environ.copy()
     env["PORT"] = "411"
+    # Informa ao Node.js que o sync já é gerenciado por este processo Python.
+    # Isso evita que o Node dispare seus próprios timers de sync (setInterval/setTimeout)
+    # ao mesmo tempo que a thread Python está gravando no banco — prevenindo deadlocks.
+    env["DISABLE_AUTO_SYNC"] = "true"
 
     log("Servidor disponível em → http://localhost:411", "ok")
 
