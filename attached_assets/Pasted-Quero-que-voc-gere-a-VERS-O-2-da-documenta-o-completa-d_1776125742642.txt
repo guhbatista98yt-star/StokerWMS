@@ -1,0 +1,355 @@
+Quero que você gere a VERSÃO 2 da documentação completa desta aplicação, elevando o nível da documentação atual para um padrão mais maduro, técnico, operacional e arquitetural.
+
+IMPORTANTE:
+A documentação base já foi gerada e está boa, mas agora eu quero uma segunda versão mais forte, mais completa e mais útil para:
+- manutenção técnica séria
+- onboarding de desenvolvedores
+- auditoria da aplicação
+- operação em produção
+- troubleshooting
+- futuras refatorações
+- expansão do sistema
+
+NESTA ETAPA:
+- NÃO quero alterar o sistema
+- NÃO quero refatorar código
+- NÃO quero corrigir bugs agora
+- quero apenas melhorar e aprofundar a documentação
+
+OBJETIVO:
+Gerar uma documentação v2 mais profissional e mais completa, acrescentando elementos que faltam para transformar o material em documentação realmente madura de sistema.
+
+============================================================
+1. ENTREGA ESPERADA
+============================================================
+
+Quero que você gere ou atualize arquivos de documentação como:
+
+- DOCUMENTACAO_COMPLETA_STOKER_V2.md  ← arquivo principal
+- ERD_ESTRUTURA_BANCO.md
+- MATRIZ_DE_PERMISSOES.md
+- RUNBOOK_OPERACIONAL.md
+- CHECKLIST_DE_PRODUCAO.md
+- MAPA_DE_TESTES.md
+- FLUXOS_CRITICOS.md
+
+Se preferir consolidar em menos arquivos, tudo bem.
+Mas preciso que o conteúdo abaixo exista de forma clara, organizada e completa.
+
+============================================================
+2. O QUE DEVE SER ADICIONADO À VERSÃO 2
+============================================================
+
+Quero acrescentar à documentação atual os seguintes blocos novos e obrigatórios:
+
+1. ERD simplificado e explicação das relações do banco
+2. Matriz completa de perfis x módulos x permissões
+3. Runbook operacional
+4. Checklist de produção / go-live
+5. Mapa de testes
+6. Diagramas dos fluxos críticos
+7. Mapa de arquivos mais sensíveis do sistema
+8. Dependências críticas e impacto de falha
+9. Guia de troubleshooting
+10. Lista de riscos arquiteturais e pontos de atenção futura
+
+============================================================
+3. ERD / MAPA DO BANCO — OBRIGATÓRIO
+============================================================
+
+Quero uma seção ou arquivo dedicado para estrutura do banco.
+
+Preciso de um ERD simplificado, textual e/ou em Mermaid, mostrando pelo menos as relações principais entre:
+
+- companies
+- users
+- sessions
+- orders
+- order_items
+- work_units
+- exceptions
+- audit_logs
+- products
+- sections
+- routes
+- pickup_points
+- section_groups
+- product_company_stock
+- cache_orcamentos
+- system_settings
+- manual_qty_rules
+- tabelas WMS
+- tabelas auxiliares importantes
+
+Para cada tabela principal, quero:
+- objetivo
+- chave primária
+- chaves estrangeiras
+- relações principais
+- campos mais críticos
+- observações importantes
+
+Se puder usar Mermaid para diagramas, ótimo.
+Se não puder, documente de forma textual clara.
+
+============================================================
+4. MATRIZ DE PERMISSÕES — OBRIGATÓRIO
+============================================================
+
+Quero um documento ou seção muito clara mostrando:
+
+- quais perfis existem
+- quais módulos cada perfil acessa
+- quais ações cada perfil pode executar
+- quais ações são só leitura
+- quais ações são críticas
+- quais perfis têm desbloqueio, aprovação, edição, exclusão e administração
+
+Quero uma matriz semelhante a:
+
+| Perfil | Login | Separação | Conferência | Balcão | Fila | Supervisor | Admin | WMS | Relatórios | Usuários | Permissões |
+|--------|-------|-----------|-------------|--------|------|-----------|-------|-----|-----------|---------|------------|
+
+E, se possível, detalhar:
+- leitura
+- criação
+- edição
+- exclusão
+- aprovação
+- desbloqueio
+- exportação
+- administração
+
+Isso precisa ficar extremamente fácil de consultar.
+
+============================================================
+5. RUNBOOK OPERACIONAL — OBRIGATÓRIO
+============================================================
+
+Quero um runbook operacional claro e útil.
+
+Ele deve responder:
+- como subir o sistema
+- como validar que está funcionando
+- como verificar login
+- como verificar sync DB2
+- como verificar PostgreSQL
+- como verificar SSE
+- como verificar print-agent
+- como verificar scanner/websocket
+- como validar locks
+- como validar separação, conferência e balcão
+- como agir em caso de falha operacional
+
+Também quero blocos como:
+
+A. Procedimento de início do sistema
+B. Verificações de saúde
+C. Rotina de operação normal
+D. Como agir em incidentes comuns
+E. Como validar se o sistema está estável
+F. Como reiniciar com segurança, se necessário
+
+============================================================
+6. CHECKLIST DE PRODUÇÃO / GO-LIVE
+============================================================
+
+Quero um checklist operacional pronto para uso, cobrindo:
+
+- servidor
+- banco
+- sessão/login
+- sync DB2
+- pedidos
+- separação
+- conferência
+- balcão
+- fila de pedidos
+- dashboards
+- relatórios
+- permissões
+- SSE
+- impressão
+- handheld
+- módulos WMS
+- responsividade básica
+- ambiente multiempresa
+
+Quero esse checklist em formato simples e direto, para poder usar antes de subir ou depois de atualizar a aplicação.
+
+============================================================
+7. MAPA DE TESTES
+============================================================
+
+Quero um documento mostrando:
+
+- o que já possui testes
+- o que ainda não possui testes
+- quais cenários críticos precisam de regressão obrigatória
+- quais módulos exigem mais atenção em testes
+- quais fluxos são críticos para operação
+- quais testes deveriam existir futuramente
+
+Quero classificar algo como:
+- Coberto
+- Parcialmente coberto
+- Não coberto
+- Crítico sem cobertura
+
+Quero atenção especial para:
+- login
+- permissões
+- separação
+- conferência
+- balcão
+- locks
+- SSE
+- batch unlock
+- exceptions
+- company isolation
+- sync DB2
+- WMS
+- print-agent
+- handheld
+
+============================================================
+8. DIAGRAMAS DOS FLUXOS CRÍTICOS
+============================================================
+
+Quero diagramas ou descrições mais visuais dos fluxos críticos, preferencialmente em Mermaid quando possível.
+
+No mínimo, documentar claramente os fluxos:
+
+1. Login e seleção de empresa
+2. Pedido vindo do ERP até virar order/order_items
+3. Lançamento do pedido
+4. Separação
+5. Conferência
+6. Balcão
+7. Exceção e autorização
+8. Unlock/reset
+9. SSE / atualização em tempo real
+10. WMS básico
+11. Impressão
+12. Handheld
+
+Quero fluxos fáceis de entender, mesmo para quem não conhece o sistema.
+
+============================================================
+9. MAPA DE ARQUIVOS MAIS SENSÍVEIS
+============================================================
+
+Quero uma seção dizendo claramente quais são os arquivos mais importantes e mais sensíveis do sistema, por exemplo:
+
+- server/routes.ts
+- server/storage.ts
+- shared/schema.ts
+- sync_db2.py
+- server/company-config.ts
+- server/sse.ts
+- server/auth.ts
+- páginas operacionais principais do frontend
+
+Para cada um, explicar:
+- por que é crítico
+- o que controla
+- que tipo de cuidado exige
+- risco de alteração indevida
+
+============================================================
+10. DEPENDÊNCIAS CRÍTICAS E IMPACTO DE FALHA
+============================================================
+
+Quero uma seção explicando:
+
+- o que acontece se o PostgreSQL cair
+- o que acontece se o DB2 cair
+- o que acontece se o sync parar
+- o que acontece se o SSE cair
+- o que acontece se o print-agent cair
+- o que acontece se o scanner/websocket cair
+- o que acontece se o navegador perder sessão
+- o que acontece se uma empresa for configurada incorretamente
+
+Quero algo útil para operação e entendimento de risco.
+
+============================================================
+11. TROUBLESHOOTING
+============================================================
+
+Quero uma seção prática de troubleshooting, com exemplos como:
+
+- pedido não aparece na separação
+- pedido não sobe para conferência
+- fila balcão não atualiza
+- SSE não reconecta
+- operador não consegue lock
+- lock expirado/restauração falha
+- exceção não aparece para supervisor
+- empresa vê dado de outra empresa
+- usuário não consegue logar
+- impressora não responde
+- handheld duplica ou não envia scan
+- sync DB2 não atualiza pedidos
+
+Para cada problema, quero:
+- sintomas
+- causas prováveis
+- onde verificar
+- como diagnosticar
+- como resolver
+
+============================================================
+12. PONTOS DE ATENÇÃO FUTURA
+============================================================
+
+Quero uma seção final com visão crítica sobre a arquitetura, apontando claramente:
+
+- pontos que merecem refatoração futura
+- riscos estruturais
+- dependências frágeis
+- partes muito grandes ou sensíveis
+- limites de escalabilidade
+- riscos de manutenção
+- melhorias arquiteturais recomendadas
+
+Mas sem inventar — só com base no que estiver implementado.
+
+============================================================
+13. LINGUAGEM E QUALIDADE
+============================================================
+
+Quero documentação:
+- clara
+- bem organizada
+- técnica, mas legível
+- confiável
+- fiel ao código
+- sem achismo
+- sem inventar comportamento
+- pronta para uso real
+
+Se alguma parte não estiver totalmente clara no código:
+- diga explicitamente que não ficou clara
+- não invente
+
+============================================================
+14. PROCESSO
+============================================================
+
+Antes de gerar essa versão 2:
+- releia a documentação já criada
+- releia a aplicação quando necessário
+- identifique lacunas
+- complemente sem contradizer a implementação real
+
+============================================================
+15. ENTREGA FINAL
+============================================================
+
+No final, quero:
+1. os arquivos/documentos gerados
+2. um resumo do que foi acrescentado em relação à versão anterior
+3. quais são os 5 pontos mais críticos do sistema hoje
+4. quais são os 5 arquivos mais sensíveis
+5. quais são os fluxos mais críticos para teste e operação

@@ -24,3 +24,45 @@ id = "PnXtRiR6Ad28PK8nDXNiR"
 uri = "file://DOCUMENTACAO_COMPLETA_STOKER.md"
 type = "text"
 title = "Documentação Completa — Stoker WMS"
+
+[[outputs]]
+id = "94dACLXVtbxympbFjfpIv"
+uri = "file://DOCUMENTACAO_COMPLETA_STOKER_V2.md"
+type = "text"
+title = "Documentação Principal V2 — Stoker WMS"
+
+[[outputs]]
+id = "uc-qoT0rQikcOVgSqxB3w"
+uri = "file://ERD_ESTRUTURA_BANCO.md"
+type = "text"
+title = "ERD — Estrutura do Banco de Dados"
+
+[[outputs]]
+id = "_FiTLlqY4XSvkWtLgjOfA"
+uri = "file://MATRIZ_DE_PERMISSOES.md"
+type = "text"
+title = "Matriz de Permissões"
+
+[[outputs]]
+id = "-oRDcsDa-7UhQn0ScHcYe"
+uri = "file://RUNBOOK_OPERACIONAL.md"
+type = "text"
+title = "Runbook Operacional"
+
+[[outputs]]
+id = "P8pbG1og2F_eV2yBFjwkJ"
+uri = "file://CHECKLIST_DE_PRODUCAO.md"
+type = "text"
+title = "Checklist de Produção (100+ verificações)"
+
+[[outputs]]
+id = "9AKYkZg7JY7eiHUHAem0N"
+uri = "file://MAPA_DE_TESTES.md"
+type = "text"
+title = "Mapa de Testes e Cobertura"
+
+[[outputs]]
+id = "1QVtzaR2dgFI7H11V1whA"
+uri = "file://FLUXOS_CRITICOS.md"
+type = "text"
+title = "Fluxos Críticos com Diagramas Mermaid"
