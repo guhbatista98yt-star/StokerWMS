@@ -1,0 +1,167 @@
+Quero que você gere uma **VERSÃO 2 da documentação completa do sistema**, evoluindo o arquivo atual para um nível mais profissional, técnico, operacional e útil para manutenção séria, onboarding e futuras auditorias.
+
+IMPORTANTE:
+- Não quero mexer no código agora.
+- Não quero refatoração agora.
+- Não quero correções agora.
+- Quero apenas evolução da documentação.
+- Quero manter a base do documento atual, mas deixá-lo mais forte, mais consultável e mais útil para operação real.
+
+OBJETIVO:
+Transformar a documentação atual em uma documentação de nível mais maduro, incluindo não só visão funcional e técnica, mas também:
+- diagrama dos fluxos críticos
+- matriz de permissões
+- ERD simplificado do banco
+- runbook operacional
+- checklist de produção
+- mapa de testes
+- mapa de arquivos críticos
+- pontos de risco e dependências críticas
+- resumo de arquitetura e sustentação do sistema
+
+Quero que você gere um novo arquivo, por exemplo:
+- DOCUMENTACAO_COMPLETA_STOKER_V2.md
+
+Se fizer sentido, pode gerar arquivos auxiliares também, como:
+- ERD_SIMPLES.md
+- MATRIZ_DE_PERMISSOES.md
+- RUNBOOK_OPERACIONAL.md
+- CHECKLIST_GO_LIVE.md
+- MAPA_DE_TESTES.md
+
+Mas a prioridade é ter **um arquivo principal muito forte e completo**.
+
+============================================================
+1. O QUE DEVE SER MELHORADO EM RELAÇÃO AO DOCUMENTO ATUAL
+============================================================
+
+Quero manter tudo que já está bom, mas acrescentar e reforçar principalmente:
+
+1. Diagrama lógico dos fluxos críticos
+2. ERD simplificado do banco
+3. Matriz perfil x módulo x ação
+4. Runbook operacional
+5. Checklist de produção
+6. Mapa de testes e cobertura
+7. Mapa dos arquivos mais críticos do projeto
+8. Dependências críticas e riscos operacionais
+9. Guia rápido de troubleshooting
+10. Resumo executivo ainda mais forte
+
+============================================================
+2. NOVA ESTRUTURA DESEJADA DO DOCUMENTO
+============================================================
+
+Quero que o novo documento tenha índice e siga uma estrutura como:
+
+# 1. Visão Geral
+# 2. Objetivo do Sistema
+# 3. Perfis de Usuário
+# 4. Matriz de Permissões
+# 5. Mapa Funcional dos Módulos
+# 6. Fluxo Geral de Navegação
+# 7. Fluxos Críticos
+# 8. Estrutura Técnica do Projeto
+# 9. Estrutura de Pastas
+# 10. Frontend
+# 11. Backend
+# 12. Banco de Dados
+# 13. ERD Simplificado
+# 14. APIs e Rotas
+# 15. Regras de Negócio
+# 16. Tempo Real (SSE / WebSocket / Polling)
+# 17. Integrações Externas
+# 18. Variáveis de Ambiente
+# 19. Dependências Principais
+# 20. Arquivos Mais Críticos do Projeto
+# 21. Runbook Operacional
+# 22. Troubleshooting / Problemas Comuns
+# 23. Checklist de Produção / Go-Live
+# 24. Mapa de Testes e Cobertura
+# 25. Pontos Sensíveis e Riscos Técnicos
+# 26. Melhorias Futuras Recomendadas
+# 27. Resumo Executivo Final
+
+============================================================
+3. MATRIZ DE PERMISSÕES — OBRIGATÓRIO
+============================================================
+
+Quero uma seção específica com matriz clara mostrando:
+
+- perfil
+- módulo
+- tipo de acesso
+- observações importantes
+
+Exemplo de colunas:
+- Perfil
+- Pode visualizar
+- Pode operar
+- Pode editar
+- Pode administrar
+- Restrições importantes
+
+Perfis:
+- administrador
+- supervisor
+- separacao
+- conferencia
+- balcao
+- fila_pedidos
+- recebedor
+- empilhador
+- conferente_wms
+
+Quero essa matriz fácil de consultar.
+
+============================================================
+4. ERD SIMPLIFICADO — OBRIGATÓRIO
+============================================================
+
+Quero um ERD simplificado, mesmo que em formato textual/markdown, mostrando as principais relações entre tabelas como:
+
+- companies
+- users
+- sessions
+- orders
+- order_items
+- work_units
+- exceptions
+- routes
+- products
+- sections
+- pickup_points
+- audit_logs
+- system_settings
+- tabelas WMS
+- tabelas de integração DB2/cache
+
+Para cada tabela principal, quero:
+- função
+- chave primária
+- principais chaves estrangeiras
+- relação com outras tabelas
+- observações importantes
+
+============================================================
+5. FLUXOS CRÍTICOS COM DIAGRAMA LÓGICO
+============================================================
+
+Quero que os fluxos críticos sejam documentados com mais clareza, usando diagramas textuais simples quando necessário.
+
+Exemplos:
+- Login e seleção de empresa
+- Lançamento de pedido
+- Separação
+- Conferência
+- Balcão
+- Exceções
+- Sync DB2
+- Lock / unlock / restore de sessão
+- Impressão
+- WMS
+
+Quero passo a passo claro, e se possível algo tipo:
+
+```text
+ERP/DB2 -> cache -> orders/order_items -> lançamento -> work_units -> separação -> conferência -> finalização
