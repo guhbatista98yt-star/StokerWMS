@@ -18,3 +18,9 @@ id = "tYzQATTDL9lkPoeCfwn4j"
 uri = "file://docs/backlog-tecnico-separacao.md"
 type = "text"
 title = "Backlog — Revisão 3 (TASK-S2-05 e TASK-S3-04 refinadas)"
+
+[[outputs]]
+id = "PnXtRiR6Ad28PK8nDXNiR"
+uri = "file://DOCUMENTACAO_COMPLETA_STOKER.md"
+type = "text"
+title = "Documentação Completa — Stoker WMS"

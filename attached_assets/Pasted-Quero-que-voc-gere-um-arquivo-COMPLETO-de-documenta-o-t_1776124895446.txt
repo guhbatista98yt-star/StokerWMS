@@ -1,0 +1,291 @@
+Quero que você gere um arquivo COMPLETO de documentação técnica e funcional desta aplicação, explicando com clareza como ela funciona e como está estruturada, ponto a ponto.
+
+IMPORTANTE:
+- Este é outro app.
+- Neste momento eu NÃO quero mudanças no código.
+- NÃO quero refatoração.
+- NÃO quero correções agora.
+- Quero primeiro um mapeamento completo, organizado e confiável de como o sistema funciona hoje.
+- Quero que você leia a aplicação inteira e gere uma documentação detalhada, profissional e fácil de consultar depois.
+
+OBJETIVO:
+Criar um arquivo de documentação completo para eu entender a aplicação de ponta a ponta, tanto no lado funcional quanto técnico.
+
+Quero que você gere um arquivo com nome como:
+- DOCUMENTACAO_COMPLETA_APP.md
+ou
+- MAPA_COMPLETO_DO_SISTEMA.md
+
+Se achar melhor, pode gerar também arquivos complementares como:
+- ARQUITETURA_TECNICA.md
+- FLUXOS_FUNCIONAIS.md
+- MAPA_DE_ROTAS_E_APIS.md
+- ESTRUTURA_DO_BANCO.md
+
+Mas a prioridade é ter pelo menos 1 arquivo principal completo e muito bem organizado.
+
+============================================================
+1. O QUE QUERO NESSA DOCUMENTAÇÃO
+============================================================
+
+Quero que o documento explique, ponto a ponto:
+
+1. visão geral do sistema
+2. objetivo da aplicação
+3. principais módulos
+4. perfis de usuário
+5. fluxo geral de uso
+6. arquitetura do projeto
+7. estrutura de pastas e arquivos
+8. frontend
+9. backend
+10. banco de dados
+11. APIs e rotas
+12. integrações externas
+13. regras de negócio
+14. fluxos críticos
+15. dashboards
+16. telas
+17. permissões
+18. cálculos importantes
+19. estados e status do sistema
+20. dependências
+21. variáveis de ambiente
+22. jobs, cron, sincronizações ou eventos em tempo real
+23. pontos sensíveis e observações importantes
+
+============================================================
+2. FORMATO DO DOCUMENTO
+============================================================
+
+Quero um documento MUITO bem organizado, com índice e seções claras.
+
+Estrutura sugerida:
+
+# 1. Visão Geral
+- O que é o sistema
+- Qual problema resolve
+- Quem usa
+- Quais são os módulos principais
+
+# 2. Perfis de Usuário
+- Quais perfis existem
+- O que cada perfil faz
+- O que cada perfil acessa
+
+# 3. Mapa Funcional do Sistema
+- Lista de módulos
+- O que cada módulo faz
+- Como eles se relacionam
+
+# 4. Fluxo Geral de Navegação
+- Como o usuário entra
+- Quais telas principais existem
+- Como o fluxo acontece ponta a ponta
+
+# 5. Estrutura Técnica do Projeto
+- Stack usada
+- Frontend
+- Backend
+- Banco de dados
+- Bibliotecas principais
+- Organização da aplicação
+
+# 6. Estrutura de Pastas
+- Explicar as principais pastas
+- Explicar os arquivos mais importantes
+- Explicar o papel de cada parte
+
+# 7. Frontend
+- Como está organizado
+- Quais páginas existem
+- Quais componentes principais existem
+- Como funciona estado, navegação e renderização
+
+# 8. Backend
+- Como está organizado
+- Quais rotas existem
+- Quais services/repositories/helpers existem
+- Como as regras de negócio estão distribuídas
+
+# 9. Banco de Dados
+- Quais tabelas existem
+- Para que serve cada tabela
+- Relações principais
+- Campos importantes
+- Tabelas críticas
+- Tabelas auxiliares
+- Estrutura geral do banco
+
+# 10. APIs e Rotas
+- Listar endpoints principais
+- Explicar o que cada endpoint faz
+- Quais recebem parâmetros
+- Quais retornam dados importantes
+- Quais exigem autenticação/permissão
+
+# 11. Regras de Negócio
+- Explicar as regras principais do sistema
+- Mostrar como o sistema decide status, cálculos, filtros e comportamentos
+- Explicar qualquer lógica importante
+
+# 12. Fluxos Críticos
+- Explicar passo a passo dos fluxos mais importantes
+- Exemplo: login, criação, edição, aprovação, conclusão, acompanhamento, etc.
+- Quero isso em linguagem clara
+
+# 13. Dashboards, Relatórios e Indicadores
+- Quais dashboards existem
+- Quais dados mostram
+- Como esses dados são montados
+- Quais relatórios existem
+- Quais exportações existem
+
+# 14. Permissões e Segurança
+- Como funciona autenticação
+- Como funciona autorização
+- Quais perfis podem acessar o quê
+- O que é protegido no backend e no frontend
+
+# 15. Tempo Real / Eventos / Filas / Polling / SSE / WebSocket
+- Explicar se existe atualização em tempo real
+- Como isso funciona
+- Quais módulos usam isso
+
+# 16. Integrações Externas
+- ERP
+- API externa
+- banco externo
+- serviços terceiros
+- qualquer integração relevante
+
+# 17. Variáveis de Ambiente e Configurações
+- Quais envs são importantes
+- O que cada uma faz
+- O que é obrigatório para subir o projeto
+
+# 18. Dependências Principais
+- Quais bibliotecas/frameworks são importantes
+- Para que servem
+
+# 19. Pontos Sensíveis / Observações Importantes
+- Trechos críticos
+- Riscos técnicos conhecidos
+- Fluxos delicados
+- Dependências sensíveis
+- Regras que exigem atenção
+
+# 20. Resumo Executivo Final
+- Explicar de forma resumida como o app funciona
+- Quais são os módulos centrais
+- O que é mais importante para entender o sistema rapidamente
+
+============================================================
+3. NÍVEL DE DETALHE
+============================================================
+
+Quero um documento realmente detalhado, mas claro.
+
+Não quero só tópicos vagos como:
+- “há um backend”
+- “há um módulo de usuários”
+- “há uma tela de dashboard”
+
+Quero explicação de verdade.
+
+Exemplo do nível desejado:
+- o nome do módulo
+- o que ele faz
+- de onde vêm os dados
+- para onde vão os dados
+- quem usa
+- quais arquivos principais participam
+- quais tabelas ou rotas estão ligadas a ele
+- quais regras impactam esse módulo
+
+============================================================
+4. QUERO MAPEAMENTO PONTO A PONTO
+============================================================
+
+Para cada módulo, tela ou fluxo, quero responder pelo menos:
+
+- o que é
+- para que serve
+- quem usa
+- como funciona
+- quais telas/arquivos participam
+- quais rotas/APIs participam
+- quais tabelas/dados participam
+- quais regras importantes existem
+- quais observações técnicas importam
+
+============================================================
+5. LINGUAGEM DO DOCUMENTO
+============================================================
+
+Quero linguagem clara e profissional.
+
+Pode ser técnica, mas precisa ser legível.
+Quero um documento que eu consiga usar depois para:
+- entender o sistema
+- explicar o sistema
+- revisar o sistema
+- pedir melhorias futuras
+- auditar o sistema
+- onboard de outras pessoas
+
+============================================================
+6. IMPORTANTE: NÃO INVENTAR
+============================================================
+
+Se alguma parte não estiver clara no código:
+- diga que não ficou claro
+- aponte a dúvida
+- não invente comportamento
+
+Quero fidelidade ao que realmente está implementado.
+
+============================================================
+7. QUERO LEITURA COMPLETA DO PROJETO
+============================================================
+
+Antes de gerar o documento:
+- leia a aplicação inteira
+- entenda os módulos
+- entenda a estrutura
+- entenda as rotas
+- entenda o banco
+- entenda os fluxos
+- só depois escreva a documentação
+
+============================================================
+8. SE POSSÍVEL, INCLUIR MAPA TÉCNICO
+============================================================
+
+Se possível, incluir também:
+
+- mapa de dependência entre módulos
+- mapa das rotas principais
+- mapa das tabelas mais importantes
+- mapa dos fluxos críticos
+- sequência resumida de uso do sistema
+
+============================================================
+9. ENTREGA ESPERADA
+============================================================
+
+Quero que você entregue:
+- 1 arquivo principal muito completo
+- bem estruturado
+- com índice
+- com explicação funcional e técnica
+- mapeando a aplicação inteira
+- sem alterar o sistema
+
+Se achar útil, pode complementar com arquivos auxiliares, mas o principal é o documento mestre.
+
+No final, me diga também:
+1. quais são os módulos centrais do sistema
+2. quais são os fluxos mais críticos
+3. quais são os pontos mais sensíveis da aplicação
+4. quais partes exigem mais atenção futura
