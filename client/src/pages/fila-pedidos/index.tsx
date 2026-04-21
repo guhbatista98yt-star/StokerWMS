@@ -157,13 +157,13 @@ function SeparandoCard({ order }: { order: QueueOrder }) {
   );
 }
 
-function AguardandoCard({ order }: { order: QueueOrder }) {
+function AguardandoCard({ order, isNew }: { order: QueueOrder; isNew?: boolean }) {
   const isInQueue = order.status === "em_fila";
 
   return (
     <div
       data-testid={`card-order-${order.orderId}`}
-      className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"
+      className={`bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden ${isNew ? "is-new" : ""}`}
     >
       <div className="bg-slate-100 dark:bg-slate-700/60 px-4 py-2.5 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
@@ -287,6 +287,15 @@ export default function FilaPedidosPage() {
   const prevOrderIdsRef = useRef<Set<string>>(new Set());
   const prevCompletedIdsRef = useRef<Set<string>>(new Set());
   const initialLoadDoneRef = useRef(false);
+  const [newOrderIds, setNewOrderIds] = useState<Set<string>>(new Set());
+  const newOrderTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  useEffect(() => {
+    return () => {
+      newOrderTimeoutsRef.current.forEach(t => clearTimeout(t));
+      newOrderTimeoutsRef.current.clear();
+    };
+  }, []);
 
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 30_000);
@@ -315,14 +324,37 @@ export default function FilaPedidosPage() {
       return;
     }
 
+    // New orders that weren't in the previous snapshot
+    const newlyArrived = [...currentIds].filter(id => !prevOrderIdsRef.current.has(id));
+
     if (soundOn) {
-      // New orders that weren't in the previous snapshot
-      const hasNew = [...currentIds].some(id => !prevOrderIdsRef.current.has(id));
-      if (hasNew) beep("warning");
+      if (newlyArrived.length > 0) beep("warning");
 
       // Orders that are newly completed
       const hasNewCompleted = [...completedIds].some(id => !prevCompletedIdsRef.current.has(id));
       if (hasNewCompleted) beep("complete");
+    }
+
+    if (newlyArrived.length > 0) {
+      setNewOrderIds(prev => {
+        const next = new Set(prev);
+        newlyArrived.forEach(id => next.add(id));
+        return next;
+      });
+      newlyArrived.forEach(id => {
+        const existing = newOrderTimeoutsRef.current.get(id);
+        if (existing) clearTimeout(existing);
+        const t = setTimeout(() => {
+          newOrderTimeoutsRef.current.delete(id);
+          setNewOrderIds(prev => {
+            if (!prev.has(id)) return prev;
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+        }, 10_000);
+        newOrderTimeoutsRef.current.set(id, t);
+      });
     }
 
     prevOrderIdsRef.current = currentIds;
@@ -513,7 +545,7 @@ export default function FilaPedidosPage() {
                   colorClass="bg-slate-100 text-slate-600 border-slate-300"
                 />
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {aguardando.map(o => <AguardandoCard key={o.orderId} order={o} />)}
+                  {aguardando.map(o => <AguardandoCard key={o.orderId} order={o} isNew={newOrderIds.has(o.orderId)} />)}
                 </div>
               </section>
             )}

@@ -1,0 +1,71 @@
+Criar dentro do módulo Impressoras um novo módulo chamado “Etiquetas” com um studio visual de criação e edição de etiquetas, inspirado no fluxo de uso do BarTender, mas adaptado à arquitetura atual da aplicação.
+
+Objetivo:
+Permitir criar, editar, visualizar, salvar, definir e imprimir modelos de etiquetas para diferentes finalidades, como:
+- etiqueta de volume
+- etiqueta de código de barras
+- etiqueta de endereço/pallet
+- outras etiquetas operacionais futuras
+
+Requisitos principais:
+1) Editor visual
+- Área de desenho da etiqueta com preview em tempo real.
+- Suporte a diferentes tamanhos de etiqueta.
+- Mostrar largura, altura, margens de segurança e réguas.
+- Permitir posicionar, mover e redimensionar componentes.
+- Exibir atualização em tempo real ao alterar qualquer item.
+- Permitir zoom, alinhamento básico e organização visual limpa.
+
+2) Componentes da etiqueta
+Permitir adicionar e configurar:
+- texto fixo
+- texto dinâmico vindo de campos do sistema
+- código de barras
+- QR Code
+- linha, caixa e elementos visuais simples
+- descrição
+- ID do produto
+- código do produto
+- endereço
+- volume
+- número do pedido
+- dados do cliente
+- outros campos disponíveis por módulo
+
+3) Fonte de dados
+- Mostrar de forma clara quais tabelas, campos ou variáveis podem ser usados em cada tipo de etiqueta.
+- Exibir lista de campos disponíveis por módulo/origem, por exemplo:
+  - Volume
+  - Endereçamento/Pallet
+  - Produtos
+  - Pedidos
+- Permitir selecionar campos dinâmicos sem o usuário precisar editar código.
+
+4) Configuração por contexto
+- Permitir definir qual etiqueta padrão será usada no módulo de impressão de volume.
+- Permitir definir qual etiqueta padrão será usada no módulo de endereçamento/pallet.
+- Essa definição deve ficar centralizada no módulo Impressoras.
+
+5) Impressão
+- Permitir imprimir direto pelo navegador.
+- Permitir imprimir pela ferramenta Print Tool configurada no usuário.
+- Preparar estrutura para compatibilidade com múltiplos modelos de impressoras térmicas, incluindo Zebra, Argox, Elgin, Bematech e similares.
+- Separar claramente a camada de layout da camada de envio para impressão.
+
+6) Persistência
+- Salvar modelos de etiquetas no banco.
+- Permitir criar, editar, duplicar, excluir, ativar e desativar modelos.
+- Armazenar propriedades de layout, tamanho, componentes, posição, fonte, conteúdo dinâmico e configuração de impressão.
+
+7) UX/UI
+- Interface profissional, limpa e funcional.
+- Evitar excesso visual.
+- Priorizar precisão de posicionamento e facilidade de uso.
+- Mostrar claramente o preview final da etiqueta.
+
+8) Arquitetura e entrega
+- Manter a arquitetura atual.
+- Não criar solução descartável.
+- Não usar mock como entrega final.
+- Preparar base extensível para novos tipos de etiquetas.
+- Entregar implementação com resumo técnico, estrutura de dados, endpoints criados/alterados e arquivos modificados.

@@ -49,6 +49,9 @@ import type { User, Section, UserSettings } from "@shared/schema";
 
 const settingsSchema = z.object({
   canAuthorizeOwnExceptions: z.boolean().default(false),
+  allowManualScanInput: z.boolean().default(true),
+  viewQuickLinkBarcode: z.boolean().default(true),
+  viewStockQuery: z.boolean().default(true),
 });
 
 const createUserSchema = z.object({
@@ -108,7 +111,12 @@ export default function UsersPage() {
       name: "",
       role: "separacao",
       sections: [],
-      settings: { canAuthorizeOwnExceptions: false },
+      settings: {
+        canAuthorizeOwnExceptions: false,
+        allowManualScanInput: true,
+        viewQuickLinkBarcode: true,
+        viewStockQuery: true,
+      },
       active: true,
     },
   });
@@ -121,7 +129,12 @@ export default function UsersPage() {
       name: "",
       role: "separacao",
       sections: [],
-      settings: { canAuthorizeOwnExceptions: false },
+      settings: {
+        canAuthorizeOwnExceptions: false,
+        allowManualScanInput: true,
+        viewQuickLinkBarcode: true,
+        viewStockQuery: true,
+      },
       active: true,
     },
   });
@@ -142,6 +155,9 @@ export default function UsersPage() {
         sections: (editingUser.sections as string[]) || [],
         settings: {
           canAuthorizeOwnExceptions: userSettings.canAuthorizeOwnExceptions ?? false,
+          allowManualScanInput: (userSettings as any).allowManualScanInput ?? true,
+          viewQuickLinkBarcode: (userSettings as any).viewQuickLinkBarcode ?? true,
+          viewStockQuery: (userSettings as any).viewStockQuery ?? true,
         },
         active: editingUser.active,
       });
@@ -520,6 +536,69 @@ export default function UsersPage() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="settings.allowManualScanInput"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel>Permitir digitação manual</FormLabel>
+                          <FormDescription>
+                            Quando desativado, somente leitura por scanner é aceita.
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value ?? true}
+                            onCheckedChange={field.onChange}
+                            data-testid="switch-allow-manual-scan-create"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="settings.viewQuickLinkBarcode"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel>Visualizar Vínculo Rápido</FormLabel>
+                          <FormDescription>
+                            Exibe o atalho para vincular código de embalagem.
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value ?? true}
+                            onCheckedChange={field.onChange}
+                            data-testid="switch-view-quicklink-create"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="settings.viewStockQuery"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel>Visualizar Consulta de Estoque</FormLabel>
+                          <FormDescription>
+                            Exibe o botão de consulta de estoque dentro da operação.
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value ?? true}
+                            onCheckedChange={field.onChange}
+                            data-testid="switch-view-stock-create"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                 </>
               )}
               <div className="flex justify-end gap-2 pt-4">
@@ -716,6 +795,69 @@ export default function UsersPage() {
                           <Switch
                             checked={field.value ?? false}
                             onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={editForm.control}
+                    name="settings.allowManualScanInput"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel>Permitir digitação manual</FormLabel>
+                          <FormDescription>
+                            Quando desativado, somente leitura por scanner é aceita.
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value ?? true}
+                            onCheckedChange={field.onChange}
+                            data-testid="switch-allow-manual-scan-edit"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={editForm.control}
+                    name="settings.viewQuickLinkBarcode"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel>Visualizar Vínculo Rápido</FormLabel>
+                          <FormDescription>
+                            Exibe o atalho para vincular código de embalagem.
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value ?? true}
+                            onCheckedChange={field.onChange}
+                            data-testid="switch-view-quicklink-edit"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={editForm.control}
+                    name="settings.viewStockQuery"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel>Visualizar Consulta de Estoque</FormLabel>
+                          <FormDescription>
+                            Exibe o botão de consulta de estoque dentro da operação.
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value ?? true}
+                            onCheckedChange={field.onChange}
+                            data-testid="switch-view-stock-edit"
                           />
                         </FormControl>
                       </FormItem>

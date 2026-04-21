@@ -63,6 +63,8 @@ interface OperatorKPI {
   excVencido: number;
   pedidosComVolume: number;
   totalVolumes: number;
+  tempoTotalMin: number;
+  ultimoMovimento: string | null;
   diario: DiarioItem[];
   workUnitsDetalhe: WorkUnitDetalhe[];
 }
@@ -551,69 +553,65 @@ export default function KpiDashboardPage() {
         {/* Sem dados */}
         {!isLoading && !isError && ops.length === 0 && (
           <div className="rounded-2xl border border-border/50 bg-card p-10 text-center">
-            <Trophy className="h-8 w-8 text-muted-foreground/20 mx-auto mb-2" />
+            <BarChart3 className="h-8 w-8 text-muted-foreground/20 mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">Nenhuma atividade no período.</p>
           </div>
         )}
 
         {!isLoading && !isError && ops.length > 0 && (
           <>
-            {/* Totais */}
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { icon: Package,       label: "Separados",  value: totalSep,            color: "text-blue-600 dark:text-blue-400",   bg: "bg-blue-50 dark:bg-blue-950/30" },
-                { icon: CheckCircle2,  label: "Conferidos", value: totalConf,            color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-950/30" },
-                { icon: Clock,         label: "T.Médio sep", value: fmtTime(avgTempo),   color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-950/30" },
-              ].map(({ icon: Icon, label, value, color, bg }) => (
-                <div key={label} className={`rounded-2xl ${bg} px-3 py-3 flex flex-col items-center gap-0.5`}>
-                  <Icon className={`h-4 w-4 ${color} opacity-70`} />
-                  <p className={`text-xl font-extrabold tabular-nums ${color}`}>{value}</p>
-                  <p className="text-[10px] text-muted-foreground">{label}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { icon: Boxes,         label: "Volumes",    value: ops.reduce((s,o) => s+o.totalVolumes, 0), color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-950/30" },
-                { icon: AlertTriangle, label: "Exceções",   value: totalExc,            color: totalExc > 0 ? "text-red-600 dark:text-red-400" : "text-muted-foreground", bg: totalExc > 0 ? "bg-red-50 dark:bg-red-950/30" : "bg-muted" },
-              ].map(({ icon: Icon, label, value, color, bg }) => (
-                <div key={label} className={`rounded-2xl ${bg} px-3 py-3 flex items-center gap-3`}>
-                  <Icon className={`h-4 w-4 ${color} opacity-70 shrink-0`} />
-                  <div>
-                    <p className={`text-xl font-extrabold tabular-nums ${color}`}>{value}</p>
-                    <p className="text-[10px] text-muted-foreground">{label}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Insights compactos */}
-            {(maisRapido || picoGlobal) && (
-              <div className="rounded-2xl border border-border/50 bg-card divide-y divide-border/40">
-                <p className="px-4 pt-3 pb-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-                  <Zap className="h-3 w-3 text-amber-500" />Destaques
-                </p>
-                {maisRapido && (
-                  <div className="flex items-center gap-3 px-4 py-2.5">
-                    <Timer className="h-4 w-4 text-green-500 shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold truncate">{maisRapido.userName}</p>
-                      <p className="text-[10px] text-muted-foreground">Mais rápido · {fmtTime(maisRapido.tempoMedioSepMin)} por pedido</p>
-                    </div>
-                  </div>
-                )}
-                {picoGlobal && (
-                  <div className="flex items-center gap-3 px-4 py-2.5">
-                    <TrendingUp className="h-4 w-4 text-violet-500 shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold">{fmtDate(picoGlobal.dia)}</p>
-                      <p className="text-[10px] text-muted-foreground">Dia mais movimentado · {picoGlobal.sep + picoGlobal.conf} pedidos</p>
-                    </div>
-                  </div>
-                )}
+            {/* Tabela limpa por operador / módulo */}
+            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
+              <div className="px-4 py-3 border-b border-border/40 flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-semibold flex-1">Operadores</span>
+                <Badge variant="outline" className="text-[10px] h-5">{ops.length}</Badge>
               </div>
-            )}
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs" data-testid="table-kpi-operators">
+                  <thead className="bg-muted/40 text-muted-foreground">
+                    <tr>
+                      <th className="text-left font-semibold px-3 py-2">Operador</th>
+                      <th className="text-left font-semibold px-3 py-2">Módulo</th>
+                      <th className="text-right font-semibold px-3 py-2">Pedidos</th>
+                      <th className="text-right font-semibold px-3 py-2">Itens</th>
+                      <th className="text-right font-semibold px-3 py-2">T. total</th>
+                      <th className="text-right font-semibold px-3 py-2">T. médio</th>
+                      <th className="text-left font-semibold px-3 py-2">Último mov.</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ops.map(op => {
+                      const pedidos = (op.pedidosSeparados ?? 0) + (op.pedidosConferidos ?? 0);
+                      const tempoTotal = op.tempoTotalMin ?? 0;
+                      const tempoMedio = pedidos > 0 ? tempoTotal / pedidos : null;
+                      return (
+                        <tr
+                          key={op.userId}
+                          className="border-t border-border/30 hover:bg-muted/20"
+                          data-testid={`row-kpi-${op.userId}`}
+                        >
+                          <td className="px-3 py-2 font-medium" data-testid={`text-kpi-name-${op.userId}`}>
+                            {op.userName}
+                            <div className="text-[10px] text-muted-foreground font-normal">{op.username}</div>
+                          </td>
+                          <td className="px-3 py-2 text-muted-foreground">
+                            {ROLE_LABELS[op.role] ?? op.role}
+                          </td>
+                          <td className="px-3 py-2 text-right tabular-nums">{pedidos}</td>
+                          <td className="px-3 py-2 text-right tabular-nums">{op.totalItens ?? 0}</td>
+                          <td className="px-3 py-2 text-right tabular-nums">{fmtTime(tempoTotal)}</td>
+                          <td className="px-3 py-2 text-right tabular-nums">{fmtTime(tempoMedio)}</td>
+                          <td className="px-3 py-2 text-muted-foreground tabular-nums">
+                            {op.ultimoMovimento ? fmtDateTime(op.ultimoMovimento) : "—"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
             {/* Busca por Pedido */}
             <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
@@ -774,139 +772,6 @@ export default function KpiDashboardPage() {
               )}
             </div>
 
-            {/* Tempo por Seção */}
-            {secTimesData && secTimesData.sections.length > 0 && (
-              <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
-                <button
-                  className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-muted/30 transition-colors"
-                  onClick={() => setShowSecTimes(v => !v)}
-                  data-testid="btn-sec-times-toggle"
-                >
-                  <Timer className="h-4 w-4 text-amber-500 shrink-0" />
-                  <span className="text-sm font-semibold flex-1">Tempo por Seção</span>
-                  <span className="text-[10px] text-muted-foreground mr-1">{secTimesData.sections.length} seções</span>
-                  {showSecTimes
-                    ? <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
-                    : <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />}
-                </button>
-
-                {showSecTimes && (() => {
-                  const maxSep  = Math.max(0, ...secTimesData.sections.map(s => s.avgSepMin  ?? 0));
-                  const maxConf = Math.max(0, ...secTimesData.sections.map(s => s.avgConfMin ?? 0));
-                  return (
-                    <div className="divide-y divide-border/20 border-t border-border/40">
-                      {secTimesData.sections.map(s => {
-                        const label = s.section === "Sem Seção"
-                          ? "Sem Seção"
-                          : s.sectionName ?? `Seção ${s.section}`;
-                        const showId = !!s.sectionName && s.section !== "Sem Seção";
-                        return (
-                          <div key={s.section} className="px-3 py-2.5">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-1.5 min-w-0">
-                                <span className="text-xs font-bold truncate">{label}</span>
-                                {showId && (
-                                  <span className="text-[10px] text-muted-foreground font-mono shrink-0">#{s.section}</span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-2 text-[10px] shrink-0 ml-2">
-                                {s.sepCount > 0 && (
-                                  <span className="text-blue-600 dark:text-blue-400 tabular-nums font-semibold">{s.sepCount} sep</span>
-                                )}
-                                {s.confCount > 0 && (
-                                  <span className="text-green-600 dark:text-green-400 tabular-nums font-semibold">{s.confCount} conf</span>
-                                )}
-                              </div>
-                            </div>
-
-                            {s.sepCount > 0 && (
-                              <div className="flex items-center gap-2 mb-1.5">
-                                <span className="text-[10px] text-blue-500 font-semibold w-7 shrink-0">Sep</span>
-                                <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                                  <div
-                                    className="h-full bg-blue-500 rounded-full transition-all"
-                                    style={{ width: maxSep > 0 ? `${((s.avgSepMin ?? 0) / maxSep) * 100}%` : "0%" }}
-                                  />
-                                </div>
-                                <div className="text-right shrink-0 min-w-[4.5rem]">
-                                  <span className="text-xs font-bold tabular-nums">{fmtTime(s.avgSepMin)}</span>
-                                  {s.minSepMin !== null && (
-                                    <span className="text-[10px] text-muted-foreground tabular-nums"> {fmtTime(s.minSepMin)}–{fmtTime(s.maxSepMin)}</span>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-
-                            {s.confCount > 0 && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-[10px] text-green-500 font-semibold w-7 shrink-0">Conf</span>
-                                <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                                  <div
-                                    className="h-full bg-green-500 rounded-full transition-all"
-                                    style={{ width: maxConf > 0 ? `${((s.avgConfMin ?? 0) / maxConf) * 100}%` : "0%" }}
-                                  />
-                                </div>
-                                <div className="text-right shrink-0 min-w-[4.5rem]">
-                                  <span className="text-xs font-bold tabular-nums">{fmtTime(s.avgConfMin)}</span>
-                                  {s.minConfMin !== null && (
-                                    <span className="text-[10px] text-muted-foreground tabular-nums"> {fmtTime(s.minConfMin)}–{fmtTime(s.maxConfMin)}</span>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-
-            {/* Gráfico diário global */}
-            {dailyGlobal.length > 0 && (
-              <div className="rounded-2xl border border-border/50 bg-card p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold">Produção diária</p>
-                  <div className="flex gap-3 text-[10px] text-muted-foreground">
-                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-blue-500 inline-block" />Sep</span>
-                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-green-500 inline-block" />Conf</span>
-                    <span className="flex items-center gap-1"><span className="w-4 h-0.5 bg-amber-500 inline-block" />T.méd</span>
-                  </div>
-                </div>
-                <div className="h-40">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={dailyGlobal} margin={{ top: 2, right: 4, left: -28, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
-                      <XAxis
-                        dataKey="dia"
-                        tickFormatter={fmtDate}
-                        tick={{ fontSize: 9 }}
-                        interval={dailyGlobal.length > 14 ? Math.floor(dailyGlobal.length / 8) : 0}
-                      />
-                      <YAxis yAxisId="qty" tick={{ fontSize: 9 }} allowDecimals={false} />
-                      <YAxis yAxisId="tempo" orientation="right" tick={{ fontSize: 9 }} tickFormatter={v => `${v}m`} width={28} />
-                      <Tooltip content={<ChartTooltip />} />
-                      <Bar yAxisId="qty" dataKey="sep" stackId="a" fill="#3b82f6" opacity={0.85} />
-                      <Bar yAxisId="qty" dataKey="conf" stackId="a" fill="#22c55e" opacity={0.85} radius={[2, 2, 0, 0]} />
-                      {dailyGlobal.some(d => d.tempoMedioSep !== null) && (
-                        <Line yAxisId="tempo" type="monotone" dataKey="tempoMedioSep" stroke="#f59e0b" strokeWidth={1.5} dot={false} connectNulls />
-                      )}
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            )}
-
-            {/* Ranking */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 px-1">
-                <Trophy className="h-4 w-4 text-amber-500 shrink-0" />
-                <p className="text-sm font-semibold">Ranking</p>
-                <Badge variant="outline" className="ml-auto text-[10px] h-5">{ops.length} operadores</Badge>
-              </div>
-              {ops.map((op, i) => <OperatorCard key={op.userId} op={op} rank={i + 1} />)}
-            </div>
           </>
         )}
       </div>

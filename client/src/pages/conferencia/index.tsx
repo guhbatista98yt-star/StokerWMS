@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import { beep, getSoundEnabled, setSoundEnabled as persistSoundEnabled } from "@/lib/audio-feedback";
 import { QuickLinkBarcodeModal } from "@/components/quick-link-barcode-modal";
+import { StockQuerySheet } from "@/components/wms/stock-query-sheet";
 import { VolumeModal } from "@/components/conferencia/VolumeModal";
 import { ScanQuantityModal } from "@/components/ui/scan-quantity-modal";
 import { BarcodeDisplay } from "@/components/ui/barcode-display";
@@ -160,11 +161,11 @@ export default function ConferenciaPage() {
   const [abandonConfirmOpen, setAbandonConfirmOpen] = useState(false);
   const [showQuickLinkModal, setShowQuickLinkModal] = useState(false);
   const [showStockModal, setShowStockModal] = useState(false);
-  const [stockQuery, setStockQuery] = useState("");
-  const [stockDebouncedQuery, setStockDebouncedQuery] = useState("");
-  const [stockKeyboard, setStockKeyboard] = useState(false);
-  const stockQueryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const stockInputRef = useRef<HTMLInputElement>(null);
+
+  // Permissões por usuário (defaults true)
+  const allowManualScanInput = (user?.settings as any)?.allowManualScanInput ?? true;
+  const canViewQuickLink = (user?.settings as any)?.viewQuickLinkBarcode ?? true;
+  const canViewStockQuery = (user?.settings as any)?.viewStockQuery ?? true;
 
   const [filterOrderId, setFilterOrderId] = useState("");
   const [filterRoute, setFilterRoute] = useState<string>("");
@@ -371,17 +372,6 @@ export default function ConferenciaPage() {
 
   const confProductIds = useMemo(() => aggregatedProducts.map(ap => ap.product.id), [aggregatedProducts]);
   const { data: addressesMap } = useProductAddressesBatch(confProductIds);
-
-  const { data: stockProducts = [], isLoading: stockLoading } = useQuery<any[]>({
-    queryKey: [`/api/products/search?q=${encodeURIComponent(stockDebouncedQuery)}`, companyId],
-    enabled: !!companyId && stockDebouncedQuery.length >= 2,
-  });
-
-  const handleStockSearch = useCallback((value: string) => {
-    setStockQuery(value);
-    if (stockQueryTimer.current) clearTimeout(stockQueryTimer.current);
-    stockQueryTimer.current = setTimeout(() => setStockDebouncedQuery(value), 350);
-  }, []);
 
   // Buscar log de endereços do separador para os pedidos sendo conferidos
   const confOrderIds = useMemo(() => {
@@ -1423,7 +1413,7 @@ export default function ConferenciaPage() {
                 {allMyUnits.map(wu => wu.order.erpOrderId).filter((v, i, a) => a.indexOf(v) === i).join(", ")}
               </span>
               <div className="flex items-center gap-1">
-                {(featureSettings?.quickLinkEnabled ?? true) && (
+                {(featureSettings?.quickLinkEnabled ?? true) && canViewQuickLink && (
                   <Button
                     variant="ghost"
                     size="icon"
@@ -1453,6 +1443,8 @@ export default function ConferenciaPage() {
               status={scanStatus}
               statusMessage={scanMessage}
               autoFocus
+              showKeyboardToggle
+              manualInputAllowed={allowManualScanInput}
               className="[&_input]:h-9 [&_input]:text-sm"
             />
           </div>
@@ -1539,19 +1531,18 @@ export default function ConferenciaPage() {
                     >
                       <AlertTriangle className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-10 px-3 text-blue-600 border-blue-300 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-700 dark:hover:bg-blue-950"
-                      onClick={() => {
-                        setShowStockModal(true);
-                        setTimeout(() => stockInputRef.current?.focus(), 100);
-                      }}
-                      title="Consultar estoque"
-                      data-testid="button-stock-query"
-                    >
-                      <BarChart2 className="h-4 w-4" />
-                    </Button>
+                    {canViewStockQuery && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-10 px-3 text-blue-600 border-blue-300 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-700 dark:hover:bg-blue-950"
+                        onClick={() => setShowStockModal(true)}
+                        title="Consultar estoque"
+                        data-testid="button-stock-query"
+                      >
+                        <BarChart2 className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       className="h-10 px-3 text-destructive border-destructive/30 hover:bg-destructive/10"
@@ -1789,135 +1780,18 @@ export default function ConferenciaPage() {
       <QuickLinkBarcodeModal
         open={showQuickLinkModal}
         onClose={() => setShowQuickLinkModal(false)}
+        manualInputAllowed={allowManualScanInput}
         prefilledProduct={currentProduct?.product
           ? { barcode: currentProduct.product.barcode, name: currentProduct.product.name, erpCode: currentProduct.product.erpCode ?? "" }
           : undefined}
       />
 
-      <Dialog open={showStockModal} onOpenChange={v => {
-        setShowStockModal(v);
-        if (!v) { setStockQuery(""); setStockDebouncedQuery(""); setStockKeyboard(false); }
-      }}>
-        <DialogContent className="max-w-lg rounded-2xl p-0 gap-0 overflow-hidden max-h-[85dvh] flex flex-col">
-          <DialogHeader className="px-4 pt-4 pb-3 border-b border-border/50 shrink-0">
-            <DialogTitle className="flex items-center gap-2 text-base">
-              <BarChart2 className="h-4 w-4 text-blue-500" />
-              Consultar Estoque
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="px-3 py-2.5 border-b border-border/30 shrink-0">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-              <input
-                ref={stockInputRef}
-                placeholder="Cód. ERP, cód. barras ou descrição..."
-                value={stockQuery}
-                onChange={e => handleStockSearch(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter") { if (stockQueryTimer.current) clearTimeout(stockQueryTimer.current); setStockDebouncedQuery(stockQuery); } }}
-                className="w-full pl-9 pr-16 h-10 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                inputMode={stockKeyboard ? "text" : "none"}
-                autoComplete="off"
-                data-scan-exclude="true"
-                data-testid="input-stock-search"
-              />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                {stockQuery ? (
-                  <button className="p-1" onClick={() => { setStockQuery(""); setStockDebouncedQuery(""); stockInputRef.current?.focus(); }}>
-                    {stockLoading ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : <X className="h-4 w-4 text-muted-foreground" />}
-                  </button>
-                ) : null}
-                <button
-                  className={`h-7 w-7 rounded-lg flex items-center justify-center transition-colors ${stockKeyboard ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
-                  onClick={() => { setStockKeyboard(v => !v); setTimeout(() => stockInputRef.current?.focus(), 50); }}
-                  data-testid="button-stock-keyboard"
-                >
-                  <Keyboard className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 mt-1.5 px-0.5">
-              <span className="text-[10px] text-muted-foreground/70">Dicas:</span>
-              <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-mono text-foreground/70">17081</span>
-              <span className="text-[10px] text-muted-foreground/50">cód. exato</span>
-              <span className="mx-1 text-muted-foreground/30">·</span>
-              <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-mono text-foreground/70">TELHA%PVC</span>
-              <span className="text-[10px] text-muted-foreground/50">% = curinga</span>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto">
-            {stockLoading && (
-              <div className="flex items-center justify-center py-10">
-                <Loader2 className="h-6 w-6 animate-spin text-primary/50" />
-              </div>
-            )}
-
-            {!stockLoading && stockDebouncedQuery.length >= 2 && stockProducts.length === 0 && (
-              <div className="text-center py-10 text-muted-foreground">
-                <Package className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                <p className="text-sm font-medium">Nenhum produto encontrado</p>
-                <p className="text-[11px] mt-0.5 opacity-60">"{stockDebouncedQuery}"</p>
-              </div>
-            )}
-
-            {stockDebouncedQuery.length < 2 && !stockLoading && (
-              <div className="text-center py-10 text-muted-foreground">
-                <Search className="h-8 w-8 mx-auto mb-2 opacity-20" />
-                <p className="text-sm font-medium">Consultar estoque</p>
-                <p className="text-[11px] mt-1 opacity-60 max-w-[220px] mx-auto leading-snug">
-                  Digite o código ERP exato, escaneie o código de barras, ou use % como curinga na descrição
-                </p>
-              </div>
-            )}
-
-            {stockProducts.length > 0 && (
-              <div className="divide-y divide-border/40">
-                {stockProducts.map((p: any) => {
-                  const real = Number(p.totalStock || 0);
-                  const hasStock = real > 0;
-                  return (
-                    <div key={p.id} className="px-3 py-2.5" data-testid={`stock-row-${p.id}`}>
-                      <div className="flex items-start gap-2">
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold leading-snug">{p.name}</p>
-                          <div className="flex items-center flex-wrap gap-x-2 gap-y-0.5 mt-0.5">
-                            <span className="text-[11px] font-mono font-bold text-blue-600 dark:text-blue-400">{p.erpCode}</span>
-                            {p.barcode && (
-                              <span className="text-[10px] font-mono text-muted-foreground flex items-center gap-0.5">
-                                <BarcodeIcon className="h-2.5 w-2.5 shrink-0" />{p.barcode}
-                              </span>
-                            )}
-                            {p.manufacturer && <span className="text-[10px] text-muted-foreground">{p.manufacturer}</span>}
-                          </div>
-                        </div>
-                        <div className={`shrink-0 flex flex-col items-center rounded-lg px-2.5 py-1 min-w-[52px] ${hasStock ? "bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800" : "bg-muted border border-border/50"}`}>
-                          <span className={`text-[9px] font-bold uppercase tracking-wide leading-none mb-0.5 ${hasStock ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}>Estoque</span>
-                          <span className={`font-mono font-extrabold text-base leading-none ${hasStock ? "text-green-700 dark:text-green-300" : "text-muted-foreground"}`}>{real.toLocaleString("pt-BR")}</span>
-                          {p.unit && <span className="text-[9px] text-muted-foreground/70 leading-none mt-0.5">{p.unit}</span>}
-                        </div>
-                      </div>
-
-                      {p.addresses && p.addresses.length > 0 && (
-                        <div className="flex items-center gap-1 flex-wrap mt-1.5">
-                          <MapPinIcon className="h-3 w-3 text-muted-foreground/50 shrink-0" />
-                          {p.addresses.map((addr: any, i: number) => (
-                            <span key={i} className="inline-flex items-center gap-1 bg-muted/60 rounded px-1.5 py-0.5 text-[10px] font-mono border border-border/30">
-                              <span className="font-bold text-foreground">{addr.code}</span>
-                              <span className="text-muted-foreground/50">·</span>
-                              <span className="font-bold text-primary">{Number(addr.quantity).toLocaleString("pt-BR")}</span>
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <StockQuerySheet
+        open={showStockModal}
+        onOpenChange={setShowStockModal}
+        companyId={companyId}
+        manualInputAllowed={allowManualScanInput}
+      />
 
       <ResultDialog
         open={showResultDialog}

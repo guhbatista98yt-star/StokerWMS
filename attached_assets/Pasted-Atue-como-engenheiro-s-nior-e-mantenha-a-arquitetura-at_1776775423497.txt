@@ -1,0 +1,42 @@
+Atue como engenheiro sênior e mantenha a arquitetura atual. Faça apenas o necessário, sem refatoração ampla, sem mock e sem quebrar fluxos existentes.
+
+Aplicar alterações nos módulos: Separação, Conferência, Balcão e KPIs de Operadores.
+
+1) Inputs de scan
+- Adicionar ícone de teclado dentro de todos os inputs de leitura/scan.
+- Ao clicar no ícone, o teclado deve abrir/fechar.
+- Criar configuração por usuário para permitir ou bloquear digitação manual de código de barras.
+- O administrador deve controlar essa permissão.
+- Onde a digitação manual estiver bloqueada, o teclado não pode funcionar.
+
+2) Vínculo Rápido de Embalagem
+- Deixar o botão um pouco mais visível, mas ainda discreto.
+- Trocar o pop-up por barra lateral.
+- Adicionar permissão por usuário para visualizar esse recurso.
+- Adicionar botão de teclado no input do código de barras.
+- Não vincular automaticamente ao bipar o código: só vincular ao clicar em “Vincular”.
+- Mostrar opção de cancelar/apagar o vínculo antes de confirmar.
+- Impedir vínculo duplicado do mesmo código de barras para o mesmo produto.
+- Validar erros de leitura e quantidade antes de salvar.
+- Após vincular, salvar no banco e atualizar o reconhecimento do novo código imediatamente, sem logout, sem recarregar sessão e sem exigir nova coleta.
+
+3) Consultar Estoque
+- Adicionar permissão por usuário para visualizar esse recurso.
+- Trocar para barra lateral.
+- Melhorar o texto de ajuda, deixando claro e profissional. Exemplo:
+  “Busque por código ou descrição. Em buscas avançadas, % pode substituir parte do texto.”
+
+4) KPIs de Operadores
+- Refazer UX/UI com layout simples, limpo e funcional.
+- Remover ranking, excessos, repetições e dados confusos.
+- Exibir dados reais de todos os operadores dos módulos Separação, Conferência e Balcão.
+- Mostrar no mínimo:
+  operador, módulo, pedidos processados, itens/produtos processados, tempo total, tempo médio e último movimento.
+- Foco: medir tempo e volume por operador, sem poluição visual.
+
+5) Regras gerais
+- Garantir que em todos os locais com botão de teclado ele sempre abra e feche corretamente.
+- Não alterar regras de negócio fora desse escopo.
+- Preservar performance no coletor.
+- Se houver cache de códigos de barras, invalidar/atualizar imediatamente após novo vínculo.
+- Entregar implementação completa, listando arquivos alterados e resumo técnico objetivo.

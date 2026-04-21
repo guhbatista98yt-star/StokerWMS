@@ -1,0 +1,49 @@
+Mantenha a arquitetura atual e altere somente o necessário, sem refatoração ampla, sem mock e sem quebrar fluxos existentes.
+
+Aplicar alterações nos módulos: Separação, Conferência, Balcão, Fila de Pedidos e KPIs de Operadores.
+
+1) Inputs de scan
+- Adicionar ícone de teclado dentro de todos os inputs de leitura/scan.
+- Ao clicar no ícone, o teclado deve abrir e fechar.
+- Criar configuração por usuário para permitir ou bloquear digitação manual.
+- O administrador deve controlar essa permissão.
+- Se a digitação manual estiver bloqueada, o teclado não pode permitir entrada manual.
+
+2) Vínculo Rápido de Embalagem
+- Deixar o botão um pouco mais visível, mas ainda discreto.
+- Trocar o pop-up por barra lateral.
+- Adicionar permissão por usuário para visualizar esse recurso.
+- Adicionar botão de teclado no input do código de barras.
+- Ao bipar ou digitar o código da embalagem, não vincular automaticamente.
+- Só salvar ao clicar no botão “Vincular”.
+- Mostrar opção de apagar/cancelar antes da confirmação.
+- Impedir vínculo duplicado do mesmo código de barras para o mesmo produto.
+- Validar quantidade e código antes de salvar.
+- Após salvar, o novo código deve ser reconhecido imediatamente na coleta, sem logout, sem nova sessão e sem necessidade de reabrir a tela.
+- Se houver cache local, estado global ou cache no backend, invalidar/atualizar imediatamente após o vínculo.
+
+3) Consultar Estoque
+- Adicionar permissão por usuário para visualizar esse recurso.
+- Trocar pop-up por barra lateral ou menu lateral.
+- Melhorar o texto de ajuda para algo claro, discreto e profissional.
+- Substituir “% = curinga” por um texto mais compreensível para usuários leigos.
+
+4) KPIs de Operadores
+- Refazer o UX/UI para ficar limpo, simples e funcional.
+- Remover ranking, excessos, repetições e informações confusas.
+- Exibir dados reais e completos de todos os operadores de Separação, Conferência e Balcão.
+- Exibir no mínimo:
+  operador, módulo, pedidos processados, itens/produtos processados, tempo total, tempo médio e último movimento.
+- O foco é medir tempo e volume com clareza.
+
+5) Fila de Pedidos
+- Quando entrar um pedido novo na tela, aplicar uma sinalização visual discreta por 10 segundos.
+- Pode ser brilho, pulso, destaque temporário, aura suave verde ou leve animação.
+- A sinalização deve ocorrer apenas para pedidos realmente novos que acabaram de entrar na lista.
+- Não aplicar esse efeito continuamente em pedidos antigos já carregados.
+
+6) Regras gerais
+- Garantir que em todos os locais com botão de teclado ele sempre abra e feche corretamente.
+- Preservar performance no coletor e no navegador.
+- Não alterar regras de negócio fora deste escopo.
+- Entregar implementação completa com resumo técnico objetivo e lista de arquivos alterados.

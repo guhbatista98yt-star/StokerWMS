@@ -77,6 +77,13 @@ export interface UserSettings {
   allowMultiplier?: boolean;
   canAuthorizeOwnExceptions?: boolean;
   printConfig?: Record<string, PrintConfig>;
+  // Permite digitação manual nos inputs de scan (físico ou via teclado virtual).
+  // Se false, somente leitura de scanner é aceita. Default: true.
+  allowManualScanInput?: boolean;
+  // Mostra o botão de "Vínculo Rápido de Embalagem" nas telas operacionais. Default: true.
+  viewQuickLinkBarcode?: boolean;
+  // Mostra o botão de "Consultar Estoque" nas telas operacionais. Default: true.
+  viewStockQuery?: boolean;
 }
 
 export const companies = pgTable("companies", {

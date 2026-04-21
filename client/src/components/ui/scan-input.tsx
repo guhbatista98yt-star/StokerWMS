@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { ScanLine, Check, X, AlertTriangle, Keyboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { VirtualKeyboard } from "@/components/ui/virtual-keyboard";
 
 interface ScanInputProps {
   placeholder?: string;
@@ -17,6 +18,11 @@ interface ScanInputProps {
   readOnly?: boolean;
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
   showKeyboardToggle?: boolean;
+  /**
+   * Quando false, bloqueia digitação manual (físico e teclado virtual).
+   * Apenas leitura por scanner é aceita. Default: true.
+   */
+  manualInputAllowed?: boolean;
 }
 
 const DIALOG_SELECTORS = '[role="dialog"], [role="alertdialog"], [data-radix-dialog-content], [data-radix-alert-dialog-content]';
@@ -38,9 +44,10 @@ export function ScanInput({
   readOnly = false,
   inputMode = "none",
   showKeyboardToggle = false,
+  manualInputAllowed = true,
 }: ScanInputProps) {
   const [internalValue, setInternalValue] = useState("");
-  const [keyboardMode, setKeyboardMode] = useState(false);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
   const refocusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -52,6 +59,11 @@ export function ScanInput({
       setInternalValue(newValue);
     }
   }, [controlledOnChange]);
+
+  // Se digitação manual estiver bloqueada o ícone do teclado nunca aparece.
+  const canShowKeyboardToggle = showKeyboardToggle && manualInputAllowed;
+  // Input fica readOnly quando manual bloqueado, OU explicitamente readOnly.
+  const effectiveReadOnly = readOnly || !manualInputAllowed;
 
   const tryFocus = useCallback(() => {
     if (inputRef.current && !inputRef.current.disabled && !hasOpenDialog()) {
@@ -75,16 +87,12 @@ export function ScanInput({
 
     const handlePointerDown = (e: PointerEvent) => {
       const target = e.target as HTMLElement;
-      // Skip if clicking inside a dialog
       if (target.closest(DIALOG_SELECTORS)) return;
-      // Skip if clicking on another input/textarea/select that is NOT the scan input itself
-      // This prevents stealing focus from quantity inputs, search fields, etc.
       const tagName = target.tagName;
       if (
         (tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT") &&
         target !== inputRef.current
       ) return;
-      // Skip if target has data-scan-exclude attribute (explicit opt-out)
       if (target.closest("[data-scan-exclude]")) return;
       scheduleFocus(80);
     };
@@ -124,32 +132,34 @@ export function ScanInput({
     if (!autoFocus || disabled) return;
     const relatedTarget = e.relatedTarget as HTMLElement | null;
     if (relatedTarget?.closest(DIALOG_SELECTORS)) return;
-    // Don't steal focus back if the user clicked another input/textarea/select
     if (
       relatedTarget &&
       (relatedTarget.tagName === "INPUT" ||
         relatedTarget.tagName === "TEXTAREA" ||
         relatedTarget.tagName === "SELECT")
     ) return;
-    // Don't steal back if clicking something with data-scan-exclude
     if (relatedTarget?.closest("[data-scan-exclude]")) return;
     scheduleFocus(120);
   }, [autoFocus, disabled, scheduleFocus]);
 
+  const fireScan = useCallback(() => {
+    const v = value.trim();
+    if (!v) return;
+    setValue("");
+    onScan(v);
+  }, [value, onScan, setValue]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && value.trim()) {
       e.preventDefault();
-      const scannedValue = value.trim();
-      setValue("");
-      onScan(scannedValue);
+      fireScan();
     }
   };
 
   const toggleKeyboard = () => {
-    setKeyboardMode(prev => {
+    setKeyboardOpen(prev => {
       const next = !prev;
-      // Re-focus after toggle
-      setTimeout(() => inputRef.current?.focus(), 50);
+      if (!next) setTimeout(() => inputRef.current?.focus(), 50);
       return next;
     });
   };
@@ -175,8 +185,6 @@ export function ScanInput({
     warning: "text-yellow-600 dark:text-yellow-400",
   };
 
-  const effectiveInputMode = keyboardMode ? "text" : inputMode;
-
   return (
     <div className={cn("relative", className)}>
       <div className="relative">
@@ -192,22 +200,26 @@ export function ScanInput({
           ref={inputRef}
           type="text"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => {
+            // Bloquear digitação manual quando proibido.
+            if (effectiveReadOnly) return;
+            setValue(e.target.value);
+          }}
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
           placeholder={placeholder}
           disabled={disabled}
-          readOnly={readOnly}
-          inputMode={effectiveInputMode}
+          readOnly={effectiveReadOnly}
+          inputMode={inputMode}
           data-scan-input="true"
           className={cn(
             "pl-11 h-14 text-lg font-mono transition-all",
-            showKeyboardToggle && "pr-11",
+            canShowKeyboardToggle && "pr-11",
             statusColors[status]
           )}
           data-testid="input-scan"
         />
-        {showKeyboardToggle && (
+        {canShowKeyboardToggle && (
           <div className="absolute inset-y-0 right-0 flex items-center pr-3">
             <Button
               type="button"
@@ -216,11 +228,11 @@ export function ScanInput({
               onClick={toggleKeyboard}
               className={cn(
                 "h-7 w-7 rounded-lg transition-colors",
-                keyboardMode
+                keyboardOpen
                   ? "text-primary bg-primary/10 hover:bg-primary/20"
                   : "text-muted-foreground hover:text-foreground"
               )}
-              title={keyboardMode ? "Modo teclado ativo — clique para voltar ao scanner" : "Digitar manualmente"}
+              title={keyboardOpen ? "Fechar teclado" : "Abrir teclado virtual"}
               data-testid="button-keyboard-toggle"
               data-scan-exclude="true"
             >
@@ -245,6 +257,21 @@ export function ScanInput({
           </p>
         )}
       </div>
+
+      {keyboardOpen && canShowKeyboardToggle && (
+        <div className="absolute z-50 left-0 right-0 top-full mt-1">
+          <VirtualKeyboard
+            value={value}
+            onChange={setValue}
+            onConfirm={() => {
+              fireScan();
+              // Mantém o teclado aberto para próxima leitura.
+            }}
+            onClose={() => setKeyboardOpen(false)}
+            enabled={manualInputAllowed}
+          />
+        </div>
+      )}
     </div>
   );
 }

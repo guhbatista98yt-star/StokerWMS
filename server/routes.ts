@@ -3881,7 +3881,15 @@ export async function registerRoutes(
                       AND wu.completed_at IS NOT NULL
             THEN EXTRACT(EPOCH FROM (wu.completed_at::timestamptz - COALESCE(wu.started_at, wu.locked_at)::timestamptz)) / 60.0
             END
-          )::numeric, 1)                                             AS tempo_medio_conf_min
+          )::numeric, 1)                                             AS tempo_medio_conf_min,
+          ROUND(SUM(
+            CASE WHEN wu.status = 'concluido'
+                      AND COALESCE(wu.started_at, wu.locked_at) IS NOT NULL
+                      AND wu.completed_at IS NOT NULL
+            THEN EXTRACT(EPOCH FROM (wu.completed_at::timestamptz - COALESCE(wu.started_at, wu.locked_at)::timestamptz)) / 60.0
+            END
+          )::numeric, 1)                                             AS tempo_total_min,
+          MAX(COALESCE(wu.completed_at, wu.locked_at))               AS ultimo_movimento
         FROM work_units wu
         JOIN users u ON wu.locked_by = u.id
         WHERE wu.company_id = ${companyId}
@@ -4134,6 +4142,9 @@ export async function registerRoutes(
           // Volumes (conferência)
           pedidosComVolume:    Number(vol.pedidos_com_volume ?? 0),
           totalVolumes:        Number(vol.total_volumes ?? 0),
+          // Tempo total operado e último movimento (KPI simples)
+          tempoTotalMin:       wu.tempo_total_min !== null && wu.tempo_total_min !== undefined ? Number(wu.tempo_total_min) : 0,
+          ultimoMovimento:     wu.ultimo_movimento ?? null,
           // Atividade diária
           diario:              daily,
           // Work units individuais
