@@ -11,10 +11,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { DatePickerWithRange } from "@/components/ui/date-range-picker";
+import type { DateRange } from "react-day-picker";
+import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, Printer, Search, Eye, Layers, RefreshCw,
-  Calendar, AlertTriangle, Info, Boxes, FileWarning,
+  AlertTriangle, Info, Boxes, FileWarning,
 } from "lucide-react";
 import {
   type LabelTemplate, type LabelContext, type PrintMediaLayout,
@@ -35,9 +38,7 @@ interface PrintConfigResponse {
   printConfig: Record<string, PrintConfigEntry>;
 }
 
-// Contextos que exigem pelo menos um filtro mínimo (data ou texto) antes de listar.
-const CONTEXTS_REQUIRING_FILTER: LabelContext[] = ["order_label", "volume_label", "pallet_label"];
-// Contextos que exibem o seletor de período.
+// Contextos que exibem o seletor de período (Pedido / Volume / Palete).
 const CONTEXTS_WITH_DATE: LabelContext[] = ["order_label", "volume_label", "pallet_label"];
 
 const SEARCH_PLACEHOLDER: Record<LabelContext, string> = {
@@ -57,9 +58,7 @@ export default function LabelPrintPage() {
   const [templateId, setTemplateId] = useState<string>("");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
-  const [searchActive, setSearchActive] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   // Mantemos o registro completo de cada item selecionado (não apenas o id),
   // para que a impressão use exatamente o que está contado no resumo.
   const [selectedRecords, setSelectedRecords] = useState<Map<string, DataRow>>(new Map());
@@ -77,12 +76,14 @@ export default function LabelPrintPage() {
   useEffect(() => {
     setSelectedRecords(new Map());
     setTemplateId("");
-    setSearchActive(false);
     setSearch("");
     setDebouncedSearch("");
-    setStartDate("");
-    setEndDate("");
+    setDateRange(undefined);
   }, [context]);
+
+  // Datas em ISO para a query — derivadas do DateRange.
+  const startDateIso = dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "";
+  const endDateIso   = dateRange?.to   ? format(dateRange.to,   "yyyy-MM-dd") : "";
 
   const { data: templates = [] } = useQuery<LabelTemplate[]>({
     queryKey: ["/api/labels/templates"],
@@ -100,19 +101,20 @@ export default function LabelPrintPage() {
   });
   const contextPrinterConfig = printConfigData?.printConfig?.[context];
 
-  // Datasource — só dispara depois que o usuário clicar em "Buscar".
+  // Datasource — auto-carrega ao entrar na página e a cada mudança de
+  // contexto/filtros/período (com debounce no termo de busca). O backend já
+  // limita a 100 registros, então não há risco de carga massiva.
   const { data: records = [], isFetching, refetch } = useQuery<DataRow[]>({
-    queryKey: ["/api/labels/datasource", context, debouncedSearch, startDate, endDate],
+    queryKey: ["/api/labels/datasource", context, debouncedSearch, startDateIso, endDateIso],
     queryFn: async () => {
       const params = new URLSearchParams({ q: debouncedSearch, limit: "100" });
-      if (startDate) params.set("startDate", startDate);
-      if (endDate)   params.set("endDate", endDate);
+      if (startDateIso) params.set("startDate", startDateIso);
+      if (endDateIso)   params.set("endDate", endDateIso);
       const url = `/api/labels/datasource/${context}?${params.toString()}`;
       const res = await fetch(url, { credentials: "include" });
       if (!res.ok) return [];
       return res.json();
     },
-    enabled: searchActive,
   });
 
   // Modelos compatíveis com a origem escolhida (regra 10).
@@ -122,12 +124,6 @@ export default function LabelPrintPage() {
   );
   const template = filteredTemplates.find(t => t.id === templateId);
   const mediaLayout = mediaLayouts.find(m => m.id === mediaLayoutId);
-
-  // Avaliação de filtros mínimos antes de buscar.
-  const hasMinFilter = useMemo(() => {
-    if (!CONTEXTS_REQUIRING_FILTER.includes(context)) return true;
-    return !!(search.trim() || startDate || endDate);
-  }, [context, search, startDate, endDate]);
 
   // Volumes detectados — soma dos totalVolumes dos registros selecionados (volume_label).
   const detectedVolumes = useMemo(() => {
@@ -322,34 +318,20 @@ export default function LabelPrintPage() {
   }
   function clearSelection() { setSelectedRecords(new Map()); }
 
-  function handleSearchClick() {
-    if (!hasMinFilter) {
-      toast({
-        title: "Informe pelo menos um filtro",
-        description: "Use a busca textual ou um período (data inicial/final) antes de buscar.",
-        variant: "destructive",
-      });
-      return;
-    }
-    // Sincroniza o termo debounced imediatamente para evitar uma fetch
-    // intermediária com o valor anterior dentro da janela de debounce.
-    setDebouncedSearch(search);
-    setSearchActive(true);
-  }
-
-  // Atalho: Enter no campo de busca dispara a procura.
+  // Atalho: Enter no campo de busca força sincronizar o debounce e refetch imediato.
   function onSearchKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       e.preventDefault();
-      handleSearchClick();
+      setDebouncedSearch(search);
     }
   }
 
   const periodLabel = useMemo(() => {
-    if (!startDate && !endDate) return "—";
-    const fmt = (s: string) => s ? s.split("-").reverse().join("/") : "?";
-    return `${fmt(startDate)} → ${fmt(endDate)}`;
-  }, [startDate, endDate]);
+    if (!dateRange?.from && !dateRange?.to) return "—";
+    const f = dateRange?.from ? format(dateRange.from, "dd/MM/yyyy") : "?";
+    const t = dateRange?.to   ? format(dateRange.to,   "dd/MM/yyyy") : f;
+    return `${f} → ${t}`;
+  }, [dateRange]);
 
   return (
     <div className="min-h-[100dvh] bg-background">
@@ -390,14 +372,11 @@ export default function LabelPrintPage() {
                 </Select>
               </div>
 
-              {/* 2. Filtros (texto + período condicional) */}
+              {/* 2. Filtros (texto + período condicional) — busca automática */}
               <div className="space-y-2">
                 <Label className="text-[11px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
                   <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary/15 text-primary text-[10px] font-semibold">2</span>
                   Filtros
-                  {CONTEXTS_REQUIRING_FILTER.includes(context) && (
-                    <span className="text-destructive ml-0.5" title="Pelo menos um filtro é obrigatório">*</span>
-                  )}
                 </Label>
 
                 <div className="relative">
@@ -413,44 +392,29 @@ export default function LabelPrintPage() {
                 </div>
 
                 {CONTEXTS_WITH_DATE.includes(context) && (
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <div>
-                      <Label className="text-[10px] text-muted-foreground flex items-center gap-1">
-                        <Calendar className="h-3 w-3" /> Data inicial
-                      </Label>
-                      <Input
-                        type="date"
-                        value={startDate}
-                        onChange={e => setStartDate(e.target.value)}
-                        className="h-8 mt-0.5 text-xs"
-                        data-testid="input-start-date"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-[10px] text-muted-foreground flex items-center gap-1">
-                        <Calendar className="h-3 w-3" /> Data final
-                      </Label>
-                      <Input
-                        type="date"
-                        value={endDate}
-                        onChange={e => setEndDate(e.target.value)}
-                        className="h-8 mt-0.5 text-xs"
-                        data-testid="input-end-date"
-                      />
-                    </div>
+                  <div>
+                    <Label className="text-[10px] text-muted-foreground">Período de importação</Label>
+                    <DatePickerWithRange
+                      date={dateRange}
+                      onDateChange={setDateRange}
+                      className="mt-0.5"
+                    />
+                    {dateRange?.from && (
+                      <button
+                        type="button"
+                        onClick={() => setDateRange(undefined)}
+                        className="text-[10px] text-muted-foreground hover:text-foreground underline mt-1"
+                        data-testid="btn-clear-date"
+                      >
+                        limpar período
+                      </button>
+                    )}
                   </div>
                 )}
 
-                <Button
-                  onClick={handleSearchClick}
-                  size="sm"
-                  className="w-full h-8 text-xs"
-                  disabled={isFetching}
-                  data-testid="btn-search"
-                >
-                  <Search className="h-3.5 w-3.5 mr-1.5" />
-                  {isFetching ? "Buscando..." : "Buscar registros"}
-                </Button>
+                <p className="text-[10px] text-muted-foreground leading-tight">
+                  A busca atualiza automaticamente. {isFetching && <span className="text-primary">carregando...</span>}
+                </p>
               </div>
 
               {/* 3. Modelo (filtrado pela origem) */}
@@ -589,20 +553,20 @@ export default function LabelPrintPage() {
                 </Alert>
               )}
 
-              {/* Ações */}
-              <div className="flex gap-2 pt-1">
+              {/* Ações — grid garante larguras iguais sem deformação */}
+              <div className="grid grid-cols-2 gap-2 pt-1">
                 <Button
                   variant="outline"
-                  className="flex-1 h-9"
+                  className="h-9 w-full justify-center"
                   onClick={() => handlePrint(true)}
                   disabled={!template || selectedRecords.size === 0 || printing}
                   data-testid="btn-preview"
                 >
-                  <Eye className="h-4 w-4 mr-1.5" />
-                  Pré-visualizar
+                  <Eye className="h-4 w-4 mr-1.5 shrink-0" />
+                  <span className="truncate">Pré-visualizar</span>
                 </Button>
                 <Button
-                  className="flex-1 h-9"
+                  className="h-9 w-full justify-center"
                   onClick={() => handlePrint(false)}
                   disabled={
                     !template
@@ -613,8 +577,8 @@ export default function LabelPrintPage() {
                   }
                   data-testid="btn-print"
                 >
-                  <Printer className="h-4 w-4 mr-1.5" />
-                  {printing ? "Enviando..." : "Imprimir"}
+                  <Printer className="h-4 w-4 mr-1.5 shrink-0" />
+                  <span className="truncate">{printing ? "Enviando..." : "Imprimir"}</span>
                 </Button>
               </div>
             </CardContent>
@@ -634,8 +598,7 @@ export default function LabelPrintPage() {
               </CardTitle>
               <Button
                 variant="ghost" size="icon" className="h-8 w-8"
-                onClick={() => searchActive && refetch()}
-                disabled={!searchActive}
+                onClick={() => refetch()}
                 title="Recarregar"
                 data-testid="btn-refresh"
               >
@@ -657,7 +620,7 @@ export default function LabelPrintPage() {
                   onCheckedChange={toggleAll}
                   className="pointer-events-none"
                 />
-                {allVisibleSelected ? "Desmarcar visíveis" : (search || startDate || endDate ? "Marcar visíveis" : "Marcar todos")}
+                {allVisibleSelected ? "Desmarcar visíveis" : (search || dateRange?.from ? "Marcar visíveis" : "Marcar todos")}
               </button>
               <span className="text-right">
                 {isFetching ? "Carregando..." : (
@@ -682,17 +645,17 @@ export default function LabelPrintPage() {
               </span>
             </div>
             <ScrollArea className="flex-1 h-[58vh]">
-              {!searchActive ? (
+              {records.length === 0 ? (
                 <div className="text-center text-muted-foreground py-12 text-sm space-y-1">
-                  <Search className="h-6 w-6 mx-auto opacity-40" />
-                  <p>Defina os filtros e clique em <strong>Buscar registros</strong>.</p>
-                  {CONTEXTS_REQUIRING_FILTER.includes(context) && (
-                    <p className="text-[11px]">Para "{LABEL_CONTEXT_LABELS[context]}" use texto e/ou um período.</p>
+                  {isFetching ? (
+                    <p>Carregando...</p>
+                  ) : (
+                    <>
+                      <Search className="h-6 w-6 mx-auto opacity-40" />
+                      <p>Nenhum registro encontrado.</p>
+                      <p className="text-[11px]">Ajuste a busca ou o período acima.</p>
+                    </>
                   )}
-                </div>
-              ) : records.length === 0 ? (
-                <div className="text-center text-muted-foreground py-12 text-sm">
-                  {isFetching ? "Carregando..." : "Nenhum registro encontrado para os filtros aplicados."}
                 </div>
               ) : (
                 <ul className="divide-y">
