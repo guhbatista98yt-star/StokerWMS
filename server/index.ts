@@ -785,6 +785,24 @@ async function runSafeMigrations() {
       updated_at text NOT NULL DEFAULT '',
       PRIMARY KEY (company_id, context)
     )`,
+    `CREATE TABLE IF NOT EXISTS print_media_layouts (
+      id text PRIMARY KEY,
+      company_id integer,
+      name text NOT NULL,
+      description text,
+      media_width_mm integer NOT NULL DEFAULT 100,
+      media_height_mm integer NOT NULL DEFAULT 150,
+      rows integer NOT NULL DEFAULT 3,
+      cols integer NOT NULL DEFAULT 1,
+      cell_width_mm integer NOT NULL DEFAULT 100,
+      cell_height_mm integer NOT NULL DEFAULT 50,
+      margin_mm integer NOT NULL DEFAULT 0,
+      gap_x_mm integer NOT NULL DEFAULT 0,
+      gap_y_mm integer NOT NULL DEFAULT 0,
+      layout_json jsonb NOT NULL DEFAULT '{"cells":[]}'::jsonb,
+      created_at text NOT NULL DEFAULT '',
+      updated_at text
+    )`,
   ];
 
   for (const ddl of tables) {

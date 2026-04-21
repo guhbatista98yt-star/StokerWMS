@@ -10,7 +10,9 @@ import {
   type Db2Mapping, type MappingField, type BatchSyncPayload,
   type OrderVolume, type InsertOrderVolume, companies, type Company,
   type SystemSettings, type SeparationMode,
-  labelTemplates, labelDefaultAssignments,
+  labelTemplates, labelDefaultAssignments, printMediaLayouts,
+  type PrintMediaLayout, type InsertPrintMediaLayout,
+  products, orders, pallets,
   type LabelTemplate, type InsertLabelTemplate, type LabelContext, type LabelDefaultAssignment,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
@@ -2607,6 +2609,92 @@ export class DatabaseStorage implements IStorage {
       .values({ context, templateId, companyId, updatedAt: new Date().toISOString() })
       .returning();
     return created;
+  }
+
+  // ── Print Media Layouts ──────────────────────────────────────────────────────
+  async getPrintMediaLayouts(companyId: number): Promise<PrintMediaLayout[]> {
+    return db.select().from(printMediaLayouts)
+      .where(or(isNull(printMediaLayouts.companyId), eq(printMediaLayouts.companyId, companyId)))
+      .orderBy(desc(printMediaLayouts.createdAt));
+  }
+  async getPrintMediaLayoutById(id: string, companyId: number): Promise<PrintMediaLayout | undefined> {
+    const [row] = await db.select().from(printMediaLayouts).where(
+      and(eq(printMediaLayouts.id, id), or(isNull(printMediaLayouts.companyId), eq(printMediaLayouts.companyId, companyId)))
+    );
+    return row;
+  }
+  async createPrintMediaLayout(data: InsertPrintMediaLayout, companyId: number): Promise<PrintMediaLayout> {
+    const [created] = await db.insert(printMediaLayouts).values({
+      ...data,
+      companyId,
+      createdAt: new Date().toISOString(),
+    }).returning();
+    return created;
+  }
+  async updatePrintMediaLayout(id: string, data: Partial<InsertPrintMediaLayout>, companyId: number): Promise<PrintMediaLayout | undefined> {
+    const [updated] = await db.update(printMediaLayouts)
+      .set({ ...data, updatedAt: new Date().toISOString() })
+      .where(and(eq(printMediaLayouts.id, id), eq(printMediaLayouts.companyId, companyId)))
+      .returning();
+    return updated;
+  }
+  async deletePrintMediaLayout(id: string, companyId: number): Promise<void> {
+    await db.delete(printMediaLayouts).where(
+      and(eq(printMediaLayouts.id, id), eq(printMediaLayouts.companyId, companyId))
+    );
+  }
+
+  // ── Datasource fetchers para impressão em lote ───────────────────────────────
+  async fetchProductsForLabels(companyId: number, query: string, limit = 50): Promise<any[]> {
+    const q = query.trim();
+    if (!q) {
+      const rows = await db.select().from(products).limit(limit);
+      return rows;
+    }
+    const pattern = `%${q}%`;
+    const rows = await db.select().from(products).where(
+      or(like(products.name, pattern), like(products.erpCode, pattern), like(products.barcode, pattern))
+    ).limit(limit);
+    return rows;
+  }
+  async fetchOrdersForLabels(companyId: number, query: string, limit = 50): Promise<any[]> {
+    const q = query.trim();
+    const baseFilter = eq(orders.companyId, companyId);
+    if (!q) {
+      const rows = await db.select().from(orders).where(baseFilter).orderBy(desc(orders.createdAt)).limit(limit);
+      return rows;
+    }
+    const pattern = `%${q}%`;
+    const rows = await db.select().from(orders).where(
+      and(baseFilter, or(like(orders.erpOrderId, pattern), like(orders.customerName, pattern), like(orders.loadCode, pattern)))
+    ).limit(limit);
+    return rows;
+  }
+  async fetchPalletsForLabels(companyId: number, query: string, limit = 50): Promise<any[]> {
+    const q = query.trim();
+    const baseFilter = eq(pallets.companyId, companyId);
+    if (!q) {
+      const rows = await db.select().from(pallets).where(baseFilter).orderBy(desc(pallets.createdAt)).limit(limit);
+      return rows;
+    }
+    const pattern = `%${q}%`;
+    const rows = await db.select().from(pallets).where(
+      and(baseFilter, like(pallets.code, pattern))
+    ).limit(limit);
+    return rows;
+  }
+  async fetchAddressesForLabels(companyId: number, query: string, limit = 100): Promise<any[]> {
+    const q = query.trim();
+    const baseFilter = and(eq(wmsAddresses.companyId, companyId), eq(wmsAddresses.active, true));
+    if (!q) {
+      const rows = await db.select().from(wmsAddresses).where(baseFilter).limit(limit);
+      return rows;
+    }
+    const pattern = `%${q}%`;
+    const rows = await db.select().from(wmsAddresses).where(
+      and(baseFilter, or(like(wmsAddresses.code, pattern), like(wmsAddresses.bairro, pattern)))
+    ).limit(limit);
+    return rows;
   }
 }
 

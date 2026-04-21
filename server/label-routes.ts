@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { isAuthenticated } from "./auth";
 import {
   insertLabelTemplateSchema,
+  insertPrintMediaLayoutSchema,
   labelContextEnum,
   type LabelContext,
   type LabelLayout,
@@ -17,6 +18,10 @@ const baseFields = {
   height: z.number().min(0.1).max(2000),
   rotation: z.number().optional(),
   zIndex: z.number().int().optional(),
+  name: z.string().optional(),
+  locked: z.boolean().optional(),
+  hidden: z.boolean().optional(),
+  opacity: z.number().min(0).max(1).optional(),
 };
 
 const textSchema = z.object({
@@ -259,6 +264,136 @@ export function registerLabelRoutes(app: Express) {
       res.setHeader("Content-Type", "application/json");
       res.setHeader("Content-Disposition", `attachment; filename="label-${tpl.name.replace(/[^a-z0-9]/gi, "_")}.json"`);
       res.send(JSON.stringify(exportData, null, 2));
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ─── Datasource para impressão em lote ───────────────────────────────────────
+  app.get("/api/labels/datasource/:context", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const companyId = requireCompanyId(req, res);
+      if (!companyId) return;
+      const ctx = req.params.context as LabelContext;
+      const q = String(req.query.q ?? "");
+      const limit = Math.min(Number(req.query.limit) || 50, 200);
+      let rows: any[] = [];
+      if (ctx === "product_label") {
+        rows = await storage.fetchProductsForLabels(companyId, q, limit);
+        rows = rows.map(r => ({
+          id: r.id, name: r.name, erpCode: r.erpCode, barcode: r.barcode ?? "",
+          unit: r.unit, price: r.price ? `R$ ${Number(r.price).toFixed(2).replace(".", ",")}` : "",
+        }));
+      } else if (ctx === "order_label" || ctx === "volume_label") {
+        rows = await storage.fetchOrdersForLabels(companyId, q, limit);
+        rows = rows.map(r => ({
+          id: r.id, erpOrderId: r.erpOrderId, order: r.erpOrderId,
+          customerName: r.customerName, customer: r.customerName,
+          cnpjCpf: r.cnpjCpf ?? "",
+          city: r.city ?? "", state: r.state ?? "",
+          address: r.address ?? "", neighborhood: r.neighborhood ?? "",
+          loadCode: r.loadCode ?? "",
+          totalValue: r.totalValue ? `R$ ${Number(r.totalValue).toFixed(2).replace(".", ",")}` : "",
+        }));
+      } else if (ctx === "pallet_label") {
+        rows = await storage.fetchPalletsForLabels(companyId, q, limit);
+        rows = rows.map(r => ({
+          id: r.id, code: r.code, status: r.status, address: r.addressId ?? "",
+        }));
+      } else if (ctx === "address_label") {
+        rows = await storage.fetchAddressesForLabels(companyId, q, limit);
+        rows = rows.map(r => ({
+          id: r.id, code: r.code, bairro: r.bairro, rua: r.rua, bloco: r.bloco,
+          nivel: r.nivel, type: r.type, capacity: r.capacity ?? "", description: r.description ?? "",
+        }));
+      } else {
+        return res.status(400).json({ error: "Contexto inválido." });
+      }
+      res.json(rows);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ─── Print Media Layouts ─────────────────────────────────────────────────────
+  app.get("/api/labels/media-layouts", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const companyId = requireCompanyId(req, res);
+      if (!companyId) return;
+      const rows = await storage.getPrintMediaLayouts(companyId);
+      res.json(rows);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/labels/media-layouts/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const companyId = requireCompanyId(req, res);
+      if (!companyId) return;
+      const row = await storage.getPrintMediaLayoutById(req.params.id, companyId);
+      if (!row) return res.status(404).json({ error: "Layout não encontrado." });
+      res.json(row);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  const mediaLayoutBodySchema = insertPrintMediaLayoutSchema
+    .omit({ companyId: true } as any)
+    .extend({
+      rows: z.number().int().min(1).max(100),
+      cols: z.number().int().min(1).max(100),
+      mediaWidthMm: z.number().min(1).max(2000),
+      mediaHeightMm: z.number().min(1).max(2000),
+      cellWidthMm: z.number().min(1).max(2000),
+      cellHeightMm: z.number().min(1).max(2000),
+      marginMm: z.number().min(0).max(500),
+      gapXMm: z.number().min(0).max(500),
+      gapYMm: z.number().min(0).max(500),
+      name: z.string().min(1).max(120),
+    });
+
+  app.post("/api/labels/media-layouts", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const companyId = requireCompanyId(req, res);
+      if (!companyId) return;
+      const parsed = mediaLayoutBodySchema.parse(req.body);
+      const created = await storage.createPrintMediaLayout(parsed as any, companyId);
+      res.status(201).json(created);
+    } catch (e: any) {
+      if (e instanceof z.ZodError) return res.status(400).json({ error: "Dados inválidos", details: e.errors });
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.put("/api/labels/media-layouts/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const companyId = requireCompanyId(req, res);
+      if (!companyId) return;
+      const existing = await storage.getPrintMediaLayoutById(req.params.id, companyId);
+      if (!existing) return res.status(404).json({ error: "Layout não encontrado." });
+      if (existing.companyId === null) return res.status(403).json({ error: "Layouts de sistema não podem ser modificados." });
+      if (existing.companyId !== companyId) return res.status(403).json({ error: "Layout pertence a outra empresa." });
+      const parsed = mediaLayoutBodySchema.partial().parse(req.body);
+      const updated = await storage.updatePrintMediaLayout(req.params.id, parsed as any, companyId);
+      res.json(updated);
+    } catch (e: any) {
+      if (e instanceof z.ZodError) return res.status(400).json({ error: "Dados inválidos", details: e.errors });
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.delete("/api/labels/media-layouts/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const companyId = requireCompanyId(req, res);
+      if (!companyId) return;
+      const existing = await storage.getPrintMediaLayoutById(req.params.id, companyId);
+      if (!existing) return res.status(404).json({ error: "Layout não encontrado." });
+      if (existing.companyId === null) return res.status(403).json({ error: "Layouts de sistema não podem ser apagados." });
+      if (existing.companyId !== companyId) return res.status(403).json({ error: "Layout pertence a outra empresa." });
+      await storage.deletePrintMediaLayout(req.params.id, companyId);
+      res.json({ success: true });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import {
-  ArrowLeft, Plus, MoreVertical, Pencil, Copy, Trash2,
+  ArrowLeft, Plus, MoreVertical, Pencil, Copy, Trash2, Star,
   ToggleLeft, ToggleRight, Tag, Layers, Search, Eye, ZoomIn, ZoomOut,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
@@ -32,6 +32,7 @@ function ContextBadge({ context }: { context: LabelContext }) {
     pallet_label:  "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
     product_label: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
     order_label:   "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+    address_label: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300",
   };
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${colors[context]}`}>
@@ -186,6 +187,22 @@ export default function LabelTemplatesPage() {
     onError: () => toast({ title: "Erro ao excluir", variant: "destructive" }),
   });
 
+  const { data: defaults = {} } = useQuery<Record<string, string | null>>({
+    queryKey: ["/api/labels/defaults"],
+  });
+
+  const setDefaultMutation = useMutation({
+    mutationFn: async ({ context, templateId }: { context: LabelContext; templateId: string }) => {
+      const res = await apiRequest("PUT", `/api/labels/defaults/${context}`, { templateId });
+      return res.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/labels/defaults"] });
+      toast({ title: "Modelo definido como padrão" });
+    },
+    onError: () => toast({ title: "Erro ao definir padrão", variant: "destructive" }),
+  });
+
   const allGroups = useMemo(() => {
     const set = new Set<string>();
     templates.forEach(t => { if (t.groupName) set.add(t.groupName); });
@@ -311,6 +328,11 @@ export default function LabelTemplatesPage() {
                             Sistema
                           </span>
                         )}
+                        {defaults[t.context] === t.id && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                            <Star className="h-3 w-3 mr-1 fill-current" />Padrão
+                          </span>
+                        )}
                         {!t.active && (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground">
                             Inativo
@@ -325,35 +347,49 @@ export default function LabelTemplatesPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setShowPreview(t)}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          Visualizar
-                        </DropdownMenuItem>
                         {t.companyId === null ? (
-                          <DropdownMenuItem onClick={() => { setShowDuplicateDialog(t); setDupName(`${t.name} (cópia)`); }}>
-                            <Copy className="h-4 w-4 mr-2" />
-                            Duplicar para editar
-                          </DropdownMenuItem>
+                          <>
+                            <DropdownMenuItem onClick={() => { setShowDuplicateDialog(t); setDupName(`${t.name} (cópia)`); }} data-testid={`menu-duplicate-${t.id}`}>
+                              <Copy className="h-4 w-4 mr-2" />
+                              Duplicar para editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setDefaultMutation.mutate({ context: t.context as LabelContext, templateId: t.id })}
+                              disabled={defaults[t.context] === t.id}
+                              data-testid={`menu-set-default-${t.id}`}
+                            >
+                              <Star className="h-4 w-4 mr-2" />
+                              {defaults[t.context] === t.id ? "Já é o padrão" : "Definir como padrão"}
+                            </DropdownMenuItem>
+                          </>
                         ) : (
                           <>
-                            <DropdownMenuItem asChild>
+                            <DropdownMenuItem asChild data-testid={`menu-edit-${t.id}`}>
                               <Link href={`/admin/label-studio/${t.id}`}>
                                 <Pencil className="h-4 w-4 mr-2" />
-                                Editar no Studio
+                                Editar
                               </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => { setShowDuplicateDialog(t); setDupName(`${t.name} (cópia)`); }}>
+                            <DropdownMenuItem onClick={() => { setShowDuplicateDialog(t); setDupName(`${t.name} (cópia)`); }} data-testid={`menu-duplicate-${t.id}`}>
                               <Copy className="h-4 w-4 mr-2" />
                               Duplicar
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setDefaultMutation.mutate({ context: t.context as LabelContext, templateId: t.id })}
+                              disabled={defaults[t.context] === t.id}
+                              data-testid={`menu-set-default-${t.id}`}
+                            >
+                              <Star className="h-4 w-4 mr-2" />
+                              {defaults[t.context] === t.id ? "Já é o padrão" : "Definir como padrão"}
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => toggleMutation.mutate({ id: t.id, active: !t.active })}>
+                            <DropdownMenuItem onClick={() => toggleMutation.mutate({ id: t.id, active: !t.active })} data-testid={`menu-toggle-${t.id}`}>
                               {t.active ? (<><ToggleLeft className="h-4 w-4 mr-2" />Desativar</>) : (<><ToggleRight className="h-4 w-4 mr-2" />Ativar</>)}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive" onClick={() => setShowDeleteDialog(t)}>
+                            <DropdownMenuItem className="text-destructive" onClick={() => setShowDeleteDialog(t)} data-testid={`menu-delete-${t.id}`}>
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Excluir
+                              Apagar
                             </DropdownMenuItem>
                           </>
                         )}

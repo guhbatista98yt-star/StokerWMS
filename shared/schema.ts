@@ -789,7 +789,7 @@ export const scanLog = pgTable("scan_log", {
 }));
 
 // ─── Label Studio ──────────────────────────────────────────────────────────────
-export const labelContextEnum = ["volume_label", "pallet_label", "product_label", "order_label"] as const;
+export const labelContextEnum = ["volume_label", "pallet_label", "product_label", "order_label", "address_label"] as const;
 export type LabelContext = typeof labelContextEnum[number];
 
 export const LABEL_CONTEXT_LABELS: Record<LabelContext, string> = {
@@ -797,6 +797,7 @@ export const LABEL_CONTEXT_LABELS: Record<LabelContext, string> = {
   pallet_label:  "Etiqueta de Palete",
   product_label: "Etiqueta de Produto",
   order_label:   "Etiqueta de Pedido",
+  address_label: "Etiqueta de Endereço",
 };
 
 export type LabelComponentType = "text" | "dynamic_text" | "barcode" | "qrcode" | "line" | "rectangle";
@@ -932,11 +933,65 @@ export const LABEL_DATA_FIELDS: Record<LabelContext, DataField[]> = {
   order_label: [
     { key: "erpOrderId",   label: "Número ERP",       example: "PED-001",    category: "Pedido" },
     { key: "customerName", label: "Cliente",          example: "Mercado ABC", category: "Pedido" },
+    { key: "cnpjCpf",      label: "CNPJ/CPF Cliente", example: "00.000.000/0001-00", category: "Cliente" },
+    { key: "city",         label: "Cidade",           example: "São Paulo",  category: "Endereço" },
+    { key: "state",        label: "Estado (UF)",      example: "SP",         category: "Endereço" },
+    { key: "address",      label: "Endereço",         example: "Rua das Flores, 123", category: "Endereço" },
+    { key: "neighborhood", label: "Bairro",           example: "Centro",     category: "Endereço" },
     { key: "routeName",    label: "Rota",             example: "Centro",     category: "Pedido" },
     { key: "totalValue",   label: "Valor Total",      example: "R$ 150,00",  category: "Pedido" },
+    { key: "operator",     label: "Operador",         example: "João Silva", category: "Operador" },
     { key: "date",         label: "Data",             example: "21/04/2026", category: "Operação" },
+    { key: "time",         label: "Hora",             example: "10:30",      category: "Operação" },
+  ],
+  address_label: [
+    { key: "code",        label: "Código WMS",       example: "A-01-01-03", category: "Endereço" },
+    { key: "bairro",      label: "Bairro WMS",       example: "A",          category: "Endereço" },
+    { key: "rua",         label: "Rua",              example: "01",         category: "Endereço" },
+    { key: "bloco",       label: "Bloco",            example: "01",         category: "Endereço" },
+    { key: "nivel",       label: "Nível",            example: "03",         category: "Endereço" },
+    { key: "type",        label: "Tipo",             example: "padrão",     category: "Endereço" },
+    { key: "capacity",    label: "Capacidade",       example: "10",         category: "Endereço" },
+    { key: "description", label: "Descrição",        example: "Picking A",  category: "Endereço" },
+    { key: "operator",    label: "Operador",         example: "João Silva", category: "Operador" },
+    { key: "date",        label: "Data",             example: "21/04/2026", category: "Operação" },
+    { key: "time",        label: "Hora",             example: "10:30",      category: "Operação" },
   ],
 };
+
+// ─── Layout de mídia (composição de impressão) ────────────────────────────────
+export interface MediaLayoutCell {
+  row: number;
+  col: number;
+  templateId?: string | null;
+}
+
+export interface MediaLayoutDefinition {
+  cells: MediaLayoutCell[];
+}
+
+export const printMediaLayouts = pgTable("print_media_layouts", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  companyId: integer("company_id"),
+  name: text("name").notNull(),
+  description: text("description"),
+  mediaWidthMm: integer("media_width_mm").notNull().default(100),
+  mediaHeightMm: integer("media_height_mm").notNull().default(150),
+  rows: integer("rows").notNull().default(3),
+  cols: integer("cols").notNull().default(1),
+  cellWidthMm: integer("cell_width_mm").notNull().default(100),
+  cellHeightMm: integer("cell_height_mm").notNull().default(50),
+  marginMm: integer("margin_mm").notNull().default(0),
+  gapXMm: integer("gap_x_mm").notNull().default(0),
+  gapYMm: integer("gap_y_mm").notNull().default(0),
+  layoutJson: jsonb("layout_json").notNull().$type<MediaLayoutDefinition>().default({ cells: [] }),
+  createdAt: text("created_at").notNull().default(new Date().toISOString()),
+  updatedAt: text("updated_at"),
+});
+
+export const insertPrintMediaLayoutSchema = createInsertSchema(printMediaLayouts).omit({ id: true, createdAt: true, updatedAt: true });
+export type PrintMediaLayout = typeof printMediaLayouts.$inferSelect;
+export type InsertPrintMediaLayout = z.infer<typeof insertPrintMediaLayoutSchema>;
 
 export const labelTemplates = pgTable("label_templates", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),

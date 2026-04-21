@@ -1,0 +1,91 @@
+Quero que você refine o módulo de Etiquetas já existente, sem recriar do zero, corrigindo problemas de UX/UI e adicionando recursos reais de impressão operacional.
+
+1) Ajuste da listagem de etiquetas
+- Remover a redundância da opção “Visualizar” no menu dos três pontos.
+- Manter “Visualizar” apenas como ação principal do card.
+- No menu dos três pontos, trocar pelas ações:
+  - Editar
+  - Duplicar
+  - Apagar
+- Opcionalmente adicionar “Definir como padrão”.
+- Se a etiqueta for de sistema, “Apagar” deve ficar oculto ou desabilitado.
+
+2) Origens de dados dinâmicas
+- Adicionar a origem de dados “Endereço”.
+- Garantir que o editor permita usar campos dinâmicos de:
+  - Produto
+  - Pedido
+  - Volume
+  - Pallet
+  - Endereço
+  - Cliente
+  - Usuário/Operador
+  - Datas e horas do sistema
+- Exibir essas origens de forma clara no painel de dados do editor.
+
+3) Composição de impressão / aproveitamento da mídia
+Preciso de suporte real para aproveitar etiquetas maiores dividindo a mídia física em múltiplas áreas menores.
+
+Exemplo real:
+- mídia comprada: 100mm x 150mm
+- preciso dividir em 3 áreas de 100mm x 50mm
+
+Implementar um recurso de “Layout de mídia” ou “Composição de impressão” com:
+- tamanho físico da mídia
+- quantidade de linhas e colunas
+- largura e altura de cada célula
+- margem externa
+- espaçamento/gap entre células
+- preview da grade de impressão
+- possibilidade de associar uma etiqueta a cada célula
+
+Esse recurso deve permitir:
+- imprimir 3 etiquetas iguais na mesma mídia
+- imprimir 3 etiquetas diferentes na mesma mídia
+- reutilizar o mesmo modelo em várias células
+- combinar etiquetas com dados diferentes no mesmo ciclo de impressão
+
+4) Impressão em lote com dados reais
+Criar ou complementar um fluxo real de impressão operacional contendo:
+- seleção do modelo da etiqueta
+- seleção da origem dos dados
+- seleção de registros reais do sistema
+- preenchimento automático dos campos dinâmicos
+- escolha da quantidade de impressões
+- opção de repetir o mesmo registro várias vezes
+- opção de imprimir vários registros diferentes
+- preview final antes de imprimir
+- envio para impressão via navegador ou Print Tool, conforme a arquitetura já existente
+
+5) Studio e preview
+Verificar se o Studio já possui integração real com impressão.
+Se ainda não existir fluxo completo, adicionar:
+- botão de pré-visualização final
+- botão de imprimir a partir do editor
+- escolha de quantidade
+- escolha de impressora quando aplicável
+- preview limpo, sem grid e sem painéis
+- dados de exemplo ou dados reais no preview
+
+6) Regras importantes
+- Não quebrar etiquetas já cadastradas.
+- Aproveitar a base atual do editor.
+- Não refazer o módulo inteiro sem necessidade.
+- Garantir compatibilidade com os modelos já salvos.
+- Se precisar criar nova estrutura para “layout de mídia” ou “job de impressão”, fazer de forma separada do modelo da etiqueta.
+
+7) Estrutura recomendada
+Separar claramente:
+- Modelo da etiqueta = layout visual de uma etiqueta
+- Layout de mídia = como várias etiquetas ocupam a mídia física
+- Job de impressão = quais dados serão usados, quantas cópias e em qual impressora
+
+8) Entrega esperada
+Ao final:
+- ajustar a listagem e o menu dos cards
+- adicionar origem de dados Endereço
+- implementar suporte a divisão de mídia em múltiplas etiquetas
+- implementar ou completar impressão em lote com dados reais
+- informar quais arquivos foram alterados
+- informar exatamente o que já existia e o que foi acrescentado
+- informar se a impressão pelo Studio já ficou funcional ou se ainda depende de alguma etapa

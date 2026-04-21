@@ -18,7 +18,7 @@ import {
   Undo2, Redo2, Copy, Lock, Unlock, EyeOff as EyeOffIcon, Eye as EyeIcon,
   AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
-  Maximize2, Square as SquareIcon, AlertTriangle, Search,
+  Maximize2, Square as SquareIcon, AlertTriangle, Search, Printer,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { renderLabelToHtml } from "@/lib/label-renderer";
@@ -794,6 +794,9 @@ export default function LabelStudioPage() {
         )}
         <Button variant="outline" size="sm" className="h-7" onClick={() => { window.open(`/api/labels/templates/${id}/export`, "_blank"); }} data-testid="btn-export-studio" title="Exportar como JSON">
           Exportar
+        </Button>
+        <Button variant="outline" size="sm" className="h-7" onClick={() => navigate("/admin/label-print")} data-testid="btn-print-studio" title="Ir para impressão em lote">
+          <Printer className="h-3.5 w-3.5 mr-1" />Imprimir
         </Button>
       </div>
 
