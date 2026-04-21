@@ -1,0 +1,269 @@
+Quero que você MELHORE o módulo de KPIs de Operadores já existente, reaproveitando a base atual e sem recriar tudo do zero. O foco é deixar o módulo mais útil para gestão operacional, com detalhamento por operador, melhor leitura dos dados, menos poluição visual e indicadores mais confiáveis.
+
+OBJETIVO GERAL
+Transformar o módulo em uma ferramenta realmente útil para acompanhar produtividade operacional de:
+- Separação
+- Conferência
+- Balcão
+
+O módulo deve responder com clareza:
+- quem produziu
+- quanto produziu
+- em quanto tempo
+- em quais pedidos
+- em quais seções, quando aplicável
+- qual foi o último movimento
+
+========================================
+1) DETALHAMENTO AO CLICAR NO OPERADOR
+========================================
+Ao clicar em um operador na tabela principal, abrir um popup/modal de detalhamento inteligente.
+
+Regras:
+- O modal deve abrir com base no período já selecionado na tela principal.
+- Não carregar informação excessiva de uma vez.
+- Não poluir a tela.
+- Carregar os detalhes sob demanda, com boa performance.
+
+O modal deve mostrar no topo:
+- nome do operador
+- login/identificação, se fizer sentido
+- módulo principal do operador
+- período analisado
+- total de pedidos
+- total de itens, se existir
+- tempo total
+- tempo médio
+- último movimento
+
+========================================
+2) DETALHAMENTO PARA CONFERENTE
+========================================
+Se o operador for Conferente, mostrar no modal:
+- lista de pedidos conferidos no período
+- para cada pedido, exibir no mínimo:
+  - número do pedido
+  - data/hora de início
+  - data/hora de fim
+  - tempo total gasto no pedido
+  - quantidade de itens conferidos, se existir esse dado
+  - último movimento
+
+Regras de visualização:
+- permitir busca por número do pedido dentro do modal
+- usar lista compacta, limpa e legível
+- permitir expandir pedido somente quando necessário
+- não abrir todos os pedidos expandidos ao mesmo tempo
+
+========================================
+3) DETALHAMENTO PARA SEPARADOR
+========================================
+Se o operador for Separador, mostrar no modal:
+- lista de pedidos separados no período
+- para cada pedido, exibir no mínimo:
+  - número do pedido
+  - data/hora de início
+  - data/hora de fim
+  - tempo total gasto no pedido
+  - último movimento
+
+Além disso:
+- mostrar as seções separadas em cada pedido
+- exibir as seções de forma compacta e inteligente
+- usar badges/tags, chips ou expansão por pedido
+- se houver muitas seções, resumir inicialmente e permitir expandir
+- evitar poluição visual
+
+Se existir dado suficiente, mostrar também:
+- tempo por seção
+- quantidade de itens por seção
+
+========================================
+4) DETALHAMENTO PARA BALCÃO
+========================================
+Se o operador for Balcão, mostrar no modal:
+- pedidos/processos atendidos no período
+- número do pedido ou atendimento
+- data/hora de início
+- data/hora de fim
+- tempo total
+- último movimento
+- quantidade de itens, quando existir
+
+A lógica deve ser consistente com o tipo de operação do balcão, sem forçar o mesmo comportamento de separação ou conferência se os dados forem diferentes.
+
+========================================
+5) ESTRUTURA DO MODAL
+========================================
+Quero um modal limpo, profissional e sem spam visual.
+
+O modal deve conter:
+- cabeçalho com resumo do operador
+- campo de busca por pedido
+- lista compacta de pedidos
+- expansão individual por pedido
+- scroll controlado apenas dentro da lista, se necessário
+- paginação ou carregamento sob demanda se houver muitos registros
+
+Importante:
+- não abrir detalhes de todos os pedidos ao mesmo tempo
+- usar accordion, expansão por linha ou subtabela compacta
+- priorizar leitura rápida
+
+========================================
+6) TABELA PRINCIPAL DOS OPERADORES
+========================================
+Melhorar a tabela principal do módulo.
+
+Quero:
+- linha do operador claramente clicável
+- hover visual indicando que há detalhamento
+- cursor e feedback visual adequados
+- melhor legibilidade dos dados
+- densidade visual equilibrada
+
+Validar e corrigir:
+- operador
+- módulo
+- pedidos
+- itens
+- tempo total
+- tempo médio
+- último movimento
+
+Importante:
+- revisar se a coluna “Itens” está correta
+- se estiver zerando por erro de cálculo ou falta de origem, corrigir
+- garantir que os dados sejam reais e consistentes
+
+========================================
+7) FILTRAR OPERADORES ADMINISTRATIVOS
+========================================
+Revisar se usuários administrativos estão aparecendo misturados com operação.
+
+Regra desejada:
+- priorizar na visão principal apenas operadores reais de:
+  - Separação
+  - Conferência
+  - Balcão
+
+Se usuários administrativos precisarem aparecer:
+- colocar sob filtro separado
+ou
+- permitir ocultar por padrão
+
+Não quero que a análise operacional fique poluída com usuários que não fazem parte da operação principal.
+
+========================================
+8) FILTROS
+========================================
+Melhorar o bloco de filtros da tela principal.
+
+Manter:
+- filtro por período
+- atalhos rápidos como 7d, 15d, 30d, 90d
+
+Adicionar, se fizer sentido:
+- filtro por módulo:
+  - Todos
+  - Separação
+  - Conferência
+  - Balcão
+- busca por operador
+
+Objetivo:
+- tornar a consulta mais rápida
+- facilitar análise segmentada
+- sem deixar o layout pesado
+
+========================================
+9) REVISÃO DA ÁREA “TEMPO POR PEDIDO”
+========================================
+Revisar a necessidade, lógica e layout da área “Tempo por Pedido”.
+
+Problema atual:
+- essa área parece solta e pouco integrada ao restante do módulo
+
+Quero que você avalie e faça a melhor decisão:
+- integrar melhor essa função ao detalhamento por operador
+ou
+- manter como busca complementar, mas de forma mais clara e útil
+ou
+- recolher/minimizar essa área por padrão, se estiver gerando ruído visual
+
+Objetivo:
+- evitar redundância
+- evitar confusão
+- melhorar utilidade real
+
+========================================
+10) RESUMO EXECUTIVO NO TOPO
+========================================
+Adicionar um resumo executivo discreto e útil no topo da tela, sem virar ranking.
+
+Mostrar algo como:
+- total de operadores no período
+- total de pedidos processados
+- total de itens processados
+- tempo médio geral
+- último movimento geral
+
+Esse resumo deve ser limpo, pequeno e útil para leitura rápida da gestão.
+
+========================================
+11) PERFORMANCE E CARGA
+========================================
+O detalhamento não deve pesar a tela principal.
+
+Regras:
+- carregar detalhes do operador somente ao clicar
+- evitar consultas pesadas já no carregamento inicial
+- se necessário, paginar ou limitar registros no modal
+- manter boa performance mesmo em períodos maiores
+
+========================================
+12) UX/UI
+========================================
+Melhorar o visual e a organização do módulo para ficar mais profissional e objetivo.
+
+Quero:
+- menos poluição visual
+- espaçamentos melhores
+- hierarquia visual mais clara
+- melhor leitura da tabela
+- modal de detalhe limpo e funcional
+- foco no que realmente importa para gestão operacional
+
+========================================
+13) VALIDAÇÃO DE LÓGICA
+========================================
+Revisar a lógica dos dados do módulo e corrigir inconsistências.
+
+Validar:
+- origem dos dados por módulo
+- cálculo de pedidos
+- cálculo de itens
+- cálculo de tempo total
+- cálculo de tempo médio
+- último movimento
+- associação correta entre operador e pedidos trabalhados
+
+Se houver falha na origem ou agregação, corrigir a consulta, API ou transformação dos dados.
+
+========================================
+14) ENTREGA ESPERADA
+========================================
+Ao final:
+- implementar clique no operador com modal de detalhamento
+- mostrar tempo por pedido para conferente
+- mostrar tempo por pedido + seções para separador
+- mostrar lógica adequada para balcão
+- manter o detalhamento limpo e sem spam visual
+- revisar e melhorar tabela principal
+- revisar filtros
+- revisar “Tempo por Pedido”
+- adicionar resumo executivo discreto
+- validar coerência dos indicadores
+- listar arquivos alterados
+- informar exatamente o que foi melhorado
+- informar se foi necessário ajustar consultas, estrutura de dados, API ou persistência

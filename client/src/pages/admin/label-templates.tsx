@@ -102,72 +102,59 @@ function PreviewModal({ template, onClose }: { template: LabelTemplate | null; o
   return (
     <Dialog open={!!template} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl p-0 gap-0 overflow-hidden flex flex-col h-[80vh]">
-        <DialogHeader className="px-4 pt-4 pb-2 shrink-0">
-          <DialogTitle className="flex items-center gap-2">
-            <Eye className="h-4 w-4" />
-            {template.name}
+        {/* Cabeçalho compacto: tudo em uma única faixa para não fragmentar visualmente */}
+        <DialogHeader className="px-4 pt-3 pb-2 shrink-0 border-b border-border">
+          <DialogTitle className="flex items-center gap-2 text-sm">
+            <Eye className="h-4 w-4 shrink-0" />
+            <span className="truncate">{template.name}</span>
           </DialogTitle>
+          <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground mt-1.5">
+            <ContextBadge context={template.context as LabelContext} />
+            {template.groupName && <span className="px-2 py-0.5 rounded bg-muted text-muted-foreground">{template.groupName}</span>}
+            <span className="opacity-50">·</span>
+            <span>{template.widthMm}×{template.heightMm}mm</span>
+            <span className="opacity-50">·</span>
+            <span>{template.dpi} DPI</span>
+            <span className="opacity-50">·</span>
+            <span>{(template.layoutJson as LabelLayout)?.components?.length ?? 0} componente(s)</span>
+            <div className="flex-1" />
+            <span className="hidden sm:inline">Atualizado: {new Date(updated).toLocaleString("pt-BR")}</span>
+            <div className="flex items-center gap-0.5 ml-2">
+              <Button
+                variant={isFit ? "secondary" : "ghost"}
+                size="sm" className="h-7 px-2 text-xs"
+                onClick={() => setZoom(null)}
+                data-testid="btn-preview-fit"
+                title="Ajustar à janela"
+              >
+                <Maximize2 className="h-3.5 w-3.5 mr-1" />Ajustar
+              </Button>
+              <Button
+                variant={zoom === 1 ? "secondary" : "ghost"}
+                size="sm" className="h-7 px-2 text-xs"
+                onClick={() => setZoom(1)}
+                data-testid="btn-preview-100"
+                title="100% — escala técnica (96 DPI no navegador)"
+              >
+                100%
+              </Button>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom(z => Math.max(0.1, (z ?? fitScale) - 0.1))} data-testid="btn-preview-zoom-out" title="Diminuir zoom">
+                <ZoomOut className="h-3.5 w-3.5" />
+              </Button>
+              <span className="text-[11px] text-muted-foreground w-10 text-center tabular-nums" data-testid="text-preview-zoom">
+                {Math.round(effectiveScale * 100)}%
+              </span>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom(z => Math.min(5, (z ?? fitScale) + 0.1))} data-testid="btn-preview-zoom-in" title="Aumentar zoom">
+                <ZoomIn className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
         </DialogHeader>
 
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground border-b border-border px-4 pb-2 shrink-0">
-          <ContextBadge context={template.context as LabelContext} />
-          {template.groupName && <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">{template.groupName}</span>}
-          <span>·</span>
-          <span>{template.widthMm}mm × {template.heightMm}mm</span>
-          <span>·</span>
-          <span>{template.dpi} DPI</span>
-          <span>·</span>
-          <span>{(template.layoutJson as LabelLayout)?.components?.length ?? 0} componente(s)</span>
-          <div className="flex-1" />
-          <span>Atualizado: {new Date(updated).toLocaleString("pt-BR")}</span>
-        </div>
-
-        {/* Barra de zoom */}
-        <div className="flex items-center gap-1.5 justify-end px-4 py-2 border-b border-border shrink-0">
-          <Button
-            variant={isFit ? "secondary" : "outline"}
-            size="sm" className="h-7 px-2 text-xs"
-            onClick={() => setZoom(null)}
-            data-testid="btn-preview-fit"
-            title="Ajustar à janela — etiqueta inteira visível"
-          >
-            <Maximize2 className="h-3.5 w-3.5 mr-1" />Ajustar
-          </Button>
-          <Button
-            variant={zoom === 1 ? "secondary" : "outline"}
-            size="sm" className="h-7 px-2 text-xs"
-            onClick={() => setZoom(1)}
-            data-testid="btn-preview-100"
-            title="100% — escala técnica (96 DPI no navegador)"
-          >
-            100%
-          </Button>
-          <div className="w-px h-5 bg-border mx-1" />
-          <Button
-            variant="outline" size="sm" className="h-7 w-7 p-0"
-            onClick={() => setZoom(z => Math.max(0.1, (z ?? fitScale) - 0.1))}
-            data-testid="btn-preview-zoom-out"
-            title="Diminuir zoom"
-          >
-            <ZoomOut className="h-3.5 w-3.5" />
-          </Button>
-          <span className="text-xs text-muted-foreground w-12 text-center tabular-nums" data-testid="text-preview-zoom">
-            {Math.round(effectiveScale * 100)}%
-          </span>
-          <Button
-            variant="outline" size="sm" className="h-7 w-7 p-0"
-            onClick={() => setZoom(z => Math.min(5, (z ?? fitScale) + 0.1))}
-            data-testid="btn-preview-zoom-in"
-            title="Aumentar zoom"
-          >
-            <ZoomIn className="h-3.5 w-3.5" />
-          </Button>
-        </div>
-
-        {/* Palco / canvas */}
+        {/* Palco: fundo único, limpo, sem variações ou faixas extras */}
         <div
           ref={stageRef}
-          className={`flex-1 min-h-0 bg-muted/30 ${allowPan ? "overflow-auto" : "overflow-hidden"} flex items-center justify-center`}
+          className={`flex-1 min-h-0 bg-muted/40 dark:bg-slate-950/60 ${allowPan ? "overflow-auto" : "overflow-hidden"} flex items-center justify-center`}
           data-testid="preview-stage"
         >
           {loading ? (
@@ -447,87 +434,83 @@ export default function LabelTemplatesPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        {t.companyId === null ? (
-                          <>
-                            <DropdownMenuItem onClick={() => { setShowDuplicateDialog(t); setDupName(`${t.name} (cópia)`); }} data-testid={`menu-duplicate-${t.id}`}>
-                              <Copy className="h-4 w-4 mr-2" />
-                              Duplicar para editar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setDefaultMutation.mutate({ context: t.context as LabelContext, templateId: t.id })}
-                              disabled={defaults[t.context] === t.id}
-                              data-testid={`menu-set-default-${t.id}`}
-                            >
-                              <Star className="h-4 w-4 mr-2" />
-                              {defaults[t.context] === t.id ? "Já é o padrão" : "Definir como padrão"}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => setShowDeleteDialog(t)}
-                              disabled={defaults[t.context] === t.id}
-                              data-testid={`menu-delete-${t.id}`}
-                              title={defaults[t.context] === t.id ? "Defina outro modelo como padrão antes de apagar" : undefined}
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              {defaults[t.context] === t.id ? "Apagar (é o padrão)" : "Apagar"}
-                            </DropdownMenuItem>
-                          </>
-                        ) : (
-                          <>
-                            <DropdownMenuItem asChild data-testid={`menu-edit-${t.id}`}>
-                              <Link href={`/admin/label-studio/${t.id}`}>
-                                <Pencil className="h-4 w-4 mr-2" />
-                                Editar
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => { setShowDuplicateDialog(t); setDupName(`${t.name} (cópia)`); }} data-testid={`menu-duplicate-${t.id}`}>
-                              <Copy className="h-4 w-4 mr-2" />
-                              Duplicar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setDefaultMutation.mutate({ context: t.context as LabelContext, templateId: t.id })}
-                              disabled={defaults[t.context] === t.id}
-                              data-testid={`menu-set-default-${t.id}`}
-                            >
-                              <Star className="h-4 w-4 mr-2" />
-                              {defaults[t.context] === t.id ? "Já é o padrão" : "Definir como padrão"}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => toggleMutation.mutate({ id: t.id, active: !t.active })} data-testid={`menu-toggle-${t.id}`}>
-                              {t.active ? (<><ToggleLeft className="h-4 w-4 mr-2" />Desativar</>) : (<><ToggleRight className="h-4 w-4 mr-2" />Ativar</>)}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive" onClick={() => setShowDeleteDialog(t)} data-testid={`menu-delete-${t.id}`}>
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Apagar
-                            </DropdownMenuItem>
-                          </>
-                        )}
+                        {(() => {
+                          const isSystem = t.companyId === null;
+                          const isDefault = defaults[t.context] === t.id;
+                          return (
+                            <>
+                              <DropdownMenuItem asChild data-testid={`menu-open-${t.id}`}>
+                                <Link href={`/admin/label-studio/${t.id}`}>
+                                  {isSystem
+                                    ? (<><Eye className="h-4 w-4 mr-2" />Abrir Studio (somente leitura)</>)
+                                    : (<><Pencil className="h-4 w-4 mr-2" />Abrir Studio</>)}
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setShowPreview(t)} data-testid={`menu-preview-${t.id}`}>
+                                <Eye className="h-4 w-4 mr-2" />Visualizar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => { setShowDuplicateDialog(t); setDupName(`${t.name} (cópia)`); }} data-testid={`menu-duplicate-${t.id}`}>
+                                <Copy className="h-4 w-4 mr-2" />
+                                {isSystem ? "Duplicar para editar" : "Duplicar"}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => setDefaultMutation.mutate({ context: t.context as LabelContext, templateId: t.id })}
+                                disabled={isDefault}
+                                data-testid={`menu-set-default-${t.id}`}
+                              >
+                                <Star className="h-4 w-4 mr-2" />
+                                {isDefault ? "Já é o padrão" : "Definir como padrão"}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => toggleMutation.mutate({ id: t.id, active: !t.active })}
+                                disabled={isSystem}
+                                title={isSystem ? "Modelos do sistema não podem ser desativados" : undefined}
+                                data-testid={`menu-toggle-${t.id}`}
+                              >
+                                {t.active ? (<><ToggleLeft className="h-4 w-4 mr-2" />Desativar</>) : (<><ToggleRight className="h-4 w-4 mr-2" />Ativar</>)}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => setShowDeleteDialog(t)}
+                                disabled={isDefault}
+                                title={isDefault ? "Defina outro modelo como padrão antes de apagar" : undefined}
+                                data-testid={`menu-delete-${t.id}`}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                {isDefault ? "Apagar (é o padrão)" : "Apagar"}
+                              </DropdownMenuItem>
+                            </>
+                          );
+                        })()}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <p className="text-xs text-muted-foreground">
-                    {t.widthMm}mm × {t.heightMm}mm · {t.dpi} DPI
+                    {t.widthMm}mm × {t.heightMm}mm · {t.dpi} DPI · {(t.layoutJson as LabelLayout)?.components?.length ?? 0} componente(s)
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {(t.layoutJson as LabelLayout)?.components?.length ?? 0} componente(s)
-                  </p>
-                  {t.companyId === null ? (
-                    <Button size="sm" variant="outline" className="w-full mt-3 h-8" onClick={() => setShowPreview(t)} data-testid={`btn-view-template-${t.id}`}>
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      size="sm" variant="outline" className="flex-1 h-8"
+                      onClick={() => setShowPreview(t)}
+                      data-testid={`btn-view-template-${t.id}`}
+                    >
                       <Eye className="h-3.5 w-3.5 mr-1.5" />
                       Visualizar
                     </Button>
-                  ) : (
-                    <Link href={`/admin/label-studio/${t.id}`}>
-                      <Button size="sm" variant="outline" className="w-full mt-3 h-8" data-testid={`btn-edit-template-${t.id}`}>
-                        <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                        Abrir Studio
+                    <Link href={`/admin/label-studio/${t.id}`} className="flex-1">
+                      <Button size="sm" variant="default" className="w-full h-8" data-testid={`btn-open-template-${t.id}`}>
+                        {t.companyId === null ? (
+                          <><Eye className="h-3.5 w-3.5 mr-1.5" />Abrir Studio</>
+                        ) : (
+                          <><Pencil className="h-3.5 w-3.5 mr-1.5" />Abrir Studio</>
+                        )}
                       </Button>
                     </Link>
-                  )}
+                  </div>
                 </CardContent>
               </Card>
             ))}

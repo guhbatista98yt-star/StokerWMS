@@ -13,12 +13,12 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, Save, Eye, EyeOff, Type, AlignLeft, Barcode, QrCode,
-  Minus, Square, Trash2, ChevronUp, ChevronDown,
+  Minus, Square, Trash2, ChevronUp, ChevronDown, ChevronLeft, ChevronRight,
   Grid, ZoomIn, ZoomOut, type LucideIcon,
   Undo2, Redo2, Copy, Lock, Unlock, EyeOff as EyeOffIcon, Eye as EyeIcon,
   AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
-  Maximize2, Square as SquareIcon, AlertTriangle, Search, Printer,
+  Maximize2, Square as SquareIcon, AlertTriangle, Printer, PanelRightClose, PanelRightOpen,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { renderLabelToHtml } from "@/lib/label-renderer";
@@ -61,34 +61,39 @@ function Ruler({ length, zoom, orient }: { length: number; zoom: number; orient:
   for (let mm = 0; mm <= length; mm += 5) {
     ticks.push({ pos: mmToCanvasPx(mm, zoom), label: mm % 10 === 0 ? String(mm) : undefined });
   }
+  // Tema: usa as variáveis do tema (claro ou escuro) via classes Tailwind no wrapper.
+  // O SVG herda cores via currentColor para os textos e por classe para o fundo.
+  const TICK_COLOR = "currentColor";
   if (orient === "h") {
     return (
-      <div style={{ position: "absolute", top: -RULER_SIZE_PX, left: 0, width: pxLen, height: RULER_SIZE_PX, overflow: "hidden", pointerEvents: "none", userSelect: "none" }}>
+      <div className="text-muted-foreground" style={{ position: "absolute", top: -RULER_SIZE_PX, left: 0, width: pxLen, height: RULER_SIZE_PX, overflow: "hidden", pointerEvents: "none", userSelect: "none" }}>
         <svg width={pxLen} height={RULER_SIZE_PX}>
-          <rect width={pxLen} height={RULER_SIZE_PX} fill="#f3f4f6" />
+          <rect width={pxLen} height={RULER_SIZE_PX} className="fill-muted" />
           {ticks.map(({ pos, label }) => (
             <g key={pos}>
-              <line x1={pos} y1={RULER_SIZE_PX} x2={pos} y2={label !== undefined ? RULER_SIZE_PX - 8 : RULER_SIZE_PX - 4} stroke="#9ca3af" strokeWidth={1} />
-              {label !== undefined && <text x={pos + 2} y={RULER_SIZE_PX - 9} fontSize={8} fill="#6b7280">{label}</text>}
+              <line x1={pos} y1={RULER_SIZE_PX} x2={pos} y2={label !== undefined ? RULER_SIZE_PX - 8 : RULER_SIZE_PX - 4} stroke={TICK_COLOR} strokeOpacity={0.55} strokeWidth={1} />
+              {label !== undefined && <text x={pos + 2} y={RULER_SIZE_PX - 9} fontSize={8} fill={TICK_COLOR}>{label}</text>}
             </g>
           ))}
+          <line x1={0} y1={RULER_SIZE_PX - 0.5} x2={pxLen} y2={RULER_SIZE_PX - 0.5} stroke={TICK_COLOR} strokeOpacity={0.3} strokeWidth={1} />
         </svg>
       </div>
     );
   }
   return (
-    <div style={{ position: "absolute", left: -RULER_SIZE_PX, top: 0, width: RULER_SIZE_PX, height: pxLen, overflow: "hidden", pointerEvents: "none", userSelect: "none" }}>
+    <div className="text-muted-foreground" style={{ position: "absolute", left: -RULER_SIZE_PX, top: 0, width: RULER_SIZE_PX, height: pxLen, overflow: "hidden", pointerEvents: "none", userSelect: "none" }}>
       <svg width={RULER_SIZE_PX} height={pxLen}>
-        <rect width={RULER_SIZE_PX} height={pxLen} fill="#f3f4f6" />
+        <rect width={RULER_SIZE_PX} height={pxLen} className="fill-muted" />
         {ticks.map(({ pos, label }) => (
           <g key={pos}>
-            <line x1={RULER_SIZE_PX} y1={pos} x2={label !== undefined ? RULER_SIZE_PX - 8 : RULER_SIZE_PX - 4} y2={pos} stroke="#9ca3af" strokeWidth={1} />
+            <line x1={RULER_SIZE_PX} y1={pos} x2={label !== undefined ? RULER_SIZE_PX - 8 : RULER_SIZE_PX - 4} y2={pos} stroke={TICK_COLOR} strokeOpacity={0.55} strokeWidth={1} />
             {label !== undefined && (
-              <text x={RULER_SIZE_PX - 9} y={pos + 3} fontSize={8} fill="#6b7280" textAnchor="middle"
+              <text x={RULER_SIZE_PX - 9} y={pos + 3} fontSize={8} fill={TICK_COLOR} textAnchor="middle"
                 transform={`rotate(-90, ${RULER_SIZE_PX - 9}, ${pos + 3})`}>{label}</text>
             )}
           </g>
         ))}
+        <line x1={RULER_SIZE_PX - 0.5} y1={0} x2={RULER_SIZE_PX - 0.5} y2={pxLen} stroke={TICK_COLOR} strokeOpacity={0.3} strokeWidth={1} />
       </svg>
     </div>
   );
@@ -381,6 +386,7 @@ export default function LabelStudioPage() {
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
   const [clipboard, setClipboard] = useState<LabelComponent | null>(null);
   const [showExitConfirm, setShowExitConfirm] = useState<string | null>(null);
+  const [rightPanelOpen, setRightPanelOpen] = useState(true);
   const canvasRef = useRef<HTMLDivElement>(null);
   const layoutRef = useRef(layout);
   layoutRef.current = layout;
@@ -792,11 +798,16 @@ export default function LabelStudioPage() {
             {saveMutation.isPending ? "Salvando..." : isDirty ? "Salvar*" : "Salvo"}
           </Button>
         )}
-        <Button variant="outline" size="sm" className="h-7" onClick={() => { window.open(`/api/labels/templates/${id}/export`, "_blank"); }} data-testid="btn-export-studio" title="Exportar como JSON">
-          Exportar
-        </Button>
         <Button variant="outline" size="sm" className="h-7" onClick={() => navigate("/admin/label-print")} data-testid="btn-print-studio" title="Ir para impressão em lote">
           <Printer className="h-3.5 w-3.5 mr-1" />Imprimir
+        </Button>
+        <Button
+          variant="outline" size="sm" className="h-7 w-7 p-0"
+          onClick={() => setRightPanelOpen(v => !v)}
+          title={rightPanelOpen ? "Esconder painel lateral" : "Mostrar painel lateral"}
+          data-testid="btn-toggle-right-panel"
+        >
+          {rightPanelOpen ? <PanelRightClose className="h-3.5 w-3.5" /> : <PanelRightOpen className="h-3.5 w-3.5" />}
         </Button>
       </div>
 
@@ -852,7 +863,15 @@ export default function LabelStudioPage() {
         {/* Canvas */}
         <div className="flex-1 overflow-auto bg-muted/30 flex items-center justify-center p-8 relative" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
           <div style={{ position: "relative", marginTop: RULER_SIZE_PX, marginLeft: RULER_SIZE_PX, flexShrink: 0 }}>
-            <div ref={canvasRef} style={{ position: "relative", width: canvasW, height: canvasH, background: "white", boxShadow: "0 4px 24px rgba(0,0,0,0.15)", cursor: dragging ? "grabbing" : "default", flexShrink: 0, outline: "1px solid #ddd" }} onClick={() => setSelectedId(null)} data-testid="label-canvas">
+            <div
+              ref={canvasRef}
+              style={{ position: "relative", width: canvasW, height: canvasH, background: "white", boxShadow: "0 4px 24px rgba(0,0,0,0.15)", cursor: dragging ? "grabbing" : "default", flexShrink: 0, outline: "1px solid hsl(var(--border))" }}
+              onMouseDown={e => {
+                // Só desseleciona se o usuário clicou no fundo do canvas (não num componente).
+                if (e.target === e.currentTarget) setSelectedId(null);
+              }}
+              data-testid="label-canvas"
+            >
               <Ruler length={template.widthMm} zoom={zoom} orient="h" />
               <Ruler length={template.heightMm} zoom={zoom} orient="v" />
               {showGrid && (
@@ -940,10 +959,14 @@ export default function LabelStudioPage() {
           </div>
         )}
 
-        {/* Propriedades */}
+        {/* Propriedades / Campos disponíveis (recolhível) */}
+        {rightPanelOpen ? (
         <div className="w-60 border-l border-border bg-card overflow-y-auto shrink-0">
-          <div className="p-2 border-b border-border">
+          <div className="p-2 border-b border-border flex items-center justify-between gap-2">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{selectedComp ? "Propriedades" : "Campos Disponíveis"}</p>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 -mr-1" onClick={() => setRightPanelOpen(false)} title="Esconder painel" data-testid="btn-collapse-fields">
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
           </div>
           {selectedComp ? (
             <div className="p-2">
@@ -978,6 +1001,18 @@ export default function LabelStudioPage() {
             </div>
           )}
         </div>
+        ) : (
+          <div className="border-l border-border bg-card flex items-start shrink-0">
+            <Button
+              variant="ghost" size="sm" className="h-8 w-7 p-0 rounded-none"
+              onClick={() => setRightPanelOpen(true)}
+              title="Mostrar painel de propriedades / campos"
+              data-testid="btn-expand-fields"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Confirmar saída */}

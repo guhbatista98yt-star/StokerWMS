@@ -1,0 +1,182 @@
+Quero que você MELHORE o módulo de Etiquetas e o módulo de Impressão de Etiquetas já existentes, reaproveitando a base atual e sem recriar tudo do zero. O foco é corrigir UX/UI, bugs de interação e simplificar o fluxo operacional. Não quero exportação por enquanto.
+
+IMPORTANTE
+- Não recriar o módulo inteiro sem necessidade.
+- Reaproveitar componentes, rotas, persistência e estrutura já existentes.
+- Manter compatibilidade com os modelos já salvos.
+- Remover o botão/exportação de exportar, pois é desnecessário por enquanto.
+- Aplicar o mesmo padrão visual dark da aplicação em tudo que for ajustado.
+
+========================================
+1) LISTAGEM DE ETIQUETAS
+========================================
+Ajustar a listagem para ficar mais consistente e profissional.
+
+Regras:
+- Independente de a etiqueta ser “do sistema” ou não, elas precisam ter o mesmo padrão de opções visuais.
+- Não esconder opções por tipo de etiqueta se isso quebrar o padrão visual.
+- Se alguma ação precisar ser restringida por regra de negócio, manter a opção visível porém desabilitada com indicação clara, ao invés de sumir com ela.
+- Manter consistência entre cards.
+
+Ações:
+- Padronizar ações dos cards.
+- Revisar o menu dos três pontos para ficar coerente.
+- Remover redundâncias.
+- Manter visual consistente entre etiquetas padrão/sistema e etiquetas normais.
+- Se existir botão “Abrir Studio” em algumas e “Visualizar” em outras de forma inconsistente, uniformizar a lógica.
+
+========================================
+2) MODAL / PREVIEW DE VISUALIZAÇÃO
+========================================
+O preview precisa ficar mais limpo e técnico.
+
+Corrigir:
+- O preview da etiqueta deve ter zoom funcional, mas toda a área externa da etiqueta deve usar um único padrão de cor, limpo e consistente com a aplicação.
+- Não quero áreas externas com blocos visuais confusos ou variações desnecessárias.
+- A área fora da etiqueta deve parecer um “palco” limpo, com uma única cor/padrão visual coerente.
+
+Regras do preview:
+- Mostrar a etiqueta inteira por padrão.
+- Manter a proporção correta.
+- Melhorar o zoom.
+- O fundo externo do preview deve ser uniforme.
+- Centralizar melhor a etiqueta.
+- Melhorar nitidez do preview.
+- O comportamento de zoom precisa ser consistente.
+- Se houver área sobrando ao redor, ela deve manter o mesmo padrão visual do restante da aplicação.
+
+========================================
+3) STUDIO / ÁREA DE EDIÇÃO
+========================================
+Quero que o Studio se aproxime mais da ergonomia de ZebraDesigner/BarTender, sem copiar literalmente.
+
+3.1 Réguas
+- As réguas precisam ficar FORA da área da etiqueta, como nas ferramentas similares.
+- Não posicionar régua em cima do canvas útil da etiqueta.
+- As réguas devem contornar a área de trabalho externamente.
+- A régua deve seguir o mesmo padrão de cor da aplicação.
+- Ajustar contraste, legibilidade e integração visual da régua com o tema dark.
+- Se houver grade e guias, elas devem combinar com essa nova organização.
+
+3.2 Seleção de componentes
+Existe um bug de interação:
+- Quando clico em algum componente da etiqueta no Studio, ele não permanece selecionado e acaba desmarcando.
+- Corrigir a lógica de seleção para que o componente clicado permaneça selecionado corretamente.
+- Ao selecionar um componente:
+  - ele deve permanecer ativo/selecionado
+  - deve exibir claramente estado de seleção
+  - deve permitir editar propriedades no painel lateral
+  - não deve deselecionar sozinho sem motivo
+- Revisar eventos de click, blur, drag e selection state para corrigir esse comportamento.
+
+3.3 Campos Disponíveis
+- A aba/painel “Campos Disponíveis” precisa ter botão para esconder/recolher.
+- O usuário deve poder expandir e recolher esse painel quando quiser.
+- Manter boa usabilidade quando o painel estiver oculto.
+- Não quebrar drag and drop ou seleção dos campos dinâmicos.
+
+3.4 Layout do Studio
+Revisar o layout geral do Studio para melhorar produtividade:
+- toolbox/painéis mais organizados
+- menos poluição visual
+- melhor aproveitamento do espaço
+- painéis recolhíveis quando fizer sentido
+- preview/canvas mais valorizado no centro
+- manter identidade da aplicação
+
+========================================
+4) OPÇÕES E PADRÃO ENTRE ETIQUETAS
+========================================
+Padronizar comportamento e opções:
+- Etiquetas do sistema e etiquetas normais precisam seguir o mesmo padrão visual e estrutural.
+- Não quero diferenças arbitrárias de layout, ações ou apresentação.
+- Se existir alguma limitação funcional por regra de negócio, manter o mesmo padrão de interface e apenas sinalizar a restrição.
+
+========================================
+5) MÓDULO “IMPRESSÃO DE ETIQUETAS”
+========================================
+Quero que você revise a lógica, necessidade e layout do módulo de impressão, pois ele está confuso, com elementos grandes demais e possivelmente com informações/etapas desnecessárias.
+
+Objetivo:
+- Simplificar o fluxo.
+- Melhorar clareza.
+- Reduzir excesso visual.
+- Melhorar usabilidade operacional.
+
+Ajustes esperados:
+1. Rever a hierarquia visual da tela.
+- Os blocos da coluna esquerda parecem grandes demais.
+- Melhorar espaçamento, proporções e densidade de informação.
+- Reduzir desperdício de espaço vertical.
+
+2. Melhorar o fluxo de uso.
+Quero um fluxo mais claro, por exemplo:
+- Origem dos dados
+- Modelo da etiqueta
+- Registros
+- Layout de mídia (quando necessário)
+- Quantidade/cópias
+- Pré-visualização
+- Impressão
+
+3. Melhorar a clareza dos campos.
+- Deixar mais óbvio o que é obrigatório e o que é opcional.
+- “Layout de mídia” deve continuar opcional, mas precisa ficar mais compreensível.
+- Deixar a relação entre seleção de registros, modelo e quantidade mais clara.
+
+4. Melhorar feedback operacional.
+- Mostrar contagem clara de:
+  - registros selecionados
+  - etiquetas geradas
+  - cópias por registro
+  - total final estimado de impressão
+- Botões de ação devem refletir corretamente o estado da seleção.
+
+5. Melhorar a listagem de registros.
+- Melhorar densidade e legibilidade.
+- Evitar excesso de espaço desperdiçado.
+- Melhorar organização visual da lista de registros disponíveis.
+- Melhorar busca e seleção em lote, se já existir.
+
+6. Pré-visualização e impressão
+- Tornar a pré-visualização mais clara.
+- Deixar a ação de imprimir mais objetiva.
+- Revisar se há etapas redundantes.
+- Se houver informações desnecessárias ou grandes demais, simplificar.
+
+7. Coerência visual
+- Aplicar o mesmo padrão da aplicação.
+- Manter consistência entre módulo de etiquetas, studio e impressão.
+
+========================================
+6) REMOÇÃO DE FUNÇÕES DESNECESSÁRIAS
+========================================
+- Remover botão/exportação “Exportar”.
+- Se houver ações que não agregam no fluxo atual, simplificar a interface.
+- Não adicionar novas complexidades desnecessárias.
+
+========================================
+7) CUIDADOS TÉCNICOS
+========================================
+- Não quebrar etiquetas já existentes.
+- Não quebrar o preview atual.
+- Não quebrar o fluxo de impressão atual.
+- Corrigir apenas o necessário com boa organização.
+- Se precisar ajustar estados, eventos ou persistência, fazer de forma segura.
+- Manter performance boa.
+
+========================================
+8) ENTREGA ESPERADA
+========================================
+Ao final:
+- aplicar as melhorias no módulo existente
+- corrigir o bug de seleção de componentes
+- ajustar preview com fundo externo uniforme
+- mover/organizar as réguas para fora da área da etiqueta
+- adicionar botão de esconder em “Campos Disponíveis”
+- padronizar opções entre etiquetas do sistema e normais
+- revisar e simplificar o layout/fluxo do módulo de impressão
+- remover exportação
+- listar arquivos alterados
+- resumir exatamente o que foi melhorado
+- informar se foi necessário alterar lógica de eventos, layout, estados ou persistência

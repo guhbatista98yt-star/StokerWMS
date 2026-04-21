@@ -34,7 +34,11 @@ export default function LabelPrintPage() {
   const [context, setContext] = useState<LabelContext>("volume_label");
   const [templateId, setTemplateId] = useState<string>("");
   const [search, setSearch] = useState("");
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  // Mantemos o registro completo de cada item selecionado (não apenas o id),
+  // para que a impressão use exatamente o que está contado no resumo,
+  // mesmo que o usuário tenha filtrado/buscado e o item já não esteja visível.
+  const [selectedRecords, setSelectedRecords] = useState<Map<string, DataRow>>(new Map());
+  const selectedIds = selectedRecords; // alias semântico
   const [copiesPerRecord, setCopiesPerRecord] = useState(1);
   const [mediaLayoutId, setMediaLayoutId] = useState<string>("none");
   const [printing, setPrinting] = useState(false);
@@ -60,9 +64,9 @@ export default function LabelPrintPage() {
     [templates, context],
   );
 
-  // Reset seleção/template quando muda contexto
+  // Reset seleção/template quando muda contexto (domínio diferente).
   useEffect(() => {
-    setSelectedIds(new Set());
+    setSelectedRecords(new Map());
     setTemplateId("");
   }, [context]);
 
@@ -94,11 +98,10 @@ export default function LabelPrintPage() {
 
   async function handlePrint(previewOnly = false) {
     if (!template) return toast({ title: "Selecione um modelo", variant: "destructive" });
-    const ids = Array.from(selectedIds);
-    if (ids.length === 0) return toast({ title: "Selecione ao menos um registro", variant: "destructive" });
+    const selected = Array.from(selectedRecords.values());
+    if (selected.length === 0) return toast({ title: "Selecione ao menos um registro", variant: "destructive" });
     setPrinting(true);
     try {
-      const selected = records.filter(r => selectedIds.has(r.id));
       const items: PrintItem[] = selected.map(r => ({
         template,
         data: enrichData(r),
@@ -169,16 +172,33 @@ export default function LabelPrintPage() {
     return totalLabels;
   }, [selectedIds.size, copiesPerRecord, mediaLayout]);
 
-  function toggleSelect(id: string) {
-    setSelectedIds(prev => {
-      const n = new Set(prev);
-      if (n.has(id)) n.delete(id); else n.add(id);
+  function toggleSelect(row: DataRow) {
+    setSelectedRecords(prev => {
+      const n = new Map(prev);
+      if (n.has(row.id)) n.delete(row.id); else n.set(row.id, row);
       return n;
     });
   }
+  // Quantos dos visíveis estão atualmente selecionados
+  const visibleSelectedCount = useMemo(
+    () => records.reduce((acc, r) => acc + (selectedRecords.has(r.id) ? 1 : 0), 0),
+    [records, selectedRecords],
+  );
+  const allVisibleSelected = records.length > 0 && visibleSelectedCount === records.length;
+  // Marca/desmarca apenas os registros visíveis na lista atual.
   function toggleAll() {
-    if (selectedIds.size === records.length) setSelectedIds(new Set());
-    else setSelectedIds(new Set(records.map(r => r.id)));
+    setSelectedRecords(prev => {
+      const n = new Map(prev);
+      if (allVisibleSelected) {
+        for (const r of records) n.delete(r.id);
+      } else {
+        for (const r of records) n.set(r.id, r);
+      }
+      return n;
+    });
+  }
+  function clearSelection() {
+    setSelectedRecords(new Map());
   }
 
   return (
@@ -196,121 +216,144 @@ export default function LabelPrintPage() {
         </div>
       </div>
 
-      <main className="max-w-6xl mx-auto px-4 py-4 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4">
-        {/* Configuração */}
-        <div className="space-y-3">
+      <main className="max-w-6xl mx-auto px-4 py-4 grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4">
+        {/* Configuração — densificada em um único card com seções */}
+        <div className="space-y-3 lg:sticky lg:top-3 self-start">
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm">1. Origem dos dados</CardTitle></CardHeader>
-            <CardContent>
-              <Select value={context} onValueChange={v => setContext(v as LabelContext)}>
-                <SelectTrigger className="h-9" data-testid="select-context"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {labelContextEnum.map(c => (
-                    <SelectItem key={c} value={c}>{LABEL_CONTEXT_LABELS[c]}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm">2. Modelo de etiqueta</CardTitle></CardHeader>
-            <CardContent>
-              <Select value={templateId} onValueChange={setTemplateId}>
-                <SelectTrigger className="h-9" data-testid="select-template">
-                  <SelectValue placeholder={filteredTemplates.length === 0 ? "Nenhum modelo ativo" : "Escolha um modelo"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredTemplates.map(t => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.name} {t.companyId === null ? "(sistema)" : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {template && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  {template.widthMm}mm × {template.heightMm}mm · {template.dpi} DPI
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm">3. Layout de mídia (opcional)</CardTitle></CardHeader>
-            <CardContent className="space-y-2">
-              <Select value={mediaLayoutId} onValueChange={setMediaLayoutId}>
-                <SelectTrigger className="h-9" data-testid="select-media-layout">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Uma etiqueta por página</SelectItem>
-                  {mediaLayouts.map(m => (
-                    <SelectItem key={m.id} value={m.id}>
-                      {m.name} ({m.mediaWidthMm}×{m.mediaHeightMm}mm · {m.rows}×{m.cols})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {mediaLayout && (
-                <p className="text-xs text-muted-foreground">
-                  Aproveita {mediaLayout.rows * mediaLayout.cols} etiquetas por mídia.
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm">4. Quantidade</CardTitle></CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="pt-4 pb-3 space-y-3">
+              {/* 1. Origem */}
               <div>
-                <Label className="text-xs">Cópias por registro</Label>
+                <Label className="text-[11px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary/15 text-primary text-[10px] font-semibold">1</span>
+                  Origem dos dados
+                  <span className="text-destructive ml-0.5">*</span>
+                </Label>
+                <Select value={context} onValueChange={v => setContext(v as LabelContext)}>
+                  <SelectTrigger className="h-8 mt-1 text-xs" data-testid="select-context"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {labelContextEnum.map(c => (
+                      <SelectItem key={c} value={c}>{LABEL_CONTEXT_LABELS[c]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* 2. Modelo */}
+              <div>
+                <Label className="text-[11px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary/15 text-primary text-[10px] font-semibold">2</span>
+                  Modelo de etiqueta
+                  <span className="text-destructive ml-0.5">*</span>
+                </Label>
+                <Select value={templateId} onValueChange={setTemplateId}>
+                  <SelectTrigger className="h-8 mt-1 text-xs" data-testid="select-template">
+                    <SelectValue placeholder={filteredTemplates.length === 0 ? "Nenhum modelo ativo" : "Escolha um modelo"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredTemplates.map(t => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.name}{t.companyId === null ? " (sistema)" : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {template && (
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    {template.widthMm}×{template.heightMm}mm · {template.dpi} DPI
+                  </p>
+                )}
+              </div>
+
+              {/* 3. Quantidade */}
+              <div>
+                <Label className="text-[11px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary/15 text-primary text-[10px] font-semibold">3</span>
+                  Cópias por registro
+                </Label>
                 <Input
                   type="number" min={1} max={500}
                   value={copiesPerRecord}
                   onChange={e => setCopiesPerRecord(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="h-9 mt-1"
+                  className="h-8 mt-1 text-xs"
                   data-testid="input-copies"
                 />
               </div>
-              <div className="text-xs text-muted-foreground border-t pt-2">
-                Selecionados: <strong>{selectedIds.size}</strong> · Etiquetas: <strong>{selectedIds.size * copiesPerRecord}</strong>
-                {mediaLayout && <> · Páginas: <strong>{totalPages}</strong></>}
+
+              {/* 4. Layout de mídia (opcional) */}
+              <div>
+                <Label className="text-[11px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-muted text-muted-foreground text-[10px] font-semibold">4</span>
+                  Layout de mídia
+                  <span className="text-[10px] text-muted-foreground/70 ml-0.5 normal-case">(opcional)</span>
+                </Label>
+                <Select value={mediaLayoutId} onValueChange={setMediaLayoutId}>
+                  <SelectTrigger className="h-8 mt-1 text-xs" data-testid="select-media-layout">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Uma etiqueta por página</SelectItem>
+                    {mediaLayouts.map(m => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.name} ({m.mediaWidthMm}×{m.mediaHeightMm}mm · {m.rows}×{m.cols})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {mediaLayout && (
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    Aproveita {mediaLayout.rows * mediaLayout.cols} etiquetas/página.
+                  </p>
+                )}
+              </div>
+
+              {/* Resumo operacional */}
+              <div className="border-t pt-2 grid grid-cols-2 gap-x-2 gap-y-0.5 text-[11px]">
+                <span className="text-muted-foreground">Registros:</span>
+                <span className="text-right tabular-nums font-medium" data-testid="text-summary-records">{selectedIds.size}</span>
+                <span className="text-muted-foreground">Cópias:</span>
+                <span className="text-right tabular-nums font-medium">{copiesPerRecord}×</span>
+                <span className="text-muted-foreground">Etiquetas:</span>
+                <span className="text-right tabular-nums font-medium" data-testid="text-summary-labels">{selectedIds.size * copiesPerRecord}</span>
+                <span className="text-muted-foreground">{mediaLayout ? "Páginas:" : "Páginas (1/etiqueta):"}</span>
+                <span className="text-right tabular-nums font-medium" data-testid="text-summary-pages">{totalPages}</span>
+              </div>
+
+              {/* Ações */}
+              <div className="flex gap-2 pt-1">
+                <Button
+                  variant="outline"
+                  className="flex-1 h-9"
+                  onClick={() => handlePrint(true)}
+                  disabled={!template || selectedIds.size === 0 || printing}
+                  data-testid="btn-preview"
+                >
+                  <Eye className="h-4 w-4 mr-1.5" />
+                  Pré-visualizar
+                </Button>
+                <Button
+                  className="flex-1 h-9"
+                  onClick={() => handlePrint(false)}
+                  disabled={!template || selectedIds.size === 0 || printing}
+                  data-testid="btn-print"
+                >
+                  <Printer className="h-4 w-4 mr-1.5" />
+                  {printing ? "Preparando..." : "Imprimir"}
+                </Button>
               </div>
             </CardContent>
           </Card>
-
-          <div className="flex flex-col gap-2">
-            <Button
-              size="lg"
-              className="w-full"
-              onClick={() => handlePrint(false)}
-              disabled={!template || selectedIds.size === 0 || printing}
-              data-testid="btn-print"
-            >
-              <Printer className="h-4 w-4 mr-2" />
-              {printing ? "Preparando..." : "Imprimir"}
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => handlePrint(true)}
-              disabled={!template || selectedIds.size === 0 || printing}
-              data-testid="btn-preview"
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              Pré-visualizar
-            </Button>
-          </div>
         </div>
 
         {/* Registros */}
-        <Card className="min-h-[400px]">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between gap-2">
+        <Card className="min-h-[400px] flex flex-col">
+          <CardHeader className="pb-2 pt-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
               <CardTitle className="text-sm flex items-center gap-1.5">
                 <Layers className="h-4 w-4" />
                 Registros disponíveis
+                <span className="text-[11px] font-normal text-muted-foreground">
+                  · {LABEL_CONTEXT_LABELS[context]}
+                </span>
               </CardTitle>
               <div className="flex items-center gap-2">
                 <div className="relative w-56">
@@ -329,14 +372,44 @@ export default function LabelPrintPage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between text-xs text-muted-foreground pb-2 border-b">
-              <button onClick={toggleAll} className="hover:text-foreground" data-testid="btn-select-all">
-                {selectedIds.size === records.length && records.length > 0 ? "Desmarcar todos" : "Marcar todos"} ({records.length})
+          <CardContent className="flex-1 flex flex-col pb-3">
+            <div className="flex items-center justify-between text-[11px] text-muted-foreground pb-1.5 border-b gap-2">
+              <button
+                onClick={toggleAll}
+                className="hover:text-foreground inline-flex items-center gap-1.5 shrink-0"
+                data-testid="btn-select-all"
+                title={search ? "Marca/desmarca apenas os registros visíveis com o filtro atual" : undefined}
+              >
+                <Checkbox
+                  checked={allVisibleSelected}
+                  onCheckedChange={toggleAll}
+                  className="pointer-events-none"
+                />
+                {allVisibleSelected ? "Desmarcar visíveis" : (search ? "Marcar visíveis" : "Marcar todos")}
               </button>
-              <span>{isFetching ? "Carregando..." : `${records.length} registro(s)`}</span>
+              <span className="text-right">
+                {isFetching ? "Carregando..." : (
+                  <>
+                    <strong className="text-foreground" data-testid="text-records-count">{records.length}</strong> registro(s)
+                    {selectedRecords.size > 0 && (
+                      <>
+                        {" · "}
+                        <strong className="text-foreground" data-testid="text-selected-total">{selectedRecords.size}</strong> selecionado(s)
+                        {selectedRecords.size !== visibleSelectedCount && (
+                          <span className="text-muted-foreground/70"> ({visibleSelectedCount} visível{visibleSelectedCount === 1 ? "" : "is"})</span>
+                        )}
+                        <button
+                          onClick={clearSelection}
+                          className="ml-2 underline hover:text-foreground"
+                          data-testid="btn-clear-selection"
+                        >limpar</button>
+                      </>
+                    )}
+                  </>
+                )}
+              </span>
             </div>
-            <ScrollArea className="h-[55vh] mt-1">
+            <ScrollArea className="flex-1 h-[58vh]">
               {records.length === 0 ? (
                 <div className="text-center text-muted-foreground py-12 text-sm">
                   {isFetching ? "Carregando..." : "Nenhum registro encontrado"}
@@ -344,15 +417,20 @@ export default function LabelPrintPage() {
               ) : (
                 <ul className="divide-y">
                   {records.map(r => {
-                    const isSel = selectedIds.has(r.id);
+                    const isSel = selectedRecords.has(r.id);
                     const fields = LABEL_DATA_FIELDS[context] ?? [];
                     const summary = fields.slice(0, 3).map(f => r[f.key]).filter(Boolean).join(" · ");
                     return (
-                      <li key={r.id} className="flex items-center gap-2 py-1.5 px-1 hover:bg-muted/40 cursor-pointer" onClick={() => toggleSelect(r.id)} data-testid={`row-record-${r.id}`}>
-                        <Checkbox checked={isSel} onCheckedChange={() => toggleSelect(r.id)} onClick={e => e.stopPropagation()} />
+                      <li
+                        key={r.id}
+                        className={`flex items-center gap-2 py-1 px-1.5 cursor-pointer transition-colors ${isSel ? "bg-primary/10" : "hover:bg-muted/40"}`}
+                        onClick={() => toggleSelect(r)}
+                        data-testid={`row-record-${r.id}`}
+                      >
+                        <Checkbox checked={isSel} onCheckedChange={() => toggleSelect(r)} onClick={e => e.stopPropagation()} />
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm truncate font-medium">{summary || r.id}</p>
-                          <p className="text-xs text-muted-foreground truncate">ID: {r.id}</p>
+                          <p className="text-xs truncate font-medium leading-tight">{summary || r.id}</p>
+                          <p className="text-[10px] text-muted-foreground truncate font-mono leading-tight">{r.id}</p>
                         </div>
                       </li>
                     );
