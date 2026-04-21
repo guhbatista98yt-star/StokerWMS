@@ -647,6 +647,7 @@ export default function LabelStudioPage() {
   const [clipboard, setClipboard] = useState<LabelComponent | null>(null);
   const [showExitConfirm, setShowExitConfirm] = useState<string | null>(null);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
+  const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const canvasRef = useRef<HTMLDivElement>(null);
   const layoutRef = useRef(layout);
   layoutRef.current = layout;
@@ -1122,6 +1123,14 @@ export default function LabelStudioPage() {
         </Button>
         <Button
           variant="outline" size="sm" className="h-7 w-7 p-0"
+          onClick={() => setLeftPanelOpen(v => !v)}
+          title={leftPanelOpen ? "Esconder painel de componentes" : "Mostrar painel de componentes"}
+          data-testid="btn-toggle-left-panel"
+        >
+          <PanelLeft className={cn("h-3.5 w-3.5", !leftPanelOpen && "opacity-50")} />
+        </Button>
+        <Button
+          variant="outline" size="sm" className="h-7 w-7 p-0"
           onClick={() => setRightPanelOpen(v => !v)}
           title={rightPanelOpen ? "Esconder painel lateral" : "Mostrar painel lateral"}
           data-testid="btn-toggle-right-panel"
@@ -1131,7 +1140,20 @@ export default function LabelStudioPage() {
       </div>
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
-        {/* Toolbox + camadas */}
+        {/* Toolbox + camadas (recolhível) */}
+        {!leftPanelOpen && (
+          <div className="border-r border-border bg-card flex items-start shrink-0">
+            <Button
+              variant="ghost" size="sm" className="h-8 w-7 p-0 rounded-none"
+              onClick={() => setLeftPanelOpen(true)}
+              title="Mostrar painel de componentes"
+              data-testid="btn-expand-components"
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        )}
+        {leftPanelOpen && (
         <div className="w-44 border-r border-border bg-card flex flex-col shrink-0 overflow-hidden">
           <div className="px-2 py-2 border-b border-border">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Componentes</p>
@@ -1178,6 +1200,7 @@ export default function LabelStudioPage() {
             </div>
           )}
         </div>
+        )}
 
         {/* Área central: canvas + (opcionalmente) preview lateral/inferior */}
         <div
@@ -1345,11 +1368,8 @@ export default function LabelStudioPage() {
         {/* Propriedades / Campos disponíveis (recolhível) */}
         {rightPanelOpen ? (
         <div className="w-60 border-l border-border bg-card overflow-y-auto shrink-0">
-          <div className="p-2 border-b border-border flex items-center justify-between gap-2">
+          <div className="p-2 border-b border-border">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{selectedComp ? "Propriedades" : "Campos Disponíveis"}</p>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 -mr-1" onClick={() => setRightPanelOpen(false)} title="Esconder painel" data-testid="btn-collapse-fields">
-              <ChevronRight className="h-3.5 w-3.5" />
-            </Button>
           </div>
           {selectedComp ? (
             <div className="p-2">
