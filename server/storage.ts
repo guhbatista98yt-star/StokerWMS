@@ -2569,6 +2569,22 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(labelDefaultAssignments.templateId, id), eq(labelDefaultAssignments.companyId, companyId)));
   }
 
+  /**
+   * Apaga um template independentemente da empresa (inclui Sistema/global, companyId=null).
+   * O caller é responsável pelas verificações de permissão e padrão.
+   */
+  async deleteLabelTemplateAny(id: string, ownerCompanyId: number | null): Promise<void> {
+    if (ownerCompanyId === null) {
+      await db.delete(labelTemplates).where(and(eq(labelTemplates.id, id), isNull(labelTemplates.companyId)));
+    } else {
+      await db.delete(labelTemplates).where(and(eq(labelTemplates.id, id), eq(labelTemplates.companyId, ownerCompanyId)));
+    }
+    // Limpa qualquer atribuição de padrão que apontava para esse template (em qualquer empresa).
+    await db.update(labelDefaultAssignments)
+      .set({ templateId: null, updatedAt: new Date().toISOString() })
+      .where(eq(labelDefaultAssignments.templateId, id));
+  }
+
   private async getLabelDefaultAssignmentOwned(context: LabelContext, companyId: number): Promise<LabelDefaultAssignment | undefined> {
     const [assignment] = await db.select().from(labelDefaultAssignments)
       .where(and(eq(labelDefaultAssignments.context, context), eq(labelDefaultAssignments.companyId, companyId)));

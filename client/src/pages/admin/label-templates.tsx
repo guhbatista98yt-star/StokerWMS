@@ -461,6 +461,17 @@ export default function LabelTemplatesPage() {
                               <Star className="h-4 w-4 mr-2" />
                               {defaults[t.context] === t.id ? "Já é o padrão" : "Definir como padrão"}
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => setShowDeleteDialog(t)}
+                              disabled={defaults[t.context] === t.id}
+                              data-testid={`menu-delete-${t.id}`}
+                              title={defaults[t.context] === t.id ? "Defina outro modelo como padrão antes de apagar" : undefined}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              {defaults[t.context] === t.id ? "Apagar (é o padrão)" : "Apagar"}
+                            </DropdownMenuItem>
                           </>
                         ) : (
                           <>

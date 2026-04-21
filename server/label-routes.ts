@@ -198,9 +198,23 @@ export function registerLabelRoutes(app: Express) {
 
   app.delete("/api/labels/templates/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const ownership = await requireTemplateOwnership(req, res, req.params.id);
-      if (!ownership) return;
-      await storage.deleteLabelTemplate(req.params.id, ownership.companyId);
+      const companyId = requireCompanyId(req, res);
+      if (!companyId) return;
+      const tpl = await storage.getLabelTemplateById(req.params.id, companyId);
+      if (!tpl) return res.status(404).json({ error: "Modelo não encontrado." });
+      // Templates da empresa: pertencem a outra empresa? bloqueia.
+      if (tpl.companyId !== null && tpl.companyId !== companyId) {
+        return res.status(403).json({ error: "Modelo pertence a outra empresa." });
+      }
+      // Bloqueia exclusão se o modelo estiver definido como padrão (próprio ou global).
+      const assignments = await storage.getLabelDefaultAssignments(companyId);
+      const isDefault = assignments.some(a => a.templateId === req.params.id);
+      if (isDefault) {
+        return res.status(409).json({
+          error: "Este modelo está definido como padrão. Defina outro modelo como padrão antes de apagá-lo.",
+        });
+      }
+      await storage.deleteLabelTemplateAny(req.params.id, tpl.companyId);
       res.json({ success: true });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
