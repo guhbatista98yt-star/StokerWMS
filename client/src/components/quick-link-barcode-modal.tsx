@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ScanInput } from "@/components/ui/scan-input";
@@ -38,9 +38,16 @@ export function QuickLinkBarcodeModal({ open, onClose, prefilledProduct, manualI
   const [scanMessage, setScanMessage] = useState<string>("");
   const [scanStatus, setScanStatus] = useState<"idle" | "success" | "error">("idle");
 
-  // Reset on open
+  // Rastreia a transição de fechado→aberto para evitar resetar estado enquanto o modal
+  // já está aberto. O pai cria um novo objeto `prefilledProduct` a cada render, o que
+  // dispararia o effect sem querer e apagaria o que o usuário já digitou.
+  const wasOpenRef = useRef(false);
+
   useEffect(() => {
-    if (!open) return;
+    const justOpened = open && !wasOpenRef.current;
+    wasOpenRef.current = open;
+    if (!justOpened) return;
+
     setPackageBarcode("");
     setCustomQty("");
     setLastSaved(null);
@@ -55,7 +62,10 @@ export function QuickLinkBarcodeModal({ open, onClose, prefilledProduct, manualI
       setResolvedProduct(null);
       setPhase("unit");
     }
-  }, [open, prefilledProduct]);
+  // prefilledProduct é lido pela closure no momento em que o modal abre (open true→true
+  // nunca dispara, só false→true). Dependência intencional apenas em `open`.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const lookupUnit = useCallback(async (code: string) => {
     if (!code.trim()) return;
