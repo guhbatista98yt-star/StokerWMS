@@ -763,6 +763,26 @@ async function runSafeMigrations() {
     )`,
     `CREATE UNIQUE INDEX IF NOT EXISTS scan_log_dedup_idx ON scan_log(msg_id, user_id, company_id_int)`,
     `CREATE INDEX IF NOT EXISTS scan_log_created_at_idx ON scan_log(created_at)`,
+    `CREATE TABLE IF NOT EXISTS label_templates (
+      id text PRIMARY KEY,
+      company_id integer,
+      name text NOT NULL,
+      context text NOT NULL,
+      width_mm integer NOT NULL DEFAULT 100,
+      height_mm integer NOT NULL DEFAULT 70,
+      dpi integer NOT NULL DEFAULT 203,
+      active boolean NOT NULL DEFAULT true,
+      layout_json jsonb NOT NULL DEFAULT '{"components":[]}'::jsonb,
+      created_at text NOT NULL DEFAULT '',
+      updated_at text
+    )`,
+    `CREATE TABLE IF NOT EXISTS label_default_assignments (
+      company_id integer NOT NULL DEFAULT 0,
+      context text NOT NULL,
+      template_id text,
+      updated_at text NOT NULL DEFAULT '',
+      PRIMARY KEY (company_id, context)
+    )`,
   ];
 
   for (const ddl of tables) {

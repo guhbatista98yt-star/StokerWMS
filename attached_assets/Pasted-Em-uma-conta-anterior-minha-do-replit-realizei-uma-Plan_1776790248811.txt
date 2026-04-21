@@ -1,0 +1,3116 @@
+Em uma conta anterior minha do replit, realizei uma Plan Task para implantar o Modulo de Etiqueta, segue abaixo meu prompt e os Review, para tentar-mos implantar mais rapido e sem muitos gastos:
+
+
+--- Prompt ---
+Criar dentro do módulo Impressoras um novo módulo chamado “Etiquetas” com um studio visual de criação e edição de etiquetas, inspirado no fluxo de uso do BarTender, mas adaptado à arquitetura atual da aplicação.
+
+Objetivo:
+Permitir criar, editar, visualizar, salvar, definir e imprimir modelos de etiquetas para diferentes finalidades, como:
+- etiqueta de volume
+- etiqueta de código de barras
+- etiqueta de endereço/pallet
+- outras etiquetas operacionais futuras
+
+Requisitos principais:
+1) Editor visual
+- Área de desenho da etiqueta com preview em tempo real.
+- Suporte a diferentes tamanhos de etiqueta.
+- Mostrar largura, altura, margens de segurança e réguas.
+- Permitir posicionar, mover e redimensionar componentes.
+- Exibir atualização em tempo real ao alterar qualquer item.
+- Permitir zoom, alinhamento básico e organização visual limpa.
+
+2) Componentes da etiqueta
+Permitir adicionar e configurar:
+- texto fixo
+- texto dinâmico vindo de campos do sistema
+- código de barras
+- QR Code
+- linha, caixa e elementos visuais simples
+- descrição
+- ID do produto
+- código do produto
+- endereço
+- volume
+- número do pedido
+- dados do cliente
+- outros campos disponíveis por módulo
+
+3) Fonte de dados
+- Mostrar de forma clara quais tabelas, campos ou variáveis podem ser usados em cada tipo de etiqueta.
+- Exibir lista de campos disponíveis por módulo/origem, por exemplo:
+  - Volume
+  - Endereçamento/Pallet
+  - Produtos
+  - Pedidos
+- Permitir selecionar campos dinâmicos sem o usuário precisar editar código.
+
+4) Configuração por contexto
+- Permitir definir qual etiqueta padrão será usada no módulo de impressão de volume.
+- Permitir definir qual etiqueta padrão será usada no módulo de endereçamento/pallet.
+- Essa definição deve ficar centralizada no módulo Impressoras.
+
+5) Impressão
+- Permitir imprimir direto pelo navegador.
+- Permitir imprimir pela ferramenta Print Tool configurada no usuário.
+- Preparar estrutura para compatibilidade com múltiplos modelos de impressoras térmicas, incluindo Zebra, Argox, Elgin, Bematech e similares.
+- Separar claramente a camada de layout da camada de envio para impressão.
+
+6) Persistência
+- Salvar modelos de etiquetas no banco.
+- Permitir criar, editar, duplicar, excluir, ativar e desativar modelos.
+- Armazenar propriedades de layout, tamanho, componentes, posição, fonte, conteúdo dinâmico e configuração de impressão.
+
+7) UX/UI
+- Interface profissional, limpa e funcional.
+- Evitar excesso visual.
+- Priorizar precisão de posicionamento e facilidade de uso.
+- Mostrar claramente o preview final da etiqueta.
+
+8) Arquitetura e entrega
+- Manter a arquitetura atual.
+- Não criar solução descartável.
+- Não usar mock como entrega final.
+- Preparar base extensível para novos tipos de etiquetas.
+- Entregar implementação com resumo técnico, estrutura de dados, endpoints criados/alterados e arquivos modificados.
+
+
+
+
+--- Review changes ---
+
+#1 – Studio de Etiquetas no módulo Impressoras
+client/src/App.tsx
+-0
++2
+import CodigosBarrasPage from "@/pages/wms/codigos-barras";
+import NotFound from "@/pages/not-found";
+import VolumeLabelPage from "@/pages/print/volume-label";
+import PalletLabelPage from "@/pages/print/pallet-label";
+import LabelTemplatesPage from "@/pages/admin/label-templates";
+import LabelStudioPage from "@/pages/admin/label-studio";
+import { Loader2 } from "lucide-react";
+function LoadingScreen() {
+-0
++12
+function Router() {
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/label-templates">
+        <ProtectedRoute allowedRoles={["supervisor", "administrador"]}>
+          <LabelTemplatesPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/label-studio/:id">
+        <ProtectedRoute allowedRoles={["supervisor", "administrador"]}>
+          <LabelStudioPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/kpi-operadores">
+        <ProtectedRoute allowedRoles={["supervisor", "administrador"]}>
+          <KpiDashboardPage />
+client/src/components/conferencia/VolumeModal.tsx
+-1
++1
+export function VolumeModal({ open, onClose, defaultErpOrderId }: VolumeModalPro
+                                        variant="outline"
+                                        className="h-13 w-14 p-0 rounded-xl shrink-0"
+                                        style={{ height: "52px", width: "52px" }}
+                                        onClick={() => { const vd = buildVolumeData(); if (vd) printVolume(null, "volume_label", vd); }}
+                                        onClick={() => { const vd = buildVolumeData(); if (vd) printVolume(null, "volume_label", { templatePayload: vd }); }}
+                                        disabled={saveMutation.isPending || printing || cooldownSeconds > 0}
+                                        title={cooldownSeconds > 0 ? `Aguarde ${cooldownSeconds}s` : "Imprimir etiquetas"}
+                                        data-testid="btn-volume-print"
+client/src/hooks/use-label-default.ts
+import { useState, useEffect } from "react";
+import { apiRequest } from "@/lib/queryClient";
+import { renderLabelToHtml, type DataRecord } from "@/lib/label-renderer";
+import type { LabelContext, LabelTemplate } from "@shared/schema";
+export interface LabelDefaultState {
+  loading: boolean;
+  templateHtml: string | null;
+}
+export function useLabelDefault(context: LabelContext, data: DataRecord): LabelDefaultState {
+  const [loading, setLoading] = useState(true);
+  const [templateHtml, setTemplateHtml] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const defaultsRes = await apiRequest("GET", "/api/labels/defaults");
+        if (!defaultsRes.ok) { setLoading(false); return; }
+        const defaults = await defaultsRes.json() as Record<LabelContext, string | null>;
+        const templateId = defaults[context];
+        if (!templateId) { setLoading(false); return; }
+        const tplRes = await apiRequest("GET", `/api/labels/templates/${templateId}`);
+        if (!tplRes.ok) { setLoading(false); return; }
+        const template = await tplRes.json() as LabelTemplate;
+        if (!cancelled) {
+          const html = await renderLabelToHtml(template, data);
+          setTemplateHtml(html);
+        }
+      } catch {
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [context, JSON.stringify(data)]);
+  return { loading, templateHtml };
+}
+client/src/hooks/use-print.ts
+-0
++2
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import type { PrintType } from "@/lib/print-config";
+import { renderLabelToHtml, renderLabelBatch, type DataRecord } from "@/lib/label-renderer";
+import type { LabelContext, LabelTemplate } from "@shared/schema";
+interface PrintConfig {
+  printer: string;
+-0
++1
+let configCache: Record<string, PrintConfig> | null = null;
+export function invalidatePrintConfigCache() {
+  configCache = null;
+  labelDefaultsCache = null;
+}
+async function loadPrintConfig(): Promise<Record<string, PrintConfig>> {
+-0
++104
+async function loadPrintConfig(): Promise<Record<string, PrintConfig>> {
+  return configCache;
+}
+let labelDefaultsCache: Record<string, string | null> | null = null;
+let labelTemplateCache: Record<string, LabelTemplate> = {};
+async function loadLabelDefaults(): Promise<Record<string, string | null>> {
+  if (labelDefaultsCache) return labelDefaultsCache;
+  try {
+    const res = await apiRequest("GET", "/api/labels/defaults");
+    if (res.ok) {
+      labelDefaultsCache = await res.json();
+      return labelDefaultsCache!;
+    }
+  } catch { }
+  return {};
+}
+async function loadLabelTemplate(id: string): Promise<LabelTemplate | null> {
+  if (labelTemplateCache[id]) return labelTemplateCache[id];
+  try {
+    const res = await apiRequest("GET", `/api/labels/templates/${id}`);
+    if (res.ok) {
+      const t = await res.json() as LabelTemplate;
+      labelTemplateCache[id] = t;
+      return t;
+    }
+  } catch { }
+  return null;
+}
+function normalizeVolumeRecord(vol: Record<string, unknown>): DataRecord {
+  const counts = (vol.counts as Record<string, unknown>) ?? {};
+  return {
+    order:        String(vol.erpOrderId ?? ""),
+    customer:     String(vol.customerName ?? ""),
+    address:      String(vol.address ?? ""),
+    neighborhood: String(vol.neighborhood ?? ""),
+    city:         String(vol.cityState ?? ""),
+    vol:          String(vol.volumeNumber ?? ""),
+    totalVol:     String(vol.totalVolumes ?? ""),
+    route:        String(vol.routeCode ?? ""),
+    routeName:    String(vol.routeName ?? ""),
+    operator:     String(vol.operator ?? ""),
+    date:         String(vol.date ?? ""),
+    time:         String(vol.time ?? ""),
+    sender:       String(vol.sender ?? ""),
+    sacola:       String(counts.sacola ?? "0"),
+    caixa:        String(counts.caixa ?? "0"),
+    saco:         String(counts.saco ?? "0"),
+    avulso:       String(counts.avulso ?? "0"),
+  };
+}
+function normalizePalletRecord(data: Record<string, unknown>): DataRecord {
+  const items = Array.isArray(data.items)
+    ? (data.items as Array<Record<string, unknown>>)
+        .map(i => `${String(i.product ?? "")} x${String(i.quantity ?? "")}${i.unit ? " " + String(i.unit) : ""}`)
+        .join(", ")
+    : "";
+  const nf = Array.isArray(data.nfIds) ? (data.nfIds as string[]).join(", ") : String(data.nfIds ?? "");
+  return {
+    code:     String(data.palletCode ?? ""),
+    address:  String(data.address ?? ""),
+    date:     String(data.createdAt ?? ""),
+    operator: String(data.printedBy ?? data.createdBy ?? ""),
+    items,
+    nf,
+    company:  String(data.qrData ?? data.palletCode ?? ""),
+    lot:      "",
+    status:   "",
+  };
+}
+async function resolveHtmlForPrint(
+  htmlOrNull: string | null,
+  printType: PrintType,
+  rawPayload?: Record<string, unknown>
+): Promise<string | null> {
+  const labelContexts: PrintType[] = ["volume_label", "pallet_label"];
+  if (!labelContexts.includes(printType) || !rawPayload) return htmlOrNull;
+  try {
+    const defaults = await loadLabelDefaults();
+    const templateId = defaults[printType as LabelContext];
+    if (!templateId) return htmlOrNull;
+    const template = await loadLabelTemplate(templateId);
+    if (!template) return htmlOrNull;
+    if (printType === "volume_label" && Array.isArray(rawPayload.volumes)) {
+      const volumes = rawPayload.volumes as Record<string, unknown>[];
+      if (volumes.length === 0) return htmlOrNull;
+      const dataArray = volumes.map(normalizeVolumeRecord);
+      return await renderLabelBatch(template, dataArray);
+    }
+    if (printType === "pallet_label") {
+      return await renderLabelToHtml(template, normalizePalletRecord(rawPayload));
+    }
+    return htmlOrNull;
+  } catch {
+    return htmlOrNull;
+  }
+}
+const lastPrintTime: Record<string, number> = {};
+const PRINT_COOLDOWN_MS = 5000;
+-1
++5
+export function usePrint() {
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
+  const { toast } = useToast();
+  async function print(htmlOrNull: string | null, printType: PrintType, templatePayload?: { template: string; data: Record<string, unknown> }) {
+  async function print(
+    htmlOrNull: string | null,
+    printType: PrintType,
+    options?: { templatePayload?: { template: string; data: Record<string, unknown> }; data?: DataRecord }
+  ) {
+    const now = Date.now();
+    const last = lastPrintTime[printType] ?? 0;
+    if (now - last < PRINT_COOLDOWN_MS) return;
+-5
++9
+export function usePrint() {
+      copies: config.copies ?? 1,
+    };
+    if (templatePayload) {
+      body.template = templatePayload.template;
+      body.data = templatePayload.data;
+    } else if (htmlOrNull) {
+      body.html = htmlOrNull;
+    const rawPayload: Record<string, unknown> | undefined =
+      options?.data ?? options?.templatePayload?.data;
+    const resolvedHtml = await resolveHtmlForPrint(htmlOrNull, printType, rawPayload);
+    if (resolvedHtml) {
+      body.html = resolvedHtml;
+    } else if (options?.templatePayload) {
+      body.template = options.templatePayload.template;
+      body.data = options.templatePayload.data;
+    }
+    apiRequest("POST", "/api/print/job", body).catch(() => {});
+client/src/lib/label-renderer.ts
+import type {
+  LabelTemplate, LabelLayout, LabelComponent,
+  TextComponent, DynamicTextComponent, BarcodeComponent, QRCodeComponent,
+  LineComponent, RectangleComponent,
+} from "@shared/schema";
+export type DataRecord = Record<string, string | number | undefined>;
+function mmToPx(mm: number, dpi = 96): number {
+  return (mm / 25.4) * dpi;
+}
+function escapeHtml(str: string): string {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+function resolveField(field: string, data: DataRecord): string {
+  const val = data[field];
+  if (val === undefined || val === null) return "";
+  return String(val);
+}
+function wrapAbsolute(
+  c: { x: number; y: number; width: number; height: number; rotation?: number },
+  inner: string,
+  extraStyle = ""
+): string {
+  const rot = c.rotation ? `transform:rotate(${c.rotation}deg);transform-origin:top left;` : "";
+  return `<div style="position:absolute;left:${c.x}mm;top:${c.y}mm;width:${c.width}mm;height:${c.height}mm;overflow:hidden;box-sizing:border-box;${rot}${extraStyle}">${inner}</div>`;
+}
+function renderTextComponent(c: TextComponent): string {
+  return wrapAbsolute(c, escapeHtml(c.content), `
+    font-size:${c.fontSize}pt;
+    font-weight:${c.fontWeight ?? "normal"};
+    font-family:${c.fontFamily ?? "Arial,Helvetica,sans-serif"};
+    text-align:${c.align ?? "left"};
+    color:${c.color ?? "#000"};
+    white-space:pre-wrap;
+    line-height:1.2;
+  `);
+}
+function renderDynamicTextComponent(c: DynamicTextComponent, data: DataRecord): string {
+  const raw = resolveField(c.field, data);
+  const value = `${c.prefix ?? ""}${raw}${c.suffix ?? ""}`;
+  return wrapAbsolute(c, escapeHtml(value), `
+    font-size:${c.fontSize}pt;
+    font-weight:${c.fontWeight ?? "normal"};
+    font-family:${c.fontFamily ?? "Arial,Helvetica,sans-serif"};
+    text-align:${c.align ?? "left"};
+    color:${c.color ?? "#000"};
+    white-space:pre-wrap;
+    line-height:1.2;
+  `);
+}
+async function generateBarcodeSvg(value: string, format: string): Promise<string> {
+  try {
+    const JsBarcode = (await import("jsbarcode")).default;
+    const NS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(NS, "svg");
+    JsBarcode(svg, value || "000000", {
+      format,
+      displayValue: true,
+      fontSize: 10,
+      margin: 4,
+      xmlDocument: document,
+    });
+    return new XMLSerializer().serializeToString(svg);
+  } catch {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><text x="50%" y="50%" text-anchor="middle" font-size="8" fill="#999">Barcode</text></svg>`;
+  }
+}
+async function generateQrSvg(value: string, errorLevel: "L" | "M" | "Q" | "H" = "M"): Promise<string> {
+  try {
+    const QRCode = await import("qrcode");
+    const svg = await QRCode.toString(value || " ", { type: "svg", errorCorrectionLevel: errorLevel });
+    return svg;
+  } catch {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><text x="50%" y="50%" text-anchor="middle" font-size="8" fill="#999">QR</text></svg>`;
+  }
+}
+async function renderBarcodeComponent(c: BarcodeComponent, data: DataRecord): Promise<string> {
+  const value = resolveField(c.field, data) || "000000000000";
+  const svgStr = await generateBarcodeSvg(value, c.format ?? "CODE128");
+  const encoded = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgStr)}`;
+  return wrapAbsolute(c,
+    `<img src="${encoded}" style="width:100%;height:100%;object-fit:contain;" alt="${escapeHtml(value)}" />`
+  );
+}
+async function renderQRCodeComponent(c: QRCodeComponent, data: DataRecord): Promise<string> {
+  const value = resolveField(c.field, data) || " ";
+  const svgStr = await generateQrSvg(value, (c.errorLevel ?? "M") as "L" | "M" | "Q" | "H");
+  const encoded = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgStr)}`;
+  return wrapAbsolute(c,
+    `<img src="${encoded}" style="width:100%;height:100%;object-fit:contain;" alt="QR" />`
+  );
+}
+function renderLineComponent(c: LineComponent): string {
+  const isH = c.orientation === "horizontal";
+  const sw = c.strokeWidth ?? 1;
+  const color = c.color ?? "#000";
+  const border = `${sw}px ${c.dashed ? "dashed" : "solid"} ${color}`;
+  if (isH) {
+    return wrapAbsolute(c, `<div style="width:100%;border-top:${border};"></div>`, "align-items:center;display:flex;");
+  }
+  return wrapAbsolute(c, `<div style="height:100%;border-left:${border};"></div>`, "justify-content:center;display:flex;");
+}
+function renderRectangleComponent(c: RectangleComponent): string {
+  return wrapAbsolute(c, "", `
+    background:${c.fillColor ?? "transparent"};
+    border:${c.strokeWidth ?? 1}px solid ${c.strokeColor ?? "#000"};
+    border-radius:${c.borderRadius ?? 0}px;
+  `);
+}
+async function renderComponent(c: LabelComponent, data: DataRecord): Promise<string> {
+  switch (c.type) {
+    case "text":         return renderTextComponent(c as TextComponent);
+    case "dynamic_text": return renderDynamicTextComponent(c as DynamicTextComponent, data);
+    case "barcode":      return renderBarcodeComponent(c as BarcodeComponent, data);
+    case "qrcode":       return renderQRCodeComponent(c as QRCodeComponent, data);
+    case "line":         return renderLineComponent(c as LineComponent);
+    case "rectangle":    return renderRectangleComponent(c as RectangleComponent);
+    default:             return "";
+  }
+}
+async function renderLabelPage(template: LabelTemplate, data: DataRecord): Promise<string> {
+  const layout = template.layoutJson as LabelLayout;
+  const components = [...(layout?.components ?? [])].sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0));
+  const parts = await Promise.all(components.map(c => renderComponent(c, data)));
+  return `<div class="label-canvas" style="
+  position:relative;
+  width:${template.widthMm}mm;
+  height:${template.heightMm}mm;
+  background:white;
+  overflow:hidden;
+  box-sizing:border-box;
+">
+${parts.join("\n")}
+</div>`;
+}
+function labelDocumentShell(
+  template: LabelTemplate,
+  pagesHtml: string,
+  multi = false
+): string {
+  const pageStyle = multi
+    ? `@page { size: ${template.widthMm}mm ${template.heightMm}mm; margin: 0; }
+  .label-page { page-break-after: always; page-break-inside: avoid; width: ${template.widthMm}mm; height: ${template.heightMm}mm; }`
+    : `@page { size: ${template.widthMm}mm ${template.heightMm}mm; margin: 0; }
+  html, body { width: ${template.widthMm}mm; height: ${template.heightMm}mm; overflow: hidden; }`;
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>${escapeHtml(template.name)}</title>
+<style>
+  html, body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background: white; color: #000; }
+  * { box-sizing: border-box; }
+  ${pageStyle}
+  @media screen {
+    body { background: #e5e5e5; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+    .label-canvas { box-shadow: 0 4px 20px rgba(0,0,0,.3); }
+  }
+</style>
+</head>
+<body>
+${pagesHtml}
+</body>
+</html>`;
+}
+export async function renderLabelToHtml(template: LabelTemplate, data: DataRecord): Promise<string> {
+  const pageHtml = await renderLabelPage(template, data);
+  return labelDocumentShell(template, pageHtml, false);
+}
+export async function renderLabelBatch(template: LabelTemplate, dataArray: DataRecord[]): Promise<string> {
+  if (dataArray.length === 0) return labelDocumentShell(template, "", true);
+  const pages = await Promise.all(
+    dataArray.map(async (data, i) => {
+      const pageContent = await renderLabelPage(template, data);
+      const isLast = i === dataArray.length - 1;
+      return `<div class="label-page"${isLast ? ' style="page-break-after:auto"' : ""}>${pageContent}</div>`;
+    })
+  );
+  return labelDocumentShell(template, pages.join("\n"), true);
+}
+client/src/pages/admin/label-studio.tsx
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams, useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import {
+  ArrowLeft, Save, Eye, EyeOff, Type, AlignLeft, Barcode, QrCode,
+  Minus, Square, Plus, Trash2, ChevronUp, ChevronDown,
+  MousePointer, Grid, ZoomIn, ZoomOut, type LucideIcon,
+} from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { renderLabelToHtml } from "@/lib/label-renderer";
+import { cn } from "@/lib/utils";
+import type {
+  LabelTemplate, LabelComponent, LabelContext,
+  TextComponent, DynamicTextComponent, BarcodeComponent, QRCodeComponent,
+  LineComponent, RectangleComponent, LabelLayout,
+} from "@shared/schema";
+import { LABEL_DATA_FIELDS, LABEL_CONTEXT_LABELS } from "@shared/schema";
+const CANVAS_SCALE = 3.7795275591;
+const SNAP_MM = 0.5;
+const SAFETY_MARGIN_MM = 2;
+const RULER_SIZE_PX = 18;
+function mmToCanvasPx(mm: number, zoom: number): number {
+  return mm * CANVAS_SCALE * (zoom / 100);
+}
+function snapMm(value: number): number {
+  return Math.round(value / SNAP_MM) * SNAP_MM;
+}
+function Ruler({ length, zoom, orient }: { length: number; zoom: number; orient: "h" | "v" }) {
+  const pxLen = mmToCanvasPx(length, zoom);
+  const ticks: { pos: number; label?: string }[] = [];
+  for (let mm = 0; mm <= length; mm += 5) {
+    ticks.push({ pos: mmToCanvasPx(mm, zoom), label: mm % 10 === 0 ? String(mm) : undefined });
+  }
+  if (orient === "h") {
+    return (
+      <div style={{ position: "absolute", top: -RULER_SIZE_PX, left: 0, width: pxLen, height: RULER_SIZE_PX, overflow: "hidden", pointerEvents: "none", userSelect: "none" }}>
+        <svg width={pxLen} height={RULER_SIZE_PX}>
+          <rect width={pxLen} height={RULER_SIZE_PX} fill="#f3f4f6" />
+          {ticks.map(({ pos, label }) => (
+            <g key={pos}>
+              <line x1={pos} y1={RULER_SIZE_PX} x2={pos} y2={label !== undefined ? RULER_SIZE_PX - 8 : RULER_SIZE_PX - 4} stroke="#9ca3af" strokeWidth={1} />
+              {label !== undefined && <text x={pos + 2} y={RULER_SIZE_PX - 9} fontSize={8} fill="#6b7280">{label}</text>}
+            </g>
+          ))}
+        </svg>
+      </div>
+    );
+  }
+  return (
+    <div style={{ position: "absolute", left: -RULER_SIZE_PX, top: 0, width: RULER_SIZE_PX, height: pxLen, overflow: "hidden", pointerEvents: "none", userSelect: "none" }}>
+      <svg width={RULER_SIZE_PX} height={pxLen}>
+        <rect width={RULER_SIZE_PX} height={pxLen} fill="#f3f4f6" />
+        {ticks.map(({ pos, label }) => (
+          <g key={pos}>
+            <line x1={RULER_SIZE_PX} y1={pos} x2={label !== undefined ? RULER_SIZE_PX - 8 : RULER_SIZE_PX - 4} y2={pos} stroke="#9ca3af" strokeWidth={1} />
+            {label !== undefined && (
+              <text
+                x={RULER_SIZE_PX - 9}
+                y={pos + 3}
+                fontSize={8}
+                fill="#6b7280"
+                textAnchor="middle"
+                transform={`rotate(-90, ${RULER_SIZE_PX - 9}, ${pos + 3})`}
+              >{label}</text>
+            )}
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+function canvasPxToMm(px: number, zoom: number): number {
+  return px / CANVAS_SCALE / (zoom / 100);
+}
+function ComponentPreview({ comp, zoom }: { comp: LabelComponent; zoom: number }) {
+  const style: React.CSSProperties = {
+    position: "absolute",
+    left: mmToCanvasPx(comp.x, zoom),
+    top: mmToCanvasPx(comp.y, zoom),
+    width: mmToCanvasPx(comp.width, zoom),
+    height: mmToCanvasPx(comp.height, zoom),
+    boxSizing: "border-box",
+    overflow: "hidden",
+  };
+  if (comp.type === "text") {
+    const c = comp as TextComponent;
+    return (
+      <div style={{
+        ...style,
+        fontSize: c.fontSize * (zoom / 100) * 1.33,
+        fontWeight: c.fontWeight ?? "normal",
+        fontFamily: c.fontFamily ?? "Arial, sans-serif",
+        textAlign: c.align ?? "left",
+        color: c.color ?? "#000",
+        lineHeight: 1.2,
+        whiteSpace: "pre-wrap",
+      }}>
+        {c.content || <span style={{ color: "#aaa", fontStyle: "italic" }}>Texto</span>}
+      </div>
+    );
+  }
+  if (comp.type === "dynamic_text") {
+    const c = comp as DynamicTextComponent;
+    const dataFields = LABEL_DATA_FIELDS;
+    const allFields = Object.values(dataFields).flat();
+    const fieldDef = allFields.find(f => f.key === c.field);
+    const displayValue = `${c.prefix ?? ""}${fieldDef?.example ?? c.field}${c.suffix ?? ""}`;
+    return (
+      <div style={{
+        ...style,
+        fontSize: c.fontSize * (zoom / 100) * 1.33,
+        fontWeight: c.fontWeight ?? "normal",
+        fontFamily: c.fontFamily ?? "Arial, sans-serif",
+        textAlign: c.align ?? "left",
+        color: c.color ?? "#000",
+        lineHeight: 1.2,
+        background: "rgba(59,130,246,0.05)",
+        border: "1px dashed rgba(59,130,246,0.3)",
+        display: "flex",
+        alignItems: "flex-start",
+        padding: "1px 2px",
+      }}>
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", width: "100%" }}>
+          {displayValue || <span style={{ color: "#aaa", fontStyle: "italic" }}>Campo dinâmico</span>}
+        </span>
+      </div>
+    );
+  }
+  if (comp.type === "barcode") {
+    return (
+      <div style={{
+        ...style,
+        background: "#f9f9f9",
+        border: "1px dashed #bbb",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 2,
+      }}>
+        <Barcode style={{ width: "60%", height: "60%", color: "#555" }} />
+        <span style={{ fontSize: Math.max(8, 10 * zoom / 100), color: "#888" }}>
+          {(comp as BarcodeComponent).field || "Código de Barras"}
+        </span>
+      </div>
+    );
+  }
+  if (comp.type === "qrcode") {
+    return (
+      <div style={{
+        ...style,
+        background: "#f9f9f9",
+        border: "1px dashed #bbb",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 2,
+      }}>
+        <QrCode style={{ width: "60%", height: "60%", color: "#555" }} />
+        <span style={{ fontSize: Math.max(8, 10 * zoom / 100), color: "#888" }}>QR Code</span>
+      </div>
+    );
+  }
+  if (comp.type === "line") {
+    const c = comp as LineComponent;
+    const isH = c.orientation === "horizontal";
+    return (
+      <div style={{
+        ...style,
+        display: "flex",
+        alignItems: isH ? "center" : "flex-start",
+        justifyContent: isH ? "flex-start" : "center",
+      }}>
+        <div style={{
+          width: isH ? "100%" : (c.strokeWidth ?? 1),
+          height: isH ? (c.strokeWidth ?? 1) : "100%",
+          background: c.color ?? "#000",
+        }} />
+      </div>
+    );
+  }
+  if (comp.type === "rectangle") {
+    const c = comp as RectangleComponent;
+    return (
+      <div style={{
+        ...style,
+        background: c.fillColor ?? "transparent",
+        border: `${c.strokeWidth ?? 1}px solid ${c.strokeColor ?? "#000"}`,
+        borderRadius: c.borderRadius ?? 0,
+      }} />
+    );
+  }
+  return null;
+}
+function PropertiesPanel({
+  comp,
+  context,
+  onChange,
+  onDelete,
+}: {
+  comp: LabelComponent;
+  context: LabelContext;
+  onChange: (updated: LabelComponent) => void;
+  onDelete: () => void;
+}) {
+  const fields = LABEL_DATA_FIELDS[context] ?? [];
+  const update = (patch: Record<string, unknown>) => {
+    onChange({ ...comp, ...patch } as LabelComponent);
+  };
+  return (
+    <div className="space-y-3 text-sm">
+      <div className="flex items-center justify-between">
+        <span className="font-medium text-xs text-muted-foreground uppercase tracking-wider">Propriedades</span>
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={onDelete} data-testid="btn-delete-component">
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label className="text-xs">X (mm)</Label>
+          <Input type="number" value={comp.x} onChange={e => update({ x: Number(e.target.value) })} className="h-7 text-xs" step={0.5} />
+        </div>
+        <div>
+          <Label className="text-xs">Y (mm)</Label>
+          <Input type="number" value={comp.y} onChange={e => update({ y: Number(e.target.value) })} className="h-7 text-xs" step={0.5} />
+        </div>
+        <div>
+          <Label className="text-xs">Largura (mm)</Label>
+          <Input type="number" value={comp.width} onChange={e => update({ width: Number(e.target.value) })} className="h-7 text-xs" step={0.5} min={1} />
+        </div>
+        <div>
+          <Label className="text-xs">Altura (mm)</Label>
+          <Input type="number" value={comp.height} onChange={e => update({ height: Number(e.target.value) })} className="h-7 text-xs" step={0.5} min={1} />
+        </div>
+      </div>
+      {(comp.type === "text" || comp.type === "dynamic_text") && (() => {
+        const c = comp as TextComponent | DynamicTextComponent;
+        return (
+          <>
+            {comp.type === "text" && (
+              <div>
+                <Label className="text-xs">Conteúdo</Label>
+                <Input value={(c as TextComponent).content} onChange={e => update({ content: e.target.value })} className="h-7 text-xs" />
+              </div>
+            )}
+            {comp.type === "dynamic_text" && (
+              <>
+                <div>
+                  <Label className="text-xs">Campo de dados</Label>
+                  <Select value={(c as DynamicTextComponent).field} onValueChange={v => update({ field: v })}>
+                    <SelectTrigger className="h-7 text-xs">
+                      <SelectValue placeholder="Selecionar campo..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {fields.map(f => (
+                        <SelectItem key={f.key} value={f.key} className="text-xs">
+                          {f.label}
+                          {f.example && <span className="text-muted-foreground ml-1">({f.example})</span>}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs">Prefixo</Label>
+                    <Input value={(c as DynamicTextComponent).prefix ?? ""} onChange={e => update({ prefix: e.target.value })} className="h-7 text-xs" placeholder="Ex: Pedido: " />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Sufixo</Label>
+                    <Input value={(c as DynamicTextComponent).suffix ?? ""} onChange={e => update({ suffix: e.target.value })} className="h-7 text-xs" placeholder="Ex: kg" />
+                  </div>
+                </div>
+              </>
+            )}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs">Tamanho (pt)</Label>
+                <Input type="number" value={c.fontSize} onChange={e => update({ fontSize: Number(e.target.value) })} className="h-7 text-xs" min={6} max={72} />
+              </div>
+              <div>
+                <Label className="text-xs">Peso</Label>
+                <Select value={c.fontWeight ?? "normal"} onValueChange={v => update({ fontWeight: v as "normal" | "bold" })}>
+                  <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="bold">Negrito</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs">Alinhamento</Label>
+                <Select value={c.align ?? "left"} onValueChange={v => update({ align: v as "left" | "center" | "right" })}>
+                  <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="left">Esquerda</SelectItem>
+                    <SelectItem value="center">Centro</SelectItem>
+                    <SelectItem value="right">Direita</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Cor</Label>
+                <Input type="color" value={c.color ?? "#000000"} onChange={e => update({ color: e.target.value })} className="h-7 p-0.5" />
+              </div>
+            </div>
+          </>
+        );
+      })()}
+      {(comp.type === "barcode" || comp.type === "qrcode") && (() => {
+        const c = comp as BarcodeComponent | QRCodeComponent;
+        return (
+          <>
+            <div>
+              <Label className="text-xs">Campo de dados</Label>
+              <Select value={c.field} onValueChange={v => update({ field: v })}>
+                <SelectTrigger className="h-7 text-xs">
+                  <SelectValue placeholder="Selecionar campo..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {fields.map(f => (
+                    <SelectItem key={f.key} value={f.key} className="text-xs">{f.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {comp.type === "barcode" && (
+              <div>
+                <Label className="text-xs">Formato</Label>
+                <Select value={(c as BarcodeComponent).format} onValueChange={v => update({ format: v as "CODE128" | "CODE39" | "EAN13" | "EAN8" | "ITF14" })}>
+                  <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {["CODE128", "CODE39", "EAN13", "EAN8", "ITF14"].map(f => (
+                      <SelectItem key={f} value={f} className="text-xs">{f}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </>
+        );
+      })()}
+      {comp.type === "line" && (() => {
+        const c = comp as LineComponent;
+        return (
+          <>
+            <div>
+              <Label className="text-xs">Orientação</Label>
+              <Select value={c.orientation} onValueChange={v => update({ orientation: v as "horizontal" | "vertical" })}>
+                <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="horizontal">Horizontal</SelectItem>
+                  <SelectItem value="vertical">Vertical</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs">Espessura (px)</Label>
+                <Input type="number" value={c.strokeWidth ?? 1} onChange={e => update({ strokeWidth: Number(e.target.value) })} className="h-7 text-xs" min={1} />
+              </div>
+              <div>
+                <Label className="text-xs">Cor</Label>
+                <Input type="color" value={c.color ?? "#000000"} onChange={e => update({ color: e.target.value })} className="h-7 p-0.5" />
+              </div>
+            </div>
+          </>
+        );
+      })()}
+      {comp.type === "rectangle" && (() => {
+        const c = comp as RectangleComponent;
+        return (
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label className="text-xs">Preenchimento</Label>
+              <Input type="color" value={c.fillColor ?? "#ffffff"} onChange={e => update({ fillColor: e.target.value })} className="h-7 p-0.5" />
+            </div>
+            <div>
+              <Label className="text-xs">Borda</Label>
+              <Input type="color" value={c.strokeColor ?? "#000000"} onChange={e => update({ strokeColor: e.target.value })} className="h-7 p-0.5" />
+            </div>
+            <div>
+              <Label className="text-xs">Espessura borda</Label>
+              <Input type="number" value={c.strokeWidth ?? 1} onChange={e => update({ strokeWidth: Number(e.target.value) })} className="h-7 text-xs" min={0} />
+            </div>
+            <div>
+              <Label className="text-xs">Raio (px)</Label>
+              <Input type="number" value={c.borderRadius ?? 0} onChange={e => update({ borderRadius: Number(e.target.value) })} className="h-7 text-xs" min={0} />
+            </div>
+          </div>
+        );
+      })()}
+    </div>
+  );
+}
+export default function LabelStudioPage() {
+  const { id } = useParams<{ id: string }>();
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const [layout, setLayout] = useState<LabelLayout>({ components: [] });
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(100);
+  const [isDirty, setIsDirty] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [dragging, setDragging] = useState<{ id: string; startX: number; startY: number; origX: number; origY: number } | null>(null);
+  const [resizing, setResizing] = useState<{
+    id: string; handle: string;
+    startX: number; startY: number;
+    origX: number; origY: number; origW: number; origH: number;
+  } | null>(null);
+  const [snapGrid, setSnapGrid] = useState(true);
+  const [showMargins, setShowMargins] = useState(true);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const { data: template, isLoading } = useQuery<LabelTemplate>({
+    queryKey: ["/api/labels/templates", id],
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/labels/templates/${id}`);
+      return res.json();
+    },
+    enabled: !!id,
+  });
+  useEffect(() => {
+    if (template) {
+      setLayout(template.layoutJson as LabelLayout ?? { components: [] });
+      setIsDirty(false);
+    }
+  }, [template]);
+  useEffect(() => {
+    if (!showPreview || !template) { setPreviewHtml(null); return; }
+    let cancelled = false;
+    setPreviewLoading(true);
+    const ctx = template.context as LabelContext;
+    const sampleData: Record<string, string> = Object.fromEntries(
+      (LABEL_DATA_FIELDS[ctx] ?? []).map(f => [f.key, f.label])
+    );
+    const previewTemplate = { ...template, layoutJson: layout };
+    renderLabelToHtml(previewTemplate, sampleData).then(html => {
+      if (!cancelled) { setPreviewHtml(html); setPreviewLoading(false); }
+    }).catch(() => { if (!cancelled) setPreviewLoading(false); });
+    return () => { cancelled = true; };
+  }, [showPreview, layout, template]);
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("PUT", `/api/labels/templates/${id}`, { layoutJson: layout });
+      return res.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/labels/templates", id] });
+      qc.invalidateQueries({ queryKey: ["/api/labels/templates"] });
+      setIsDirty(false);
+      toast({ title: "Modelo salvo com sucesso" });
+    },
+    onError: () => toast({ title: "Erro ao salvar", variant: "destructive" }),
+  });
+  const updateComponent = useCallback((updated: LabelComponent) => {
+    setLayout(prev => ({
+      components: prev.components.map(c => c.id === updated.id ? updated : c),
+    }));
+    setIsDirty(true);
+  }, []);
+  const deleteComponent = useCallback((compId: string) => {
+    setLayout(prev => ({ components: prev.components.filter(c => c.id !== compId) }));
+    setSelectedId(null);
+    setIsDirty(true);
+  }, []);
+  const addComponent = useCallback((type: LabelComponent["type"]) => {
+    const base = {
+      id: crypto.randomUUID(),
+      x: 5, y: 5,
+      zIndex: layout.components.length,
+    };
+    let newComp: LabelComponent;
+    switch (type) {
+      case "text":
+        newComp = { ...base, type: "text", width: 40, height: 8, content: "Texto", fontSize: 10, fontWeight: "normal", align: "left", color: "#000" } as TextComponent;
+        break;
+      case "dynamic_text":
+        newComp = { ...base, type: "dynamic_text", width: 50, height: 8, field: LABEL_DATA_FIELDS[(template?.context as LabelContext) ?? "volume_label"][0]?.key ?? "order", fontSize: 10, fontWeight: "normal", align: "left", color: "#000" } as DynamicTextComponent;
+        break;
+      case "barcode":
+        newComp = { ...base, type: "barcode", width: 50, height: 15, field: LABEL_DATA_FIELDS[(template?.context as LabelContext) ?? "volume_label"][0]?.key ?? "order", format: "CODE128", showValue: true } as BarcodeComponent;
+        break;
+      case "qrcode":
+        newComp = { ...base, type: "qrcode", width: 15, height: 15, field: LABEL_DATA_FIELDS[(template?.context as LabelContext) ?? "volume_label"][0]?.key ?? "order", errorLevel: "M" } as QRCodeComponent;
+        break;
+      case "line":
+        newComp = { ...base, type: "line", width: 40, height: 1, orientation: "horizontal", strokeWidth: 1, color: "#000" } as LineComponent;
+        break;
+      case "rectangle":
+        newComp = { ...base, type: "rectangle", width: 30, height: 20, fillColor: "transparent", strokeColor: "#000", strokeWidth: 1, borderRadius: 0 } as RectangleComponent;
+        break;
+      default:
+        return;
+    }
+    setLayout(prev => ({ components: [...prev.components, newComp] }));
+    setSelectedId(newComp.id);
+    setIsDirty(true);
+  }, [layout.components.length, template?.context]);
+  const moveLayer = useCallback((id: string, dir: "up" | "down") => {
+    setLayout(prev => {
+      const idx = prev.components.findIndex(c => c.id === id);
+      if (idx < 0) return prev;
+      const newComps = [...prev.components];
+      if (dir === "up" && idx < newComps.length - 1) {
+        [newComps[idx], newComps[idx + 1]] = [newComps[idx + 1], newComps[idx]];
+      } else if (dir === "down" && idx > 0) {
+        [newComps[idx], newComps[idx - 1]] = [newComps[idx - 1], newComps[idx]];
+      }
+      return { components: newComps.map((c, i) => ({ ...c, zIndex: i })) };
+    });
+    setIsDirty(true);
+  }, []);
+  const handleCanvasMouseDown = useCallback((e: React.MouseEvent, compId: string) => {
+    e.stopPropagation();
+    setSelectedId(compId);
+    const comp = layout.components.find(c => c.id === compId);
+    if (!comp) return;
+    setDragging({
+      id: compId,
+      startX: e.clientX,
+      startY: e.clientY,
+      origX: comp.x,
+      origY: comp.y,
+    });
+  }, [layout.components]);
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (resizing) {
+      const { id, handle, startX, startY, origX, origY, origW, origH } = resizing;
+      const comp = layout.components.find(c => c.id === id);
+      if (!comp || !template) return;
+      const dxMm = canvasPxToMm(e.clientX - startX, zoom);
+      const dyMm = canvasPxToMm(e.clientY - startY, zoom);
+      let nx = origX, ny = origY, nw = origW, nh = origH;
+      if (handle.includes("e")) nw = Math.max(1, origW + dxMm);
+      if (handle.includes("s")) nh = Math.max(1, origH + dyMm);
+      if (handle.includes("w")) { nx = origX + dxMm; nw = Math.max(1, origW - dxMm); }
+      if (handle.includes("n")) { ny = origY + dyMm; nh = Math.max(1, origH - dyMm); }
+      nx = Math.max(0, Math.min(template.widthMm - nw, nx));
+      ny = Math.max(0, Math.min(template.heightMm - nh, ny));
+      updateComponent({
+        ...comp,
+        x: Math.round(nx * 10) / 10,
+        y: Math.round(ny * 10) / 10,
+        width: Math.round(nw * 10) / 10,
+        height: Math.round(nh * 10) / 10,
+      });
+      return;
+    }
+    if (!dragging) return;
+    const dx = canvasPxToMm(e.clientX - dragging.startX, zoom);
+    const dy = canvasPxToMm(e.clientY - dragging.startY, zoom);
+    const comp = layout.components.find(c => c.id === dragging.id);
+    if (!comp || !template) return;
+    const rawX = Math.max(0, Math.min(template.widthMm - comp.width, dragging.origX + dx));
+    const rawY = Math.max(0, Math.min(template.heightMm - comp.height, dragging.origY + dy));
+    const newX = snapGrid ? snapMm(rawX) : Math.round(rawX * 10) / 10;
+    const newY = snapGrid ? snapMm(rawY) : Math.round(rawY * 10) / 10;
+    updateComponent({ ...comp, x: newX, y: newY });
+  }, [dragging, resizing, layout.components, zoom, template, updateComponent]);
+  const handleMouseUp = useCallback(() => {
+    setDragging(null);
+    setResizing(null);
+  }, []);
+  const handleResizeStart = useCallback((e: React.MouseEvent, compId: string, handle: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const comp = layout.components.find(c => c.id === compId);
+    if (!comp) return;
+    setResizing({
+      id: compId, handle,
+      startX: e.clientX, startY: e.clientY,
+      origX: comp.x, origY: comp.y,
+      origW: comp.width, origH: comp.height,
+    });
+  }, [layout.components]);
+  const selectedComp = layout.components.find(c => c.id === selectedId) ?? null;
+  if (isLoading || !template) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground text-sm">Carregando studio...</p>
+      </div>
+    );
+  }
+  const context = template.context as LabelContext;
+  const fields = LABEL_DATA_FIELDS[context] ?? [];
+  const canvasW = mmToCanvasPx(template.widthMm, zoom);
+  const canvasH = mmToCanvasPx(template.heightMm, zoom);
+  const TOOLBAR_ITEMS: { type: LabelComponent["type"]; label: string; Icon: LucideIcon }[] = [
+    { type: "text", label: "Texto", Icon: Type },
+    { type: "dynamic_text", label: "Campo", Icon: AlignLeft },
+    { type: "barcode", label: "Código de Barras", Icon: Barcode },
+    { type: "qrcode", label: "QR Code", Icon: QrCode },
+    { type: "line", label: "Linha", Icon: Minus },
+    { type: "rectangle", label: "Caixa", Icon: Square },
+  ];
+  return (
+    <div className="flex flex-col h-screen bg-background overflow-hidden">
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-card shrink-0">
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate("/admin/label-templates")}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-sm font-semibold text-foreground truncate">{template.name}</h1>
+          <p className="text-xs text-muted-foreground">{LABEL_CONTEXT_LABELS[context]} · {template.widthMm}×{template.heightMm}mm</p>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom(z => Math.max(50, z - 10))}>
+            <ZoomOut className="h-3.5 w-3.5" />
+          </Button>
+          <span className="text-xs text-muted-foreground w-10 text-center">{zoom}%</span>
+          <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom(z => Math.min(200, z + 10))}>
+            <ZoomIn className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+        <Button
+          variant={snapGrid ? "secondary" : "outline"}
+          size="sm"
+          className="h-7 w-7 p-0"
+          onClick={() => setSnapGrid(v => !v)}
+          title={snapGrid ? "Desativar snap" : "Ativar snap ao grid (0.5mm)"}
+          data-testid="btn-toggle-snap"
+        >
+          <Grid className="h-3.5 w-3.5" />
+        </Button>
+        <Button
+          variant={showMargins ? "secondary" : "outline"}
+          size="sm"
+          className="h-7 w-7 p-0"
+          onClick={() => setShowMargins(v => !v)}
+          title={showMargins ? "Esconder margens de segurança" : "Mostrar margens de segurança (2mm)"}
+          data-testid="btn-toggle-margins"
+        >
+          <MousePointer className="h-3.5 w-3.5" />
+        </Button>
+        <Button
+          variant={showPreview ? "secondary" : "outline"}
+          size="sm"
+          className="h-7"
+          onClick={() => setShowPreview(v => !v)}
+          data-testid="btn-toggle-preview"
+        >
+          {showPreview ? <><EyeOff className="h-3.5 w-3.5 mr-1.5" />Fechar</> : <><Eye className="h-3.5 w-3.5 mr-1.5" />Preview</>}
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => saveMutation.mutate()}
+          disabled={!isDirty || saveMutation.isPending}
+          data-testid="btn-save-studio"
+          className={cn(!isDirty && "opacity-50")}
+        >
+          <Save className="h-4 w-4 mr-1.5" />
+          {saveMutation.isPending ? "Salvando..." : isDirty ? "Salvar*" : "Salvo"}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7"
+          onClick={() => { window.open(`/api/labels/templates/${id}/export`, "_blank"); }}
+          data-testid="btn-export-studio"
+          title="Exportar template como JSON"
+        >
+          Exportar
+        </Button>
+      </div>
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        <div className="w-40 border-r border-border bg-card flex flex-col shrink-0 overflow-y-auto">
+          <div className="px-2 py-2 border-b border-border">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Componentes</p>
+          </div>
+          <div className="p-1.5 space-y-1">
+            {TOOLBAR_ITEMS.map(({ type, label, Icon }) => (
+              <button
+                key={type}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs text-foreground hover:bg-muted transition-colors text-left"
+                onClick={() => addComponent(type)}
+                data-testid={`btn-add-${type}`}
+              >
+                <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="px-2 py-2 border-b border-t border-border mt-2">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Camadas</p>
+          </div>
+          <div className="flex-1 overflow-y-auto p-1.5 space-y-1">
+            {[...layout.components].reverse().map(c => (
+              <div
+                key={c.id}
+                className={cn(
+                  "flex items-center gap-1 px-2 py-1 rounded text-xs cursor-pointer transition-colors",
+                  selectedId === c.id ? "bg-primary/15 text-primary font-medium" : "hover:bg-muted text-foreground"
+                )}
+                onClick={() => setSelectedId(c.id)}
+                data-testid={`layer-${c.id}`}
+              >
+                <span className="flex-1 truncate">{
+                  c.type === "text" ? (c as TextComponent).content || "Texto" :
+                  c.type === "dynamic_text" ? `[${(c as DynamicTextComponent).field}]` :
+                  c.type === "barcode" ? "Barcode" :
+                  c.type === "qrcode" ? "QR Code" :
+                  c.type === "line" ? "Linha" : "Caixa"
+                }</span>
+                <button onClick={e => { e.stopPropagation(); moveLayer(c.id, "up"); }} className="opacity-50 hover:opacity-100">
+                  <ChevronUp className="h-3 w-3" />
+                </button>
+                <button onClick={e => { e.stopPropagation(); moveLayer(c.id, "down"); }} className="opacity-50 hover:opacity-100">
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+            {layout.components.length === 0 && (
+              <p className="text-xs text-muted-foreground text-center py-4">Nenhum componente</p>
+            )}
+          </div>
+        </div>
+        <div
+          className="flex-1 overflow-auto bg-muted/30 flex items-center justify-center p-8"
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        >
+          <div style={{ position: "relative", marginTop: RULER_SIZE_PX, marginLeft: RULER_SIZE_PX, flexShrink: 0 }}>
+          <div
+            ref={canvasRef}
+            style={{
+              position: "relative",
+              width: canvasW,
+              height: canvasH,
+              background: "white",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.15)",
+              cursor: dragging ? "grabbing" : "default",
+              flexShrink: 0,
+              outline: "1px solid #ddd",
+            }}
+            onClick={() => setSelectedId(null)}
+            data-testid="label-canvas"
+          >
+            <Ruler length={template.widthMm} zoom={zoom} orient="h" />
+            <Ruler length={template.heightMm} zoom={zoom} orient="v" />
+            {showMargins && (
+              <div style={{
+                position: "absolute",
+                top: mmToCanvasPx(SAFETY_MARGIN_MM, zoom),
+                left: mmToCanvasPx(SAFETY_MARGIN_MM, zoom),
+                width: mmToCanvasPx(template.widthMm - SAFETY_MARGIN_MM * 2, zoom),
+                height: mmToCanvasPx(template.heightMm - SAFETY_MARGIN_MM * 2, zoom),
+                border: "1px dashed rgba(239, 68, 68, 0.4)",
+                pointerEvents: "none",
+                zIndex: 999,
+              }} />
+            )}
+            {layout.components.map(comp => {
+              const isSelected = selectedId === comp.id;
+              const HANDLES = [
+                { id: "nw", style: { top: -4, left: -4, cursor: "nw-resize" } },
+                { id: "n",  style: { top: -4, left: "calc(50% - 4px)", cursor: "n-resize" } },
+                { id: "ne", style: { top: -4, right: -4, cursor: "ne-resize" } },
+                { id: "e",  style: { top: "calc(50% - 4px)", right: -4, cursor: "e-resize" } },
+                { id: "se", style: { bottom: -4, right: -4, cursor: "se-resize" } },
+                { id: "s",  style: { bottom: -4, left: "calc(50% - 4px)", cursor: "s-resize" } },
+                { id: "sw", style: { bottom: -4, left: -4, cursor: "sw-resize" } },
+                { id: "w",  style: { top: "calc(50% - 4px)", left: -4, cursor: "w-resize" } },
+              ];
+              return (
+                <div
+                  key={comp.id}
+                  style={{
+                    position: "absolute",
+                    left: mmToCanvasPx(comp.x, zoom),
+                    top: mmToCanvasPx(comp.y, zoom),
+                    width: mmToCanvasPx(comp.width, zoom),
+                    height: mmToCanvasPx(comp.height, zoom),
+                    cursor: dragging ? "grabbing" : "grab",
+                    outline: isSelected ? "2px solid #3b82f6" : "1px dashed transparent",
+                    zIndex: comp.zIndex ?? 0,
+                    boxSizing: "border-box",
+                  }}
+                  onMouseDown={e => handleCanvasMouseDown(e, comp.id)}
+                  data-testid={`component-${comp.id}`}
+                >
+                  <ComponentPreview comp={comp} zoom={zoom} />
+                  {isSelected && HANDLES.map(h => (
+                    <div
+                      key={h.id}
+                      style={{
+                        position: "absolute",
+                        width: 8, height: 8,
+                        background: "white",
+                        border: "2px solid #3b82f6",
+                        borderRadius: 1,
+                        ...h.style,
+                      }}
+                      onMouseDown={e => handleResizeStart(e, comp.id, h.id)}
+                    />
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+          </div>
+        </div>
+        {showPreview && (
+          <div className="w-64 border-l border-border bg-card flex flex-col shrink-0 overflow-hidden" data-testid="preview-panel">
+            <div className="px-2 py-2 border-b border-border flex items-center gap-1.5">
+              <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Preview Real</p>
+            </div>
+            <div className="flex-1 overflow-auto p-2 flex items-start justify-center">
+              {previewLoading ? (
+                <p className="text-xs text-muted-foreground pt-4">Renderizando...</p>
+              ) : previewHtml ? (
+                <iframe
+                  srcDoc={previewHtml}
+                  style={{ border: "1px solid #ccc", background: "white", width: "100%", minHeight: 200 }}
+                  title="Label Preview"
+                  data-testid="preview-iframe"
+                />
+              ) : (
+                <p className="text-xs text-muted-foreground pt-4">Nenhum componente</p>
+              )}
+            </div>
+          </div>
+        )}
+        <div className="w-56 border-l border-border bg-card overflow-y-auto shrink-0">
+          <div className="p-2 border-b border-border">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              {selectedComp ? "Propriedades" : "Campos Disponíveis"}
+            </p>
+          </div>
+          {selectedComp ? (
+            <div className="p-2">
+              <PropertiesPanel
+                comp={selectedComp}
+                context={context}
+                onChange={updateComponent}
+                onDelete={() => deleteComponent(selectedComp.id)}
+              />
+            </div>
+          ) : (
+            <div className="p-2 space-y-3">
+              <p className="text-xs text-muted-foreground">
+                Arraste um componente para o canvas, depois selecione-o para editar suas propriedades.
+              </p>
+              <div>
+                <p className="text-xs font-medium text-foreground mb-1">Campos dinâmicos disponíveis:</p>
+                {Array.from(new Set(fields.map(f => f.category))).map(cat => (
+                  <div key={cat} className="mb-2">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">{cat}</p>
+                    {fields.filter(f => f.category === cat).map(f => (
+                      <div key={f.key} className="flex items-start gap-1 py-0.5">
+                        <code className="text-[10px] bg-muted px-1 rounded text-foreground shrink-0">{f.key}</code>
+                        <span className="text-[10px] text-muted-foreground">{f.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+client/src/pages/admin/label-templates.tsx
+import { useState, useRef } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link, useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import {
+  ArrowLeft, Plus, MoreVertical, Pencil, Copy, Trash2,
+  ToggleLeft, ToggleRight, Tag, Layers, Upload,
+} from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import {
+  type LabelTemplate, type LabelContext, type LabelLayout, labelContextEnum, LABEL_CONTEXT_LABELS,
+} from "@shared/schema";
+function ContextBadge({ context }: { context: LabelContext }) {
+  const colors: Record<LabelContext, string> = {
+    volume_label:  "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+    pallet_label:  "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+    product_label: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+    order_label:   "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+  };
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${colors[context]}`}>
+      {LABEL_CONTEXT_LABELS[context]}
+    </span>
+  );
+}
+export default function LabelTemplatesPage() {
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const [filterContext, setFilterContext] = useState<LabelContext | "all">("all");
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState<LabelTemplate | null>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState<LabelTemplate | null>(null);
+  const [newName, setNewName] = useState("");
+  const [newContext, setNewContext] = useState<LabelContext>("volume_label");
+  const [newWidth, setNewWidth] = useState(100);
+  const [newHeight, setNewHeight] = useState(70);
+  const [dupName, setDupName] = useState("");
+  const { data: templates = [], isLoading } = useQuery<LabelTemplate[]>({
+    queryKey: ["/api/labels/templates"],
+  });
+  const createMutation = useMutation({
+    mutationFn: async (data: { name: string; context: LabelContext; widthMm: number; heightMm: number }) => {
+      const res = await apiRequest("POST", "/api/labels/templates", {
+        ...data,
+        active: true,
+        layoutJson: { components: [] },
+      });
+      return res.json() as Promise<LabelTemplate>;
+    },
+    onSuccess: (created) => {
+      qc.invalidateQueries({ queryKey: ["/api/labels/templates"] });
+      setShowCreateDialog(false);
+      toast({ title: "Template criado", description: created.name });
+      navigate(`/admin/label-studio/${created.id}`);
+    },
+    onError: () => toast({ title: "Erro ao criar template", variant: "destructive" }),
+  });
+  const importMutation = useMutation({
+    mutationFn: async (payload: unknown) => {
+      const res = await apiRequest("POST", "/api/labels/templates/import", payload);
+      return res.json() as Promise<LabelTemplate>;
+    },
+    onSuccess: (created) => {
+      qc.invalidateQueries({ queryKey: ["/api/labels/templates"] });
+      toast({ title: "Template importado", description: created.name });
+      navigate(`/admin/label-studio/${created.id}`);
+    },
+    onError: () => toast({ title: "Erro ao importar template", variant: "destructive" }),
+  });
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const json = JSON.parse(ev.target?.result as string);
+        importMutation.mutate(json);
+      } catch {
+        toast({ title: "Arquivo inválido", description: "O arquivo não é um JSON válido.", variant: "destructive" });
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+  const duplicateMutation = useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+      const res = await apiRequest("POST", `/api/labels/templates/${id}/duplicate`, { name });
+      return res.json() as Promise<LabelTemplate>;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/labels/templates"] });
+      setShowDuplicateDialog(null);
+      toast({ title: "Template duplicado com sucesso" });
+    },
+    onError: () => toast({ title: "Erro ao duplicar", variant: "destructive" }),
+  });
+  const toggleMutation = useMutation({
+    mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
+      const res = await apiRequest("PATCH", `/api/labels/templates/${id}/active`, { active });
+      return res.json();
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/labels/templates"] }),
+    onError: () => toast({ title: "Erro ao atualizar status", variant: "destructive" }),
+  });
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/labels/templates/${id}`);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/labels/templates"] });
+      setShowDeleteDialog(null);
+      toast({ title: "Template excluído" });
+    },
+    onError: () => toast({ title: "Erro ao excluir", variant: "destructive" }),
+  });
+  const filtered = templates.filter(t =>
+    filterContext === "all" || t.context === filterContext
+  );
+  return (
+    <div className="min-h-[100dvh] bg-background">
+      <div className="flex items-center gap-3 px-3 py-2.5 border-b border-border bg-card shrink-0">
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate("/")}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-base font-semibold text-foreground leading-tight flex items-center gap-2">
+            <Tag className="h-4 w-4 text-primary" />
+            Etiquetas
+          </h1>
+          <p className="text-xs text-muted-foreground">Modelos de etiquetas para impressão</p>
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => importInputRef.current?.click()}
+          disabled={importMutation.isPending}
+          data-testid="btn-import-template"
+        >
+          <Upload className="h-4 w-4 mr-1.5" />
+          {importMutation.isPending ? "Importando..." : "Importar"}
+        </Button>
+        <input
+          ref={importInputRef}
+          type="file"
+          accept=".json,application/json"
+          className="hidden"
+          onChange={handleImportFile}
+          data-testid="input-import-file"
+        />
+        <Button size="sm" onClick={() => setShowCreateDialog(true)} data-testid="btn-create-template">
+          <Plus className="h-4 w-4 mr-1.5" />
+          Novo Modelo
+        </Button>
+      </div>
+      <main className="max-w-4xl mx-auto px-4 py-4 space-y-4">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={filterContext === "all" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setFilterContext("all")}
+            data-testid="filter-all"
+          >
+            Todos
+          </Button>
+          {labelContextEnum.map(ctx => (
+            <Button
+              key={ctx}
+              variant={filterContext === ctx ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilterContext(ctx)}
+              data-testid={`filter-${ctx}`}
+            >
+              {LABEL_CONTEXT_LABELS[ctx]}
+            </Button>
+          ))}
+        </div>
+        {isLoading ? (
+          <div className="text-center text-muted-foreground py-12 text-sm">Carregando modelos...</div>
+        ) : filtered.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 flex flex-col items-center gap-3 text-muted-foreground">
+              <Layers className="h-10 w-10 opacity-30" />
+              <p className="text-sm text-center">Nenhum modelo encontrado.<br />Clique em <strong>Novo Modelo</strong> para criar.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {filtered.map(t => (
+              <Card
+                key={t.id}
+                className={`transition-all ${!t.active ? "opacity-60" : ""}`}
+                data-testid={`card-template-${t.id}`}
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-sm font-semibold truncate">{t.name}</CardTitle>
+                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                        <ContextBadge context={t.context as LabelContext} />
+                        {t.companyId === null && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                            Sistema
+                          </span>
+                        )}
+                        {!t.active && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground">
+                            Inativo
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" data-testid={`menu-template-${t.id}`}>
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {t.companyId === null ? (
+                          <>
+                            <DropdownMenuItem asChild>
+                              <Link href={`/admin/label-studio/${t.id}`}>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Visualizar (somente leitura)
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              setShowDuplicateDialog(t);
+                              setDupName(`${t.name} (cópia)`);
+                            }}>
+                              <Copy className="h-4 w-4 mr-2" />
+                              Duplicar para editar
+                            </DropdownMenuItem>
+                          </>
+                        ) : (
+                          <>
+                            <DropdownMenuItem asChild>
+                              <Link href={`/admin/label-studio/${t.id}`}>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Editar no Studio
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              setShowDuplicateDialog(t);
+                              setDupName(`${t.name} (cópia)`);
+                            }}>
+                              <Copy className="h-4 w-4 mr-2" />
+                              Duplicar
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => toggleMutation.mutate({ id: t.id, active: !t.active })}>
+                              {t.active ? (
+                                <><ToggleLeft className="h-4 w-4 mr-2" />Desativar</>
+                              ) : (
+                                <><ToggleRight className="h-4 w-4 mr-2" />Ativar</>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => setShowDeleteDialog(t)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <p className="text-xs text-muted-foreground">
+                    {t.widthMm}mm × {t.heightMm}mm · {t.dpi} DPI
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {(t.layoutJson as LabelLayout)?.components?.length ?? 0} componente(s)
+                  </p>
+                  <Link href={`/admin/label-studio/${t.id}`}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full mt-3 h-8"
+                      data-testid={`btn-edit-template-${t.id}`}
+                    >
+                      <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                      Abrir Studio
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </main>
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Novo Modelo de Etiqueta</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Nome do modelo</Label>
+              <Input
+                placeholder="Ex: Etiqueta de Volume Padrão"
+                value={newName}
+                onChange={e => setNewName(e.target.value)}
+                data-testid="input-template-name"
+              />
+            </div>
+            <div>
+              <Label>Tipo de etiqueta</Label>
+              <Select value={newContext} onValueChange={v => setNewContext(v as LabelContext)}>
+                <SelectTrigger data-testid="select-template-context">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {labelContextEnum.map(ctx => (
+                    <SelectItem key={ctx} value={ctx}>{LABEL_CONTEXT_LABELS[ctx]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label>Largura (mm)</Label>
+                <Input
+                  type="number"
+                  value={newWidth}
+                  onChange={e => setNewWidth(Number(e.target.value))}
+                  data-testid="input-template-width"
+                />
+              </div>
+              <div>
+                <Label>Altura (mm)</Label>
+                <Input
+                  type="number"
+                  value={newHeight}
+                  onChange={e => setNewHeight(Number(e.target.value))}
+                  data-testid="input-template-height"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancelar</Button>
+            <Button
+              onClick={() => createMutation.mutate({ name: newName.trim(), context: newContext, widthMm: newWidth, heightMm: newHeight })}
+              disabled={!newName.trim() || createMutation.isPending}
+              data-testid="btn-confirm-create"
+            >
+              {createMutation.isPending ? "Criando..." : "Criar e Abrir Studio"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!showDuplicateDialog} onOpenChange={() => setShowDuplicateDialog(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Duplicar Modelo</DialogTitle>
+          </DialogHeader>
+          <div>
+            <Label>Nome da cópia</Label>
+            <Input value={dupName} onChange={e => setDupName(e.target.value)} data-testid="input-dup-name" />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDuplicateDialog(null)}>Cancelar</Button>
+            <Button
+              onClick={() => {
+                if (showDuplicateDialog) {
+                  duplicateMutation.mutate({ id: showDuplicateDialog.id, name: dupName.trim() });
+                }
+              }}
+              disabled={!dupName.trim() || duplicateMutation.isPending}
+              data-testid="btn-confirm-duplicate"
+            >
+              {duplicateMutation.isPending ? "Duplicando..." : "Duplicar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!showDeleteDialog} onOpenChange={() => setShowDeleteDialog(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Excluir Modelo</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Tem certeza que deseja excluir <strong>{showDeleteDialog?.name}</strong>?
+            Esta ação não pode ser desfeita.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(null)}>Cancelar</Button>
+            <Button
+              variant="destructive"
+              onClick={() => showDeleteDialog && deleteMutation.mutate(showDeleteDialog.id)}
+              disabled={deleteMutation.isPending}
+              data-testid="btn-confirm-delete"
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+client/src/pages/home.tsx
+-1
++1
+import {
+  Package, ClipboardCheck, Store, LogOut, ClipboardList,
+  Warehouse, PackagePlus, ArrowRightLeft, MapPin, BarChart3,
+  Truck, AlertTriangle, FileText, Users, Settings, ShieldCheck,
+  Printer, Cog, BoxesIcon, ScrollText, Search, Trash2, TrendingUp, Barcode, PackageMinus, Layers,
+  Printer, Cog, BoxesIcon, ScrollText, Search, Trash2, TrendingUp, Barcode, PackageMinus, Layers, Tag,
+  PanelLeftClose, PanelLeftOpen,
+  Menu, X, Sun, Moon,
+} from "lucide-react";
+-0
++1
+const ALL_GROUPS: NavGroup[] = [
+      { icon: ShieldCheck,   label: "Permissões",       description: "Definir acessos",               href: "/admin/permissoes",               color: "text-amber-400",  bg: "bg-amber-500/15" },
+      { icon: Barcode,       label: "Gestão Barcodes",  description: "Gerenciar códigos de barras",   href: "/supervisor/codigos-barras",      color: "text-rose-400",   bg: "bg-rose-500/15" },
+      { icon: Printer,       label: "Impressoras",      description: "Configurar impressoras",        href: "/supervisor/print-settings",      color: "text-indigo-400", bg: "bg-indigo-500/15" },
+      { icon: Tag,           label: "Etiquetas",        description: "Modelos de etiquetas",          href: "/admin/label-templates",          color: "text-pink-400",   bg: "bg-pink-500/15" },
+      { icon: Layers,        label: "Modo Separação",   description: "Configurar modo de separação",  href: "/supervisor/separation-settings", color: "text-purple-400", bg: "bg-purple-500/15" },
+      { icon: Trash2,        label: "Limpeza de Dados", description: "Resetar dados de teste",        href: "/admin/limpeza",                  color: "text-red-400",    bg: "bg-red-500/15" },
+    ],
+-0
++2
+const ROLE_MODULE_ACCESS: Record<string, string[]> = {
+    "/supervisor/users","/supervisor/mapping-studio","/supervisor/codigos-barras",
+    "/supervisor/reports","/supervisor/audit","/admin/permissoes",
+    "/admin/limpeza","/supervisor/print-settings","/admin/kpi-operadores","/supervisor/separation-settings",
+    "/admin/label-templates",
+  ],
+  supervisor: [
+    "/wms/recebimento","/wms/checkin","/wms/transferencia","/wms/retirada","/wms/adicao","/wms/contagem","/wms/enderecos","/wms/produtos","/wms/codigos-barras",
+    "/fila-pedidos","/supervisor/orders","/supervisor/routes","/supervisor/route-orders","/supervisor/exceptions",
+    "/supervisor/users","/supervisor/reports","/supervisor/audit",
+    "/supervisor/codigos-barras","/admin/kpi-operadores","/supervisor/separation-settings",
+    "/admin/label-templates",
+  ],
+  separacao:      ["/separacao","/wms/codigos-barras"],
+  conferencia:    ["/conferencia","/wms/codigos-barras"],
+-2
++2
+const ROLE_MODULE_ACCESS: Record<string, string[]> = {
+function buildAllowedHrefs(role: string, customModules?: string[] | null): string[] {
+  const base = Array.isArray(customModules) ? customModules : (ROLE_MODULE_ACCESS[role] ?? []);
+  if (role === "administrador") return [...new Set([...base, "/admin/permissoes","/admin/limpeza","/supervisor/print-settings","/admin/kpi-operadores","/supervisor/separation-settings"])];
+  if (role === "supervisor")    return [...new Set([...base, "/admin/kpi-operadores","/supervisor/separation-settings"])];
+  if (role === "administrador") return [...new Set([...base, "/admin/permissoes","/admin/limpeza","/supervisor/print-settings","/admin/kpi-operadores","/supervisor/separation-settings","/admin/label-templates"])];
+  if (role === "supervisor")    return [...new Set([...base, "/admin/kpi-operadores","/supervisor/separation-settings","/admin/label-templates"])];
+  return base;
+}
+client/src/pages/print/pallet-label.tsx
+-0
++1
+import { useEffect, useRef } from "react";
+import { useSearch } from "wouter";
+import { QRCodeSVG } from "qrcode.react";
+import { useLabelDefault } from "@/hooks/use-label-default";
+/**
+ * Página de etiqueta de PALLET — aberta em nova aba, imprime automaticamente.
+-0
++12
+export default function PalletLabelPage() {
+  const barcodeRef = useRef<SVGSVGElement | null>(null);
+  const labelData = { code, status, address, items, operator, date, company, nf, lot };
+  const { loading: tplLoading, templateHtml } = useLabelDefault("pallet_label", labelData);
+  useEffect(() => {
+    if (!tplLoading && templateHtml) {
+      document.open();
+      document.write(templateHtml);
+      document.close();
+      setTimeout(() => window.print(), 800);
+    }
+  }, [tplLoading, templateHtml]);
+  useEffect(() => {
+    if (barcodeRef.current && code !== "—") {
+      import("jsbarcode").then(({ default: JsBarcode }) => {
+-0
++3
+export default function PalletLabelPage() {
+  const statusLabel = STATUS_LABELS[status] ?? status.toUpperCase();
+  const statusColor = status === "alocado" ? "#1a7a3a" : status === "cancelado" ? "#c0392b" : "#1a3a5c";
+  if (tplLoading) return null;
+  if (templateHtml) return null;
+  return (
+    <>
+      <style>{`
+client/src/pages/print/volume-label.tsx
+-0
++2
+import { useEffect } from "react";
+import { useSearch } from "wouter";
+import { QRCodeSVG } from "qrcode.react";
+import { useLabelDefault } from "@/hooks/use-label-default";
+/**
+ * Etiqueta de VOLUME — 100mm × 70mm landscape
+-0
++20
+export default function VolumeLabelPage() {
+  const cityLine = [city, state].filter(Boolean).join(" - ");
+  const labelData = {
+    order, customer, address, neighborhood, city, state,
+    vol, totalVol, route: routeDisplay, operator, sender, date, time,
+    sacola: String(sacola), caixa: String(caixa), saco: String(saco), avulso: String(avulso),
+  };
+  const { loading: tplLoading, templateHtml } = useLabelDefault("volume_label", labelData);
+  useEffect(() => {
+    if (!tplLoading && templateHtml) {
+      document.open();
+      document.write(templateHtml);
+      document.close();
+      setTimeout(() => window.print(), 800);
+    }
+  }, [tplLoading, templateHtml]);
+  if (tplLoading) return null;
+  if (templateHtml) return null;
+  const countCells = [
+    { label: "ROTA",   val: routeDisplay || "—" },
+    { label: "SACOLA", val: sacola },
+client/src/pages/supervisor/print-settings.tsx
+-1
++2
+import {
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, Printer, RotateCcw, Save, CheckCircle2, User, Cpu } from "lucide-react";
+import { ArrowLeft, Printer, RotateCcw, Save, CheckCircle2, User, Cpu, Tag } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { apiRequest } from "@/lib/queryClient";
+import { invalidatePrintConfigCache } from "@/hooks/use-print";
+import { PRINT_TYPE_LABELS, PRINT_TYPES, type PrintType } from "@/lib/print-config";
+import { useAuth } from "@/lib/auth";
+import { labelContextEnum, LABEL_CONTEXT_LABELS, type LabelContext, type LabelTemplate } from "@shared/schema";
+interface PrinterInfo {
+  name: string;
+-0
++73
+export default function PrintSettingsPage() {
+            )}
+          </>
+        )}
+        <LabelDefaultsSection />
+      </main>
+    </div>
+  );
+}
+function LabelDefaultsSection() {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const { data: templates = [] } = useQuery<LabelTemplate[]>({
+    queryKey: ["/api/labels/templates"],
+  });
+  const { data: defaults = {} } = useQuery<Record<LabelContext, string | null>>({
+    queryKey: ["/api/labels/defaults"],
+  });
+  const setDefaultMutation = useMutation({
+    mutationFn: async ({ context, templateId }: { context: LabelContext; templateId: string | null }) => {
+      const res = await apiRequest("PUT", `/api/labels/defaults/${context}`, { templateId: templateId ?? null });
+      return res.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/labels/defaults"] });
+      toast({ title: "Padrão de etiqueta atualizado" });
+    },
+    onError: () => toast({ title: "Erro ao atualizar padrão", variant: "destructive" }),
+  });
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Tag className="h-4 w-4 text-muted-foreground" />
+          Modelos de Etiqueta Padrão
+        </CardTitle>
+        <CardDescription className="text-xs">
+          Defina qual modelo de etiqueta será usado por padrão em cada operação.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {labelContextEnum.map(ctx => {
+          const ctxTemplates = templates.filter(t => t.context === ctx && t.active);
+          const currentVal = defaults[ctx] ?? "__none__";
+          return (
+            <div key={ctx}>
+              <Label className="text-xs mb-1 block">{LABEL_CONTEXT_LABELS[ctx]}</Label>
+              <Select
+                value={currentVal}
+                onValueChange={v => setDefaultMutation.mutate({ context: ctx, templateId: v === "__none__" ? null : v })}
+              >
+                <SelectTrigger className="h-8 text-xs" data-testid={`select-default-template-${ctx}`}>
+                  <SelectValue placeholder="Nenhum padrão definido" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Nenhum (usar HTML legado)</SelectItem>
+                  {ctxTemplates.map(t => (
+                    <SelectItem key={t.id} value={t.id} className="text-xs">{t.name}</SelectItem>
+                  ))}
+                  {ctxTemplates.length === 0 && (
+                    <SelectItem value="_placeholder" disabled className="text-xs text-muted-foreground">
+                      Nenhum modelo ativo encontrado
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          );
+        })}
+        <p className="text-xs text-muted-foreground pt-1">
+          Se nenhum modelo for selecionado, será usado o template HTML integrado ao sistema.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+client/src/pages/wms/recebimento.tsx
+-1
++1
+export default function RecebimentoPage() {
+      nfIds: labelDialog.nfIds || [],
+    };
+    printPallet(null, "pallet_label", { template: "pallet_label", data: palletData });
+    printPallet(null, "pallet_label", { templatePayload: { template: "pallet_label", data: palletData } });
+  };
+  const totalItems = palletItems.reduce((sum, i) => sum + i.quantity, 0);
+replit.md
+-1
++1
+The frontend is organized with pages under `client/src/pages/` grouped by functi
+- **Auth pages**: `login.tsx`, `company-select.tsx`, `home.tsx`
+- **WMS / Operação modules**: `wms/recebimento.tsx`, `wms/checkin.tsx` (Endereçamento), `wms/transferencia.tsx`, `wms/retirada.tsx` (Retirada de Produto), `wms/adicao.tsx` (Adição em Pallet — add products to existing pallets), `wms/contagem.tsx`, `wms/enderecos.tsx`, `wms/produtos.tsx`, `wms/codigos-barras.tsx` (Vínculo Rápido)
+- **Logística modules**: `fila-pedidos/`, `supervisor/orders.tsx`, `supervisor/routes.tsx`, `supervisor/route-orders.tsx` (Expedição), `supervisor/exceptions.tsx`
+- **Administração modules**: `supervisor/users.tsx`, `supervisor/mapping-studio.tsx`, `supervisor/reports.tsx`, `supervisor/audit.tsx`, `admin/permissoes.tsx`, `admin/kpi-dashboard.tsx` (KPIs de Operadores — desempenho por operador com ranking, tempo médio, exceções, volumes)
+- **Administração modules**: `supervisor/users.tsx`, `supervisor/mapping-studio.tsx`, `supervisor/reports.tsx`, `supervisor/audit.tsx`, `admin/permissoes.tsx`, `admin/kpi-dashboard.tsx` (KPIs de Operadores — desempenho por operador com ranking, tempo médio, exceções, volumes), `admin/label-templates.tsx` (list/CRUD), `admin/label-studio.tsx` (visual WYSIWYG editor)
+- **WMS Report pages** (under `supervisor/reports/`): `counting-cycles.tsx` (contagem — with supervisor approve/reject actions and confirmation dialog), `wms-addresses.tsx` (endereços), `pallet-movements.tsx` (movimentações), `stock-discrepancy.tsx` (divergências de estoque) — accessible from the Reports hub with filters, summary stats, expandable details, and print support
+- **Legacy operator modules**: `separacao/`, `conferencia/`, `balcao/`, `handheld/`
+-1
++11
+Reusable UI components are in `client/src/components/ui/` following shadcn conve
+- **Authentication**: JWT tokens stored in HttpOnly cookies with bcrypt password hashing
+- **Session Management**: Custom session table with tokens, session keys, company context, and expiration
+Routes are registered in `server/routes.ts` (legacy + auth) and `server/wms-routes.ts` (WMS modules). The storage layer (`server/storage.ts`) implements an `IStorage` interface that abstracts all database operations.
+Routes are registered in `server/routes.ts` (legacy + auth), `server/wms-routes.ts` (WMS modules), and `server/label-routes.ts` (label template CRUD + defaults). The storage layer (`server/storage.ts`) implements an `IStorage` interface that abstracts all database operations.
+### Label Studio (Studio de Etiquetas)
+A full visual WYSIWYG label editor module under `admin/label-templates` and `admin/label-studio/:id`:
+- **DB Tables**: `label_templates` (template JSON + metadata) and `label_default_assignments` (context → templateId mapping). Created via raw SQL (drizzle-kit push blocked by unrelated FK violation on order_items).
+- **Contexts**: `volume_label`, `pallet_label`, `product_label`, `order_label` — each with a catalog of dynamic data fields (`LABEL_DATA_FIELDS` in `shared/schema.ts`).
+- **Components**: text, dynamic_text (data-bound), barcode, qrcode, line, rectangle — stored as discriminated union JSON in `layoutJson`.
+- **Renderer**: `client/src/lib/label-renderer.ts` — converts template JSON + data record to a standalone print-ready HTML document.
+- **Print integration**: `client/src/hooks/use-label-default.ts` hook checks if a default template is configured for a context; if yes, renders it via the shared renderer and replaces the document (with fallback to legacy HTML templates). Used in `print/volume-label.tsx` and `print/pallet-label.tsx`.
+- **Default assignment**: `supervisor/print-settings.tsx` includes a "Modelos de Etiqueta Padrão" section to configure which template is active per context.
+- **Seed**: Two default templates (volume + pallet) are seeded in `server/seed.ts` using the component structure.
+### Authentication and Authorization
+- Role-based access control with roles: `administrador`, `supervisor`, `separacao`, `conferencia`, `balcao`, `fila_pedidos`, `recebedor`, `empilhador`, `conferente_wms`
+server/index.ts
+-0
++4
+async function runSafeMigrations() {
+    { table: "system_settings", column: "quick_link_enabled", type: "boolean NOT NULL DEFAULT true" },
+    // users — quick_link_enabled (adicionado por engano em alguns ambientes, sem efeito)
+    { table: "users", column: "quick_link_enabled", type: "boolean NOT NULL DEFAULT true" },
+    // label_templates — isolamento multi-empresa
+    { table: "label_templates", column: "company_id", type: "integer" },
+    // label_default_assignments — isolamento multi-empresa
+    { table: "label_default_assignments", column: "company_id", type: "integer NOT NULL DEFAULT 0" },
+  ];
+  for (const m of migrations) {
+-0
++22
+async function runSafeMigrations() {
+    }
+  }
+  // Fix label_default_assignments PK to composite (company_id, context)
+  try {
+    await db.execute(sql.raw(`
+      DO $$ BEGIN
+        IF EXISTS (
+          SELECT 1 FROM pg_constraint
+          WHERE conname = 'label_default_assignments_pkey'
+            AND contype = 'p'
+        ) THEN
+          -- Only fix if PK is single-column (context only)
+          IF (SELECT COUNT(*) FROM pg_attribute a
+              JOIN pg_constraint c ON a.attrelid = c.conrelid AND a.attnum = ANY(c.conkey)
+              WHERE c.conname = 'label_default_assignments_pkey'
+          ) = 1 THEN
+            ALTER TABLE label_default_assignments DROP CONSTRAINT label_default_assignments_pkey;
+            ALTER TABLE label_default_assignments ADD PRIMARY KEY (company_id, context);
+          END IF;
+        END IF;
+      END $$;
+    `));
+  } catch { }
+  // ── Todas as tabelas do schema (em ordem de dependência FK) ─────────────────
+  const tables: string[] = [
+    // Tabelas base (sem dependências)
+-0
++21
+async function runSafeMigrations() {
+    )`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS scan_log_dedup_idx ON scan_log(msg_id, user_id, company_id_int)`,
+    `CREATE INDEX IF NOT EXISTS scan_log_created_at_idx ON scan_log(created_at)`,
+    // Label Templates (Studio de Etiquetas)
+    `CREATE TABLE IF NOT EXISTS label_templates (
+      id text PRIMARY KEY,
+      company_id integer,
+      name text NOT NULL,
+      context text NOT NULL,
+      width_mm integer NOT NULL DEFAULT 100,
+      height_mm integer NOT NULL DEFAULT 70,
+      dpi integer NOT NULL DEFAULT 203,
+      active boolean NOT NULL DEFAULT true,
+      layout_json jsonb NOT NULL DEFAULT '{"components":[]}',
+      created_at text NOT NULL,
+      updated_at text
+    )`,
+    `CREATE TABLE IF NOT EXISTS label_default_assignments (
+      company_id integer NOT NULL DEFAULT 0,
+      context text NOT NULL,
+      template_id text,
+      updated_at text NOT NULL,
+      PRIMARY KEY (company_id, context)
+    )`,
+  ];
+  for (const ddl of tables) {
+server/label-routes.ts
+import type { Express, Request, Response } from "express";
+import { isAuthenticated, requireRole } from "./auth";
+import { storage } from "./storage";
+import { z } from "zod";
+import { insertLabelTemplateSchema, labelContextEnum, type LabelContext } from "@shared/schema";
+import { log } from "./log";
+function isLabelContext(v: unknown): v is LabelContext {
+  return typeof v === "string" && (labelContextEnum as readonly string[]).includes(v);
+}
+function getCompanyId(req: Request): number {
+  return req.companyId;
+}
+// ── Strict Zod schema for layoutJson components ─────────────────────────────
+const boundsSchema = {
+  x: z.number().min(-500).max(2000),
+  y: z.number().min(-500).max(2000),
+  width: z.number().min(1).max(2000),
+  height: z.number().min(1).max(2000),
+  zIndex: z.number().min(0).max(100).optional(),
+};
+const baseComponent = z.object({
+  id: z.string().max(100),
+  x: boundsSchema.x,
+  y: boundsSchema.y,
+  width: boundsSchema.width,
+  height: boundsSchema.height,
+  zIndex: boundsSchema.zIndex,
+});
+const textComponent = baseComponent.extend({
+  type: z.literal("text"),
+  content: z.string().max(500),
+  fontSize: z.number().min(4).max(200),
+  fontWeight: z.enum(["normal", "bold"]),
+  align: z.enum(["left", "center", "right"]),
+  color: z.string().regex(/^#[0-9a-fA-F]{3,8}$/).max(9),
+});
+const dynamicTextComponent = baseComponent.extend({
+  type: z.literal("dynamic_text"),
+  field: z.string().max(100),
+  fontSize: z.number().min(4).max(200),
+  fontWeight: z.enum(["normal", "bold"]),
+  align: z.enum(["left", "center", "right"]),
+  color: z.string().regex(/^#[0-9a-fA-F]{3,8}$/).max(9),
+  prefix: z.string().max(100).optional(),
+  suffix: z.string().max(100).optional(),
+});
+const barcodeComponent = baseComponent.extend({
+  type: z.literal("barcode"),
+  field: z.string().max(100),
+  format: z.enum(["CODE128", "CODE39", "EAN13", "EAN8", "ITF14"]).optional(),
+  showValue: z.boolean().optional(),
+});
+const qrcodeComponent = baseComponent.extend({
+  type: z.literal("qrcode"),
+  field: z.string().max(100),
+  errorLevel: z.enum(["L", "M", "Q", "H"]).optional(),
+});
+const rectangleComponent = baseComponent.extend({
+  type: z.literal("rectangle"),
+  fillColor: z.string().regex(/^(#[0-9a-fA-F]{3,8}|transparent)$/).max(12),
+  strokeColor: z.string().regex(/^#[0-9a-fA-F]{3,8}$/).max(9),
+  strokeWidth: z.number().min(0).max(50),
+  borderRadius: z.number().min(0).max(200).optional(),
+});
+const lineComponent = baseComponent.extend({
+  type: z.literal("line"),
+  orientation: z.enum(["horizontal", "vertical"]),
+  color: z.string().regex(/^#[0-9a-fA-F]{3,8}$/).max(9),
+  strokeWidth: z.number().min(1).max(50),
+});
+const labelComponentSchema = z.discriminatedUnion("type", [
+  textComponent,
+  dynamicTextComponent,
+  barcodeComponent,
+  qrcodeComponent,
+  rectangleComponent,
+  lineComponent,
+]);
+const layoutJsonSchema = z.object({
+  components: z.array(labelComponentSchema).max(100),
+});
+const patchedInsertSchema = insertLabelTemplateSchema.omit({ companyId: true }).extend({
+  layoutJson: layoutJsonSchema,
+});
+// Returns the template if the company owns it (not null/global), sends HTTP error and returns null otherwise
+async function requireTemplateOwnership(id: string, companyId: number, res: Response): Promise<import("@shared/schema").LabelTemplate | null> {
+  const template = await storage.getLabelTemplateById(id, companyId);
+  if (!template) {
+    res.status(404).json({ error: "Template não encontrado" });
+    return null;
+  }
+  if (template.companyId !== companyId) {
+    res.status(403).json({ error: "Templates do sistema não podem ser modificados. Use 'Duplicar' para criar uma cópia editável." });
+    return null;
+  }
+  return template;
+}
+// ── Routes ────────────────────────────────────────────────────────────────────
+export function registerLabelRoutes(app: Express) {
+  app.get("/api/labels/templates", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const rawCtx = req.query.context;
+      const context: LabelContext | undefined = isLabelContext(rawCtx) ? rawCtx : undefined;
+      if (req.query.context !== undefined && !context) {
+        return res.status(400).json({ error: "Contexto inválido" });
+      }
+      const companyId = getCompanyId(req);
+      const templates = await storage.getLabelTemplates(context, companyId);
+      res.json(templates);
+    } catch (err) {
+      log(`[labels] Erro ao listar templates: ${err instanceof Error ? err.message : String(err)}`);
+      res.status(500).json({ error: "Erro interno" });
+    }
+  });
+  app.get("/api/labels/templates/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const companyId = getCompanyId(req);
+      const template = await storage.getLabelTemplateById(req.params.id, companyId);
+      if (!template) return res.status(404).json({ error: "Template não encontrado" });
+      res.json(template);
+    } catch (err) {
+      log(`[labels] Erro ao buscar template: ${err instanceof Error ? err.message : String(err)}`);
+      res.status(500).json({ error: "Erro interno" });
+    }
+  });
+  app.post("/api/labels/templates", isAuthenticated, requireRole("supervisor", "administrador"), async (req: Request, res: Response) => {
+    try {
+      const parsed = patchedInsertSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Dados inválidos", details: parsed.error.flatten() });
+      }
+      const companyId = getCompanyId(req);
+      const template = await storage.createLabelTemplate(parsed.data, companyId);
+      res.status(201).json(template);
+    } catch (err) {
+      log(`[labels] Erro ao criar template: ${err instanceof Error ? err.message : String(err)}`);
+      res.status(500).json({ error: "Erro interno" });
+    }
+  });
+  app.put("/api/labels/templates/:id", isAuthenticated, requireRole("supervisor", "administrador"), async (req: Request, res: Response) => {
+    try {
+      const parsed = patchedInsertSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Dados inválidos", details: parsed.error.flatten() });
+      }
+      const companyId = getCompanyId(req);
+      const owned = await requireTemplateOwnership(req.params.id, companyId, res);
+      if (!owned) return;
+      const updated = await storage.updateLabelTemplate(req.params.id, parsed.data, companyId);
+      if (!updated) return res.status(404).json({ error: "Template não encontrado" });
+      res.json(updated);
+    } catch (err) {
+      log(`[labels] Erro ao atualizar template: ${err instanceof Error ? err.message : String(err)}`);
+      res.status(500).json({ error: "Erro interno" });
+    }
+  });
+  app.post("/api/labels/templates/:id/duplicate", isAuthenticated, requireRole("supervisor", "administrador"), async (req: Request, res: Response) => {
+    try {
+      const { name } = req.body as { name?: string };
+      const companyId = getCompanyId(req);
+      const original = await storage.getLabelTemplateById(req.params.id, companyId);
+      if (!original) return res.status(404).json({ error: "Template não encontrado" });
+      const newName = name || `${original.name} (cópia)`;
+      const duplicated = await storage.duplicateLabelTemplate(req.params.id, newName, companyId);
+      if (!duplicated) return res.status(404).json({ error: "Template não encontrado" });
+      res.status(201).json(duplicated);
+    } catch (err) {
+      log(`[labels] Erro ao duplicar template: ${err instanceof Error ? err.message : String(err)}`);
+      res.status(500).json({ error: "Erro interno" });
+    }
+  });
+  app.patch("/api/labels/templates/:id/active", isAuthenticated, requireRole("supervisor", "administrador"), async (req: Request, res: Response) => {
+    try {
+      const { active } = req.body as { active: boolean };
+      if (typeof active !== "boolean") {
+        return res.status(400).json({ error: "Campo 'active' deve ser booleano" });
+      }
+      const companyId = getCompanyId(req);
+      const owned = await requireTemplateOwnership(req.params.id, companyId, res);
+      if (!owned) return;
+      const updated = await storage.toggleLabelTemplateActive(req.params.id, active, companyId);
+      if (!updated) return res.status(404).json({ error: "Template não encontrado" });
+      res.json(updated);
+    } catch (err) {
+      log(`[labels] Erro ao ativar/desativar template: ${err instanceof Error ? err.message : String(err)}`);
+      res.status(500).json({ error: "Erro interno" });
+    }
+  });
+  app.delete("/api/labels/templates/:id", isAuthenticated, requireRole("supervisor", "administrador"), async (req: Request, res: Response) => {
+    try {
+      const companyId = getCompanyId(req);
+      const owned = await requireTemplateOwnership(req.params.id, companyId, res);
+      if (!owned) return;
+      await storage.deleteLabelTemplate(req.params.id, companyId);
+      res.json({ success: true });
+    } catch (err) {
+      log(`[labels] Erro ao excluir template: ${err instanceof Error ? err.message : String(err)}`);
+      res.status(500).json({ error: "Erro interno" });
+    }
+  });
+  app.get("/api/labels/defaults", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const companyId = getCompanyId(req);
+      const assignments = await storage.getLabelDefaultAssignments(companyId);
+      const result: Record<string, string | null> = {};
+      for (const ctx of labelContextEnum) {
+        const found = assignments.find(a => a.context === ctx);
+        result[ctx] = found?.templateId ?? null;
+      }
+      res.json(result);
+    } catch (err) {
+      log(`[labels] Erro ao listar defaults: ${err instanceof Error ? err.message : String(err)}`);
+      res.status(500).json({ error: "Erro interno" });
+    }
+  });
+  app.get("/api/labels/defaults/:context", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      if (!isLabelContext(req.params.context)) {
+        return res.status(400).json({ error: "Contexto inválido" });
+      }
+      const context = req.params.context;
+      const companyId = getCompanyId(req);
+      const assignment = await storage.getLabelDefaultAssignment(context, companyId);
+      if (!assignment) return res.json({ context, templateId: null });
+      if (assignment.templateId) {
+        const template = await storage.getLabelTemplateById(assignment.templateId, companyId);
+        return res.json({ ...assignment, template: template ?? null });
+      }
+      res.json({ ...assignment, template: null });
+    } catch (err) {
+      log(`[labels] Erro ao buscar default: ${err instanceof Error ? err.message : String(err)}`);
+      res.status(500).json({ error: "Erro interno" });
+    }
+  });
+  // Export a template as JSON (downloadable)
+  app.get("/api/labels/templates/:id/export", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const companyId = getCompanyId(req);
+      const template = await storage.getLabelTemplateById(req.params.id, companyId);
+      if (!template) return res.status(404).json({ error: "Template não encontrado" });
+      const exportPayload = {
+        exportVersion: 1,
+        name: template.name,
+        context: template.context,
+        widthMm: template.widthMm,
+        heightMm: template.heightMm,
+        dpi: template.dpi,
+        layoutJson: template.layoutJson,
+      };
+      const filename = `${template.name.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.json`;
+      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+      res.setHeader("Content-Type", "application/json");
+      res.json(exportPayload);
+    } catch (err) {
+      log(`[labels] Erro ao exportar template: ${err instanceof Error ? err.message : String(err)}`);
+      res.status(500).json({ error: "Erro interno" });
+    }
+  });
+  // Import a template from JSON
+  app.post("/api/labels/templates/import", isAuthenticated, requireRole("supervisor", "administrador"), async (req: Request, res: Response) => {
+    try {
+      const importSchema = patchedInsertSchema.extend({
+        exportVersion: z.number().optional(),
+      });
+      const parsed = importSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "JSON de importação inválido", details: parsed.error.flatten() });
+      }
+      const companyId = getCompanyId(req);
+      const { exportVersion: _v, ...templateData } = parsed.data;
+      const template = await storage.createLabelTemplate({
+        ...templateData,
+        name: `${templateData.name} (importado)`,
+      }, companyId);
+      res.status(201).json(template);
+    } catch (err) {
+      log(`[labels] Erro ao importar template: ${err instanceof Error ? err.message : String(err)}`);
+      res.status(500).json({ error: "Erro interno" });
+    }
+  });
+  app.put("/api/labels/defaults/:context", isAuthenticated, requireRole("supervisor", "administrador"), async (req: Request, res: Response) => {
+    try {
+      if (!isLabelContext(req.params.context)) {
+        return res.status(400).json({ error: "Contexto inválido" });
+      }
+      const context = req.params.context;
+      const schema = z.object({ templateId: z.string().nullable() });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "templateId inválido" });
+      }
+      const companyId = getCompanyId(req);
+      if (parsed.data.templateId) {
+        const template = await storage.getLabelTemplateById(parsed.data.templateId, companyId);
+        if (!template) return res.status(404).json({ error: "Template não encontrado" });
+        if (template.context !== context) {
+          return res.status(400).json({ error: "Template não pertence ao contexto especificado" });
+        }
+      }
+      const assignment = await storage.setLabelDefaultAssignment(context, parsed.data.templateId, companyId);
+      res.json(assignment);
+    } catch (err) {
+      log(`[labels] Erro ao definir default: ${err instanceof Error ? err.message : String(err)}`);
+      res.status(500).json({ error: "Erro interno" });
+    }
+  });
+}
+server/print-routes.ts
+-0
++18
+export function registerPrintRoutes(app: Express) {
+    res.json({ success: true, default_printer: defaultPrinter, printers: allPrinters });
+  });
+  /** Resolve um label template do Studio de Etiquetas para impressão.
+   *  Valida acesso e retorna o template para o cliente renderizar e chamar /api/print/job. */
+  app.post("/api/print/label-template-resolve", isAuthenticated, async (req: Request, res: Response) => {
+    const { labelTemplateId } = req.body as { labelTemplateId?: string };
+    if (!labelTemplateId) {
+      return res.status(400).json({ success: false, error: "labelTemplateId obrigatório" });
+    }
+    const companyId = req.companyId;
+    const template = await storage.getLabelTemplateById(labelTemplateId, companyId);
+    if (!template) {
+      return res.status(404).json({ success: false, error: "Template de etiqueta não encontrado" });
+    }
+    if (!template.active) {
+      return res.status(400).json({ success: false, error: "Template de etiqueta inativo" });
+    }
+    res.json({ success: true, template });
+  });
+  /** Envia trabalho de impressão.
+   *  - Impressoras locais: responde 202 e executa Chrome em background.
+   *  - Impressoras de agente (MACHINE\\Printer): roteia via WebSocket. */
+server/routes.ts
+-0
++1
+import { getCompanyBalcaoPickupPoints } from "./company-config";
+import { registerWmsRoutes } from "./wms-routes";
+import { registerPrintRoutes, refreshPrinterCache } from "./print-routes";
+import { registerLabelRoutes } from "./label-routes";
+import { getConnectedAgents } from "./print-agent";
+import { z } from "zod";
+import { spawn } from "child_process";
+-0
++1
+export async function registerRoutes(
+  registerWmsRoutes(app);
+  registerPrintRoutes(app);
+  registerLabelRoutes(app);
+  return httpServer;
+}
+server/seed.ts
+-1
++1
+import { db } from "./db";
+import { users, routes, products, orders, orderItems, workUnits, sections } from "@shared/schema";
+import { users, routes, products, orders, orderItems, workUnits, sections, labelTemplates, labelDefaultAssignments, type InsertLabelTemplate, type LabelLayout } from "@shared/schema";
+import { hashPassword, generateBadgeCode } from "./auth";
+import { eq } from "drizzle-orm";
+-0
++61
+async function seedSystemSettings() {
+  console.log("System settings seeded");
+}
+async function seedLabelTemplates() {
+  const existing = await db.select().from(labelTemplates).limit(1);
+  if (existing.length > 0) return;
+  const uid = () => crypto.randomUUID();
+  const volumeLayout: LabelLayout = {
+    components: [
+      { id: uid(), type: "rectangle", x: 0, y: 0, width: 100, height: 70, fillColor: "transparent", strokeColor: "#000000", strokeWidth: 2, borderRadius: 0, zIndex: 0 },
+      { id: uid(), type: "rectangle", x: 0, y: 0, width: 100, height: 22, fillColor: "#000000", strokeColor: "#000000", strokeWidth: 0, borderRadius: 0, zIndex: 1 },
+      { id: uid(), type: "dynamic_text", x: 2, y: 1, width: 60, height: 10, field: "order", fontSize: 14, fontWeight: "bold", align: "left", color: "#ffffff", zIndex: 2 },
+      { id: uid(), type: "text", x: 2, y: 11, width: 25, height: 5, content: "PEDIDO", fontSize: 7, fontWeight: "normal", align: "left", color: "#aaaaaa", zIndex: 3 },
+      { id: uid(), type: "dynamic_text", x: 70, y: 1, width: 28, height: 10, field: "vol", fontSize: 14, fontWeight: "bold", align: "right", color: "#ffffff", zIndex: 2 },
+      { id: uid(), type: "text", x: 70, y: 11, width: 28, height: 5, content: "VOLUME", fontSize: 7, fontWeight: "normal", align: "right", color: "#aaaaaa", zIndex: 3 },
+      { id: uid(), type: "dynamic_text", x: 2, y: 24, width: 96, height: 8, field: "customer", fontSize: 12, fontWeight: "bold", align: "left", color: "#000000", zIndex: 4 },
+      { id: uid(), type: "dynamic_text", x: 2, y: 33, width: 96, height: 6, field: "address", fontSize: 9, fontWeight: "normal", align: "left", color: "#000000", zIndex: 4 },
+      { id: uid(), type: "dynamic_text", x: 2, y: 39, width: 96, height: 6, field: "city", fontSize: 9, fontWeight: "normal", align: "left", color: "#000000", zIndex: 4 },
+      { id: uid(), type: "qrcode", x: 72, y: 46, width: 22, height: 22, field: "order", errorLevel: "M", zIndex: 5 },
+      { id: uid(), type: "dynamic_text", x: 2, y: 48, width: 68, height: 6, field: "route", prefix: "ROTA: ", fontSize: 9, fontWeight: "bold", align: "left", color: "#000000", zIndex: 5 },
+      { id: uid(), type: "dynamic_text", x: 2, y: 58, width: 68, height: 5, field: "date", fontSize: 8, fontWeight: "normal", align: "left", color: "#666666", zIndex: 5 },
+    ],
+  };
+  const palletLayout: LabelLayout = {
+    components: [
+      { id: uid(), type: "rectangle", x: 0, y: 0, width: 100, height: 150, fillColor: "transparent", strokeColor: "#000000", strokeWidth: 2, borderRadius: 0, zIndex: 0 },
+      { id: uid(), type: "rectangle", x: 0, y: 0, width: 100, height: 20, fillColor: "#1a3a5c", strokeColor: "#1a3a5c", strokeWidth: 0, borderRadius: 0, zIndex: 1 },
+      { id: uid(), type: "text", x: 2, y: 3, width: 96, height: 14, content: "PALLET", fontSize: 16, fontWeight: "bold", align: "center", color: "#ffffff", zIndex: 2 },
+      { id: uid(), type: "dynamic_text", x: 5, y: 26, width: 90, height: 16, field: "code", fontSize: 20, fontWeight: "bold", align: "center", color: "#000000", zIndex: 3 },
+      { id: uid(), type: "barcode", x: 10, y: 46, width: 80, height: 25, field: "code", format: "CODE128", showValue: true, zIndex: 4 },
+      { id: uid(), type: "line", x: 2, y: 76, width: 96, height: 1, orientation: "horizontal", strokeWidth: 1, color: "#cccccc", zIndex: 5 },
+      { id: uid(), type: "text", x: 5, y: 80, width: 30, height: 5, content: "ENDEREÇO:", fontSize: 8, fontWeight: "bold", align: "left", color: "#666666", zIndex: 5 },
+      { id: uid(), type: "dynamic_text", x: 5, y: 86, width: 90, height: 10, field: "address", fontSize: 12, fontWeight: "bold", align: "left", color: "#000000", zIndex: 5 },
+      { id: uid(), type: "text", x: 5, y: 100, width: 30, height: 5, content: "ITENS:", fontSize: 8, fontWeight: "bold", align: "left", color: "#666666", zIndex: 5 },
+      { id: uid(), type: "dynamic_text", x: 5, y: 106, width: 90, height: 10, field: "items", fontSize: 8, fontWeight: "normal", align: "left", color: "#000000", zIndex: 5 },
+      { id: uid(), type: "qrcode", x: 70, y: 120, width: 25, height: 25, field: "code", errorLevel: "M", zIndex: 6 },
+      { id: uid(), type: "dynamic_text", x: 5, y: 130, width: 60, height: 5, field: "date", fontSize: 8, fontWeight: "normal", align: "left", color: "#999999", zIndex: 6 },
+      { id: uid(), type: "dynamic_text", x: 5, y: 137, width: 60, height: 5, field: "operator", prefix: "Op: ", fontSize: 8, fontWeight: "normal", align: "left", color: "#999999", zIndex: 6 },
+    ],
+  };
+  const templates: InsertLabelTemplate[] = [
+    { name: "Etiqueta de Volume Padrão", context: "volume_label", widthMm: 100, heightMm: 70, dpi: 203, active: true, layoutJson: volumeLayout },
+    { name: "Etiqueta de Pallet Padrão", context: "pallet_label", widthMm: 100, heightMm: 150, dpi: 203, active: true, layoutJson: palletLayout },
+  ];
+  const inserted = await db.insert(labelTemplates).values(templates).returning();
+  console.log("Label templates seeded: 2 default templates");
+  const volumeTemplate = inserted.find(t => t.context === "volume_label");
+  const palletTemplate = inserted.find(t => t.context === "pallet_label");
+  if (volumeTemplate || palletTemplate) {
+    const assignments = [];
+    if (volumeTemplate) assignments.push({ context: "volume_label" as const, templateId: volumeTemplate.id });
+    if (palletTemplate) assignments.push({ context: "pallet_label" as const, templateId: palletTemplate.id });
+    await db.insert(labelDefaultAssignments).values(assignments).onConflictDoNothing();
+    console.log("Label default assignments seeded:", assignments.length);
+  }
+}
+export async function seedDatabase() {
+  console.log("Seeding database...");
+  await seedSections();
+  await seedSystemSettings();
+  await seedLabelTemplates();
+  // Check if already seeded
+  console.log("Checking for existing users...");
+server/storage.ts
+-1
++3
+import {
+  type SectionGroup, type InsertSectionGroup, type Section, pickingSessions, type PickingSession, type InsertPickingSession,
+  type Db2Mapping, type MappingField, type BatchSyncPayload,
+  type OrderVolume, type InsertOrderVolume, companies, type Company,
+  type SystemSettings, type SeparationMode
+  type SystemSettings, type SeparationMode,
+  labelTemplates, labelDefaultAssignments,
+  type LabelTemplate, type InsertLabelTemplate, type LabelContext, type LabelDefaultAssignment,
+} from "@shared/schema";
+import { randomUUID } from "crypto";
+import { log, getErrorMessage, getDbError } from "./log";
+-0
++12
+export interface IStorage {
+  // Scan Log — dedup persistente de msgIds (S1-04)
+  insertScanLogDedup(msgId: string, userId: string, companyId: number | undefined, workUnitId: string, barcode: string, quantity: number): Promise<{ inserted: boolean }>;
+  cleanupOldScanLogs(daysOld?: number): Promise<number>;
+  // Label Templates
+  getLabelTemplates(context?: LabelContext, companyId?: number): Promise<LabelTemplate[]>;
+  getLabelTemplateById(id: string, companyId?: number): Promise<LabelTemplate | undefined>;
+  createLabelTemplate(template: InsertLabelTemplate, companyId: number): Promise<LabelTemplate>;
+  updateLabelTemplate(id: string, data: Partial<InsertLabelTemplate>, companyId: number): Promise<LabelTemplate | undefined>;
+  duplicateLabelTemplate(id: string, newName: string, companyId: number): Promise<LabelTemplate | undefined>;
+  toggleLabelTemplateActive(id: string, active: boolean, companyId: number): Promise<LabelTemplate | undefined>;
+  deleteLabelTemplate(id: string, companyId: number): Promise<void>;
+  getLabelDefaultAssignment(context: LabelContext, companyId: number): Promise<LabelDefaultAssignment | undefined>;
+  getLabelDefaultAssignments(companyId: number): Promise<LabelDefaultAssignment[]>;
+  setLabelDefaultAssignment(context: LabelContext, templateId: string | null, companyId: number): Promise<LabelDefaultAssignment>;
+}
+export class DatabaseStorage implements IStorage {
+-0
++123
+export class DatabaseStorage implements IStorage {
+    );
+    return (result as any).rowCount ?? 0;
+  }
+  // Label Templates
+  async getLabelTemplates(context?: LabelContext, companyId?: number): Promise<LabelTemplate[]> {
+    const visibilityFilter = companyId !== undefined
+      ? or(isNull(labelTemplates.companyId), eq(labelTemplates.companyId, companyId))
+      : undefined;
+    if (context) {
+      const conditions = visibilityFilter
+        ? and(eq(labelTemplates.context, context), visibilityFilter)
+        : eq(labelTemplates.context, context);
+      return db.select().from(labelTemplates).where(conditions).orderBy(desc(labelTemplates.createdAt));
+    }
+    return visibilityFilter
+      ? db.select().from(labelTemplates).where(visibilityFilter).orderBy(desc(labelTemplates.createdAt))
+      : db.select().from(labelTemplates).orderBy(desc(labelTemplates.createdAt));
+  }
+  async getLabelTemplateById(id: string, companyId?: number): Promise<LabelTemplate | undefined> {
+    const visibilityFilter = companyId !== undefined
+      ? or(isNull(labelTemplates.companyId), eq(labelTemplates.companyId, companyId))
+      : undefined;
+    const condition = visibilityFilter
+      ? and(eq(labelTemplates.id, id), visibilityFilter)
+      : eq(labelTemplates.id, id);
+    const [template] = await db.select().from(labelTemplates).where(condition);
+    return template;
+  }
+  async createLabelTemplate(template: InsertLabelTemplate, companyId: number): Promise<LabelTemplate> {
+    const [created] = await db.insert(labelTemplates).values({
+      ...template,
+      companyId,
+      createdAt: new Date().toISOString(),
+    }).returning();
+    return created;
+  }
+  async updateLabelTemplate(id: string, data: Partial<InsertLabelTemplate>, companyId: number): Promise<LabelTemplate | undefined> {
+    const [updated] = await db.update(labelTemplates)
+      .set({ ...data, updatedAt: new Date().toISOString() })
+      .where(and(eq(labelTemplates.id, id), eq(labelTemplates.companyId, companyId)))
+      .returning();
+    return updated;
+  }
+  async duplicateLabelTemplate(id: string, newName: string, companyId: number): Promise<LabelTemplate | undefined> {
+    const original = await this.getLabelTemplateById(id, companyId);
+    if (!original) return undefined;
+    const [created] = await db.insert(labelTemplates).values({
+      name: newName,
+      companyId,
+      context: original.context,
+      widthMm: original.widthMm,
+      heightMm: original.heightMm,
+      dpi: original.dpi,
+      active: true,
+      layoutJson: original.layoutJson,
+      createdAt: new Date().toISOString(),
+    }).returning();
+    return created;
+  }
+  async toggleLabelTemplateActive(id: string, active: boolean, companyId: number): Promise<LabelTemplate | undefined> {
+    const [updated] = await db.update(labelTemplates)
+      .set({ active, updatedAt: new Date().toISOString() })
+      .where(and(eq(labelTemplates.id, id), eq(labelTemplates.companyId, companyId)))
+      .returning();
+    return updated;
+  }
+  async deleteLabelTemplate(id: string, companyId: number): Promise<void> {
+    await db.delete(labelTemplates).where(and(eq(labelTemplates.id, id), eq(labelTemplates.companyId, companyId)));
+    await db.update(labelDefaultAssignments)
+      .set({ templateId: null, updatedAt: new Date().toISOString() })
+      .where(and(eq(labelDefaultAssignments.templateId, id), eq(labelDefaultAssignments.companyId, companyId)));
+  }
+  // Returns the company-owned row only (no global fallback) — used for upsert logic
+  private async getLabelDefaultAssignmentOwned(context: LabelContext, companyId: number): Promise<LabelDefaultAssignment | undefined> {
+    const [assignment] = await db.select().from(labelDefaultAssignments)
+      .where(and(eq(labelDefaultAssignments.context, context), eq(labelDefaultAssignments.companyId, companyId)));
+    return assignment;
+  }
+  // Falls back to global (company_id = 0) seeded defaults when no company-specific row exists
+  async getLabelDefaultAssignment(context: LabelContext, companyId: number): Promise<LabelDefaultAssignment | undefined> {
+    const owned = await this.getLabelDefaultAssignmentOwned(context, companyId);
+    if (owned) return owned;
+    const [global] = await db.select().from(labelDefaultAssignments)
+      .where(and(eq(labelDefaultAssignments.context, context), eq(labelDefaultAssignments.companyId, 0)));
+    return global;
+  }
+  // Returns company-specific rows, merged with global fallbacks for unset contexts
+  async getLabelDefaultAssignments(companyId: number): Promise<LabelDefaultAssignment[]> {
+    const rows = await db.select().from(labelDefaultAssignments)
+      .where(or(eq(labelDefaultAssignments.companyId, companyId), eq(labelDefaultAssignments.companyId, 0)));
+    // Prefer company-specific (companyId) over global (0) for the same context
+    const map = new Map<string, LabelDefaultAssignment>();
+    for (const row of rows) {
+      const existing = map.get(row.context);
+      if (!existing || (existing.companyId === 0 && row.companyId === companyId)) {
+        map.set(row.context, row);
+      }
+    }
+    return Array.from(map.values());
+  }
+  async setLabelDefaultAssignment(context: LabelContext, templateId: string | null, companyId: number): Promise<LabelDefaultAssignment> {
+    // Check for an existing company-owned row (no fallback to global)
+    const existing = await this.getLabelDefaultAssignmentOwned(context, companyId);
+    if (existing) {
+      const [updated] = await db.update(labelDefaultAssignments)
+        .set({ templateId, updatedAt: new Date().toISOString() })
+        .where(and(eq(labelDefaultAssignments.context, context), eq(labelDefaultAssignments.companyId, companyId)))
+        .returning();
+      return updated;
+    }
+    const [created] = await db.insert(labelDefaultAssignments)
+      .values({ context, templateId, companyId, updatedAt: new Date().toISOString() })
+      .returning();
+    return created;
+  }
+}
+export const storage = new DatabaseStorage();
+shared/schema.ts
+-1
++1
+import { pgTable, text, integer, doublePrecision, boolean, serial, uniqueIndex, index, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, doublePrecision, boolean, serial, uniqueIndex, index, jsonb, primaryKey } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+-0
++176
+export const insertPrintAgentSchema = createInsertSchema(printAgents).omit({ id:
+export type PrintAgent = typeof printAgents.$inferSelect;
+export type InsertPrintAgent = z.infer<typeof insertPrintAgentSchema>;
+// ─── Label Studio ──────────────────────────────────────────────────────────────
+export const labelContextEnum = ["volume_label", "pallet_label", "product_label", "order_label"] as const;
+export type LabelContext = typeof labelContextEnum[number];
+export const LABEL_CONTEXT_LABELS: Record<LabelContext, string> = {
+  volume_label:  "Etiqueta de Volume",
+  pallet_label:  "Etiqueta de Palete",
+  product_label: "Etiqueta de Produto",
+  order_label:   "Etiqueta de Pedido",
+};
+export type LabelComponentType = "text" | "dynamic_text" | "barcode" | "qrcode" | "line" | "rectangle";
+export interface LabelComponentBase {
+  id: string;
+  type: LabelComponentType;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation?: number;
+  zIndex?: number;
+}
+export interface TextComponent extends LabelComponentBase {
+  type: "text";
+  content: string;
+  fontSize: number;
+  fontWeight?: "normal" | "bold";
+  fontFamily?: string;
+  align?: "left" | "center" | "right";
+  color?: string;
+}
+export interface DynamicTextComponent extends LabelComponentBase {
+  type: "dynamic_text";
+  field: string;
+  label?: string;
+  fontSize: number;
+  fontWeight?: "normal" | "bold";
+  fontFamily?: string;
+  align?: "left" | "center" | "right";
+  color?: string;
+  prefix?: string;
+  suffix?: string;
+}
+export interface BarcodeComponent extends LabelComponentBase {
+  type: "barcode";
+  field: string;
+  format: "CODE128" | "CODE39" | "EAN13" | "EAN8" | "ITF14";
+  showValue?: boolean;
+  lineWidth?: number;
+  barHeight?: number;
+}
+export interface QRCodeComponent extends LabelComponentBase {
+  type: "qrcode";
+  field: string;
+  errorLevel?: "L" | "M" | "Q" | "H";
+}
+export interface LineComponent extends LabelComponentBase {
+  type: "line";
+  orientation: "horizontal" | "vertical";
+  strokeWidth?: number;
+  color?: string;
+  dashed?: boolean;
+}
+export interface RectangleComponent extends LabelComponentBase {
+  type: "rectangle";
+  fillColor?: string;
+  strokeColor?: string;
+  strokeWidth?: number;
+  borderRadius?: number;
+}
+export type LabelComponent =
+  | TextComponent
+  | DynamicTextComponent
+  | BarcodeComponent
+  | QRCodeComponent
+  | LineComponent
+  | RectangleComponent;
+export interface LabelLayout {
+  components: LabelComponent[];
+}
+export interface DataField {
+  key: string;
+  label: string;
+  example?: string;
+  category?: string;
+}
+export const LABEL_DATA_FIELDS: Record<LabelContext, DataField[]> = {
+  volume_label: [
+    { key: "order",        label: "Número do Pedido",   example: "PED-001",     category: "Pedido" },
+    { key: "customer",     label: "Nome do Cliente",     example: "Mercado ABC", category: "Pedido" },
+    { key: "address",      label: "Endereço",            example: "Rua das Flores, 123", category: "Endereço" },
+    { key: "neighborhood", label: "Bairro",              example: "Centro",      category: "Endereço" },
+    { key: "city",         label: "Cidade",              example: "São Paulo",   category: "Endereço" },
+    { key: "state",        label: "Estado (UF)",         example: "SP",          category: "Endereço" },
+    { key: "vol",          label: "Volume Atual",        example: "1",           category: "Volume" },
+    { key: "totalVol",     label: "Total de Volumes",    example: "3",           category: "Volume" },
+    { key: "route",        label: "Código da Rota",      example: "R01",         category: "Rota" },
+    { key: "routeName",    label: "Nome da Rota",        example: "Centro",      category: "Rota" },
+    { key: "loadCode",     label: "Código de Carga",     example: "CARGA-001",   category: "Pedido" },
+    { key: "operator",     label: "Operador",            example: "João Silva",  category: "Operação" },
+    { key: "date",         label: "Data",                example: "21/04/2026",  category: "Operação" },
+    { key: "time",         label: "Hora",                example: "10:30",       category: "Operação" },
+    { key: "sender",       label: "Remetente",           example: "Stoker WMS",  category: "Operação" },
+    { key: "sacola",       label: "Qtd Sacola",          example: "2",           category: "Contagem" },
+    { key: "caixa",        label: "Qtd Caixa",           example: "1",           category: "Contagem" },
+    { key: "saco",         label: "Qtd Saco",            example: "0",           category: "Contagem" },
+    { key: "avulso",       label: "Qtd Avulso",          example: "3",           category: "Contagem" },
+  ],
+  pallet_label: [
+    { key: "code",     label: "Código do Pallet",  example: "PAL-001",    category: "Pallet" },
+    { key: "status",   label: "Status",            example: "alocado",    category: "Pallet" },
+    { key: "address",  label: "Endereço WMS",      example: "A-01-01",    category: "Endereço" },
+    { key: "items",    label: "Conteúdo",          example: "Produto A x10", category: "Pallet" },
+    { key: "operator", label: "Operador",          example: "João Silva", category: "Operação" },
+    { key: "date",     label: "Data",              example: "21/04/2026", category: "Operação" },
+    { key: "company",  label: "Empresa",           example: "Stoker WMS", category: "Operação" },
+    { key: "nf",       label: "Número da NF",      example: "NF-12345",   category: "Fiscal" },
+    { key: "lot",      label: "Lote",              example: "L-001",      category: "Fiscal" },
+  ],
+  product_label: [
+    { key: "name",        label: "Nome do Produto",   example: "Arroz 5kg",  category: "Produto" },
+    { key: "erpCode",     label: "Código ERP",        example: "P001",       category: "Produto" },
+    { key: "barcode",     label: "Código de Barras",  example: "7891234567890", category: "Produto" },
+    { key: "unit",        label: "Unidade",           example: "UN",         category: "Produto" },
+    { key: "price",       label: "Preço",             example: "R$ 24,90",   category: "Produto" },
+  ],
+  order_label: [
+    { key: "erpOrderId",   label: "Número ERP",       example: "PED-001",    category: "Pedido" },
+    { key: "customerName", label: "Cliente",          example: "Mercado ABC", category: "Pedido" },
+    { key: "routeName",    label: "Rota",             example: "Centro",     category: "Pedido" },
+    { key: "totalValue",   label: "Valor Total",      example: "R$ 150,00",  category: "Pedido" },
+    { key: "date",         label: "Data",             example: "21/04/2026", category: "Operação" },
+  ],
+};
+export const labelTemplates = pgTable("label_templates", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  companyId: integer("company_id"),
+  name: text("name").notNull(),
+  context: text("context").notNull().$type<LabelContext>(),
+  widthMm: integer("width_mm").notNull().default(100),
+  heightMm: integer("height_mm").notNull().default(70),
+  dpi: integer("dpi").notNull().default(203),
+  active: boolean("active").notNull().default(true),
+  layoutJson: jsonb("layout_json").notNull().$type<LabelLayout>().default({ components: [] }),
+  createdAt: text("created_at").notNull().default(new Date().toISOString()),
+  updatedAt: text("updated_at"),
+});
+export const insertLabelTemplateSchema = createInsertSchema(labelTemplates).omit({ id: true, createdAt: true, updatedAt: true });
+export type LabelTemplate = typeof labelTemplates.$inferSelect;
+export type InsertLabelTemplate = z.infer<typeof insertLabelTemplateSchema>;
+export const labelDefaultAssignments = pgTable("label_default_assignments", {
+  companyId: integer("company_id").notNull().default(0),
+  context: text("context").notNull().$type<LabelContext>(),
+  templateId: text("template_id"),
+  updatedAt: text("updated_at").notNull().default(new Date().toISOString()),
+}, (table) => ({
+  pk: primaryKey({ columns: [table.companyId, table.context] }),
+}));
+export type LabelDefaultAssignment = typeof labelDefaultAssignments.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+export type InsertRoute = z.infer<typeof insertRouteSchema>;
+
+
+--- Log Task ---
+
+
+Task approved
+
+Validation failed · 1 failed
+
+Planning database fallback logic (33 seconds)
+The code review found 4 issues to fix. Let me address them all:
+
+Defaults don't fall back to global (company_id=0) seeds
+Global templates return 404 on mutations instead of 403
+Barcode enum has UPC instead of ITF14
+companyId not omitted from update schema (authz boundary leak)
+
+5 actions
+Now let me implement all 4 fixes simultaneously:
+
+Fix 3 + Fix 4: Update label-routes.ts (barcode enum + omit companyId from schemas + 403 for global templates):
+
+
+2 actions
+Now fix companyId omission in client-writable schema (Fix 4):
+
+
+2 actions
+Now Fix 1 (defaults fallback) and Fix 2 (403 for global templates). Let me update storage.ts:
+
+
+2 actions
+Now add the 403 ownership guard for global templates in label-routes.ts (Fix 2):
+
+
+2 actions
+Now update the PUT, PATCH, and DELETE routes to use the ownership guard:
+
+
+2 actions
+Now update PATCH /active and DELETE routes:
+
+
+2 actions
+Now let me restart the workflow to verify everything compiles:
+
+
+4 actions
+Clean startup, no errors. Let me update the commit message with the additional fixes:
+
+
+2 actions
+All 4 issues from the code review are now resolved:
+
+Defaults fallback: getLabelDefaultAssignment now falls back to company_id = 0 (global seeded defaults) when no company-specific row exists, and getLabelDefaultAssignments merges both
+403 for global templates: requireTemplateOwnership() helper returns 403 (not 404) when a system template is visible but not owned by the requesting company
+Barcode enum: Fixed UPC → ITF14 to match the frontend
+companyId omit: patchedInsertSchema now strips companyId from client payloads — clients can't move template ownership across tenants
+
+Validation failed · 1 failed
+
+Planning migrations for label tables (4 seconds)
+The critical fix is: add CREATE TABLE IF NOT EXISTS for both label tables in the bootstrap list. Let me find the right place in the tables[] array:
+
+
+2 actions
+Now let me find the end of the tables[] array to add the label table DDL:
+
+
+2 actions
+Found it. Let me add the label table DDL before the closing ]:
+
+
+2 actions
+Now let me restart and verify clean startup:
+
+
+4 actions
+Server runs cleanly. Let me update the commit message and re-submit:
+
+
+2 actions
+
+Validation failed · 1 failed
+
+Planning schema and export/import fixes (17 seconds)
+The reviewer is flagging 4 issues. Let me fix the quick one (image component mismatch) and add export/import endpoints — then assess the others:
+
+
+7 actions
+Let me check what features are already in the label studio UI:
+
+
+2 actions
+Let me look at the editor canvas/drag logic to understand what to add:
+
+
+3 actions
+Let me read the key drag, resize, and canvas sections of label-studio.tsx:
+
+
+3 actions
+Let me read the canvas area and component rendering section:
+
+
+2 actions
+Let me read the top of label-studio.tsx:
+
+
+2 actions
+Now let me implement all remaining fixes. First, remove image from the Zod schema in routes and add export/import endpoints:
+
+
+2 actions
+Now add the export/import endpoints at the end of label-routes.ts:
+
+
+2 actions
+Now implement snap-to-grid, safety margins, and rulers in label-studio.tsx. Let me make all the changes at once:
+
+
+2 actions
+Fix unused variable warning in the Ruler component:
+
+
+2 actions
+Now add snapGrid and showMargins state to the editor, and modify the drag handler:
+
+
+2 actions
+Now modify the drag handler to use snap-to-grid:
+
+
+2 actions
+Now add the rulers and safety margin overlay to the canvas, plus the toolbar buttons for snap/margins:
+
+
+2 actions
+Now let me add rulers and safety margin to the canvas rendering:
+
+
+2 actions
+I need to close the outer div wrapper I added. Let me check the end of the canvas section and close it:
+
+
+2 actions
+I need to close the wrapper div I added around the canvas. Let me fix that:
+
+
+2 actions
+Now add toolbar buttons for snap-to-grid and safety margins. Let me find the toolbar:
+
+
+4 actions
+Let me also add an Export button to the studio toolbar to make it accessible from the UI:
+
+
+2 actions
+Let me add the Export button right after Save:
+
+
+2 actions
+Let me restart and verify the app compiles cleanly:
+
+
+4 actions
+Server is clean. Let me also look at the label templates list page to add import button there:
+
+
+4 actions
+Let me read the label-templates list page header area and add an import button:
+
+
+2 actions
+Let me read the state/imports section of label-templates.tsx:
+
+
+2 actions
+Let me add import functionality to label-templates.tsx:
+
+
+6 actions
+Now add the import mutation and file ref to the component:
+
+
+2 actions
+Now add the import mutation to the component. Let me find a good place to add it:
+
+
+4 actions
+Now add the import button and hidden file input to the header:
+
+
+2 actions
+Let me restart and check compilation:
+
+
+4 actions
+The app starts cleanly. Let me also check what server-side print architecture needs to be added. Let me look at the relevant server print files:
+
+
+5 actions
+Let me look at the print-routes.ts more carefully to understand where to add the label template extension point:
+
+
+2 actions
+Now let me add the server-side label template print extension point to print-routes.ts:
+
+
+2 actions
+Storage is already imported. Let me add a label-aware print endpoint to print-routes.ts:
+
+
+4 actions
+Let me restart and verify the final state:
+
+
+4 actions
+All running cleanly. Let me update the commit message with the complete list of all fixes:
+
+
+2 actions
+
+Ran validation · 1 passed
+
+Deciding on template UI improvements (10 seconds)
+Approved with comments! The reviewer suggests adding a UI indicator for system/global templates. Let me implement that:
+
+
+2 actions
+Now let me add the "Sistema" badge and disable mutations for global templates in the template list:
+
+
+Edited client/src/pages/admin/label-templates.tsx
+The ability to use Replit Agent has been disabled by your admin.
+
+
+Checkpoint made
+22 minutes ago
+
+Worked for 1h 17m

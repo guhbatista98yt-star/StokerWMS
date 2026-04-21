@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useSearch } from "wouter";
 import { QRCodeSVG } from "qrcode.react";
+import { useLabelDefault } from "@/hooks/use-label-default";
 
 /**
  * Página de etiqueta de PALLET — aberta em nova aba, imprime automaticamente.
@@ -59,6 +60,24 @@ export default function PalletLabelPage() {
 
   const statusLabel = STATUS_LABELS[status] ?? status.toUpperCase();
   const statusColor = status === "alocado" ? "#1a7a3a" : status === "cancelado" ? "#c0392b" : "#1a3a5c";
+
+  const { loading: tplLoading, templateHtml } = useLabelDefault("pallet_label", {
+    code, status: statusLabel, address, items, operator, date, company, nf, lot,
+  });
+
+  if (tplLoading) return null;
+  if (templateHtml) {
+    return (
+      <iframe
+        srcDoc={templateHtml}
+        style={{ border: 0, width: "100vw", height: "100vh" }}
+        title="Etiqueta de Pallet"
+        onLoad={(e) => {
+          try { (e.currentTarget.contentWindow as Window | null)?.print(); } catch {}
+        }}
+      />
+    );
+  }
 
   return (
     <>

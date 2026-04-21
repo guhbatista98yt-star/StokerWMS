@@ -1,5 +1,6 @@
 import { useSearch } from "wouter";
 import { QRCodeSVG } from "qrcode.react";
+import { useLabelDefault } from "@/hooks/use-label-default";
 
 /**
  * Etiqueta de VOLUME — 100mm × 70mm landscape
@@ -45,6 +46,25 @@ export default function VolumeLabelPage() {
   const avulso = Number(p.get("avulso") ?? 0);
 
   const cityLine = [city, state].filter(Boolean).join(" - ");
+
+  const { loading: tplLoading, templateHtml } = useLabelDefault("volume_label", {
+    order, customer, address, neighborhood, city, state, vol, totalVol,
+    route: routeDisplay, operator, sender, date, time, sacola, caixa, saco, avulso,
+  });
+
+  if (tplLoading) return null;
+  if (templateHtml) {
+    return (
+      <iframe
+        srcDoc={templateHtml}
+        style={{ border: 0, width: "100vw", height: "100vh" }}
+        title="Etiqueta de Volume"
+        onLoad={(e) => {
+          try { (e.currentTarget.contentWindow as Window | null)?.print(); } catch {}
+        }}
+      />
+    );
+  }
 
   const countCells = [
     { label: "ROTA",   val: routeDisplay || "—" },

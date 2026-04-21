@@ -9,7 +9,9 @@ import {
   type SectionGroup, type InsertSectionGroup, type Section, pickingSessions, type PickingSession, type InsertPickingSession,
   type Db2Mapping, type MappingField, type BatchSyncPayload,
   type OrderVolume, type InsertOrderVolume, companies, type Company,
-  type SystemSettings, type SeparationMode
+  type SystemSettings, type SeparationMode,
+  labelTemplates, labelDefaultAssignments,
+  type LabelTemplate, type InsertLabelTemplate, type LabelContext, type LabelDefaultAssignment,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { log, getErrorMessage, getDbError } from "./log";
@@ -183,6 +185,18 @@ export interface IStorage {
   // Scan Log — dedup persistente de msgIds (S1-04)
   insertScanLogDedup(msgId: string, userId: string, companyId: number | undefined, workUnitId: string, barcode: string, quantity: number): Promise<{ inserted: boolean }>;
   cleanupOldScanLogs(daysOld?: number): Promise<number>;
+
+  // Label Templates
+  getLabelTemplates(context?: LabelContext, companyId?: number): Promise<LabelTemplate[]>;
+  getLabelTemplateById(id: string, companyId?: number): Promise<LabelTemplate | undefined>;
+  createLabelTemplate(template: InsertLabelTemplate, companyId: number): Promise<LabelTemplate>;
+  updateLabelTemplate(id: string, data: Partial<InsertLabelTemplate>, companyId: number): Promise<LabelTemplate | undefined>;
+  duplicateLabelTemplate(id: string, newName: string, companyId: number): Promise<LabelTemplate | undefined>;
+  toggleLabelTemplateActive(id: string, active: boolean, companyId: number): Promise<LabelTemplate | undefined>;
+  deleteLabelTemplate(id: string, companyId: number): Promise<void>;
+  getLabelDefaultAssignment(context: LabelContext, companyId: number): Promise<LabelDefaultAssignment | undefined>;
+  getLabelDefaultAssignments(companyId: number): Promise<LabelDefaultAssignment[]>;
+  setLabelDefaultAssignment(context: LabelContext, templateId: string | null, companyId: number): Promise<LabelDefaultAssignment>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2475,6 +2489,124 @@ export class DatabaseStorage implements IStorage {
       sql`DELETE FROM scan_log WHERE created_at < ${cutoff.toISOString()}`
     );
     return (result as any).rowCount ?? 0;
+  }
+
+  // Label Templates
+  async getLabelTemplates(context?: LabelContext, companyId?: number): Promise<LabelTemplate[]> {
+    const visibilityFilter = companyId !== undefined
+      ? or(isNull(labelTemplates.companyId), eq(labelTemplates.companyId, companyId))
+      : undefined;
+    if (context) {
+      const conditions = visibilityFilter
+        ? and(eq(labelTemplates.context, context), visibilityFilter)
+        : eq(labelTemplates.context, context);
+      return db.select().from(labelTemplates).where(conditions).orderBy(desc(labelTemplates.createdAt));
+    }
+    return visibilityFilter
+      ? db.select().from(labelTemplates).where(visibilityFilter).orderBy(desc(labelTemplates.createdAt))
+      : db.select().from(labelTemplates).orderBy(desc(labelTemplates.createdAt));
+  }
+
+  async getLabelTemplateById(id: string, companyId?: number): Promise<LabelTemplate | undefined> {
+    const visibilityFilter = companyId !== undefined
+      ? or(isNull(labelTemplates.companyId), eq(labelTemplates.companyId, companyId))
+      : undefined;
+    const condition = visibilityFilter
+      ? and(eq(labelTemplates.id, id), visibilityFilter)
+      : eq(labelTemplates.id, id);
+    const [template] = await db.select().from(labelTemplates).where(condition);
+    return template;
+  }
+
+  async createLabelTemplate(template: InsertLabelTemplate, companyId: number): Promise<LabelTemplate> {
+    const [created] = await db.insert(labelTemplates).values({
+      ...template,
+      companyId,
+      createdAt: new Date().toISOString(),
+    }).returning();
+    return created;
+  }
+
+  async updateLabelTemplate(id: string, data: Partial<InsertLabelTemplate>, companyId: number): Promise<LabelTemplate | undefined> {
+    const [updated] = await db.update(labelTemplates)
+      .set({ ...data, updatedAt: new Date().toISOString() })
+      .where(and(eq(labelTemplates.id, id), eq(labelTemplates.companyId, companyId)))
+      .returning();
+    return updated;
+  }
+
+  async duplicateLabelTemplate(id: string, newName: string, companyId: number): Promise<LabelTemplate | undefined> {
+    const original = await this.getLabelTemplateById(id, companyId);
+    if (!original) return undefined;
+    const [created] = await db.insert(labelTemplates).values({
+      name: newName,
+      companyId,
+      context: original.context,
+      widthMm: original.widthMm,
+      heightMm: original.heightMm,
+      dpi: original.dpi,
+      active: true,
+      layoutJson: original.layoutJson,
+      createdAt: new Date().toISOString(),
+    }).returning();
+    return created;
+  }
+
+  async toggleLabelTemplateActive(id: string, active: boolean, companyId: number): Promise<LabelTemplate | undefined> {
+    const [updated] = await db.update(labelTemplates)
+      .set({ active, updatedAt: new Date().toISOString() })
+      .where(and(eq(labelTemplates.id, id), eq(labelTemplates.companyId, companyId)))
+      .returning();
+    return updated;
+  }
+
+  async deleteLabelTemplate(id: string, companyId: number): Promise<void> {
+    await db.delete(labelTemplates).where(and(eq(labelTemplates.id, id), eq(labelTemplates.companyId, companyId)));
+    await db.update(labelDefaultAssignments)
+      .set({ templateId: null, updatedAt: new Date().toISOString() })
+      .where(and(eq(labelDefaultAssignments.templateId, id), eq(labelDefaultAssignments.companyId, companyId)));
+  }
+
+  private async getLabelDefaultAssignmentOwned(context: LabelContext, companyId: number): Promise<LabelDefaultAssignment | undefined> {
+    const [assignment] = await db.select().from(labelDefaultAssignments)
+      .where(and(eq(labelDefaultAssignments.context, context), eq(labelDefaultAssignments.companyId, companyId)));
+    return assignment;
+  }
+
+  async getLabelDefaultAssignment(context: LabelContext, companyId: number): Promise<LabelDefaultAssignment | undefined> {
+    const owned = await this.getLabelDefaultAssignmentOwned(context, companyId);
+    if (owned) return owned;
+    const [global] = await db.select().from(labelDefaultAssignments)
+      .where(and(eq(labelDefaultAssignments.context, context), eq(labelDefaultAssignments.companyId, 0)));
+    return global;
+  }
+
+  async getLabelDefaultAssignments(companyId: number): Promise<LabelDefaultAssignment[]> {
+    const rows = await db.select().from(labelDefaultAssignments)
+      .where(or(eq(labelDefaultAssignments.companyId, companyId), eq(labelDefaultAssignments.companyId, 0)));
+    const map = new Map<string, LabelDefaultAssignment>();
+    for (const row of rows) {
+      const existing = map.get(row.context);
+      if (!existing || (existing.companyId === 0 && row.companyId === companyId)) {
+        map.set(row.context, row);
+      }
+    }
+    return Array.from(map.values());
+  }
+
+  async setLabelDefaultAssignment(context: LabelContext, templateId: string | null, companyId: number): Promise<LabelDefaultAssignment> {
+    const existing = await this.getLabelDefaultAssignmentOwned(context, companyId);
+    if (existing) {
+      const [updated] = await db.update(labelDefaultAssignments)
+        .set({ templateId, updatedAt: new Date().toISOString() })
+        .where(and(eq(labelDefaultAssignments.context, context), eq(labelDefaultAssignments.companyId, companyId)))
+        .returning();
+      return updated;
+    }
+    const [created] = await db.insert(labelDefaultAssignments)
+      .values({ context, templateId, companyId, updatedAt: new Date().toISOString() })
+      .returning();
+    return created;
   }
 }
 

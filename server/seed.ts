@@ -1,7 +1,7 @@
 import { db } from "./db";
-import { users, routes, products, orders, orderItems, workUnits, sections } from "@shared/schema";
+import { users, routes, products, orders, orderItems, workUnits, sections, labelTemplates, labelDefaultAssignments } from "@shared/schema";
 import { hashPassword, generateBadgeCode } from "./auth";
-import { eq } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 
 async function seedSections() {
   const existingSections = await db.select().from(sections);
@@ -26,6 +26,82 @@ async function seedSections() {
 
 import { systemSettings } from "@shared/schema";
 
+async function seedLabelTemplates() {
+  try {
+    const existingGlobal = await db.select().from(labelTemplates).where(isNull(labelTemplates.companyId));
+    if (existingGlobal.length > 0) return;
+
+    const volumeTplId = crypto.randomUUID();
+    const palletTplId = crypto.randomUUID();
+    const now = new Date().toISOString();
+
+    await db.insert(labelTemplates).values([
+      {
+        id: volumeTplId,
+        companyId: null,
+        name: "Volume Padrão (Sistema)",
+        context: "volume_label",
+        widthMm: 100,
+        heightMm: 70,
+        dpi: 203,
+        active: true,
+        layoutJson: {
+          components: [
+            { id: crypto.randomUUID(), type: "text", x: 3, y: 3, width: 60, height: 6, content: "PEDIDO", fontSize: 8, fontWeight: "bold", align: "left", color: "#000", zIndex: 0 },
+            { id: crypto.randomUUID(), type: "dynamic_text", x: 3, y: 9, width: 60, height: 8, field: "order", fontSize: 14, fontWeight: "bold", align: "left", color: "#000", zIndex: 1 },
+            { id: crypto.randomUUID(), type: "text", x: 70, y: 3, width: 27, height: 6, content: "VOLUME", fontSize: 8, fontWeight: "bold", align: "center", color: "#000", zIndex: 2 },
+            { id: crypto.randomUUID(), type: "dynamic_text", x: 70, y: 9, width: 12, height: 12, field: "vol", fontSize: 22, fontWeight: "bold", align: "center", color: "#000", zIndex: 3 },
+            { id: crypto.randomUUID(), type: "text", x: 82, y: 13, width: 5, height: 6, content: "/", fontSize: 14, fontWeight: "bold", align: "center", color: "#000", zIndex: 4 },
+            { id: crypto.randomUUID(), type: "dynamic_text", x: 87, y: 9, width: 10, height: 12, field: "totalVol", fontSize: 22, fontWeight: "bold", align: "center", color: "#000", zIndex: 5 },
+            { id: crypto.randomUUID(), type: "line", x: 3, y: 22, width: 94, height: 0.5, orientation: "horizontal", strokeWidth: 1, color: "#000", zIndex: 6 },
+            { id: crypto.randomUUID(), type: "text", x: 3, y: 24, width: 60, height: 5, content: "CLIENTE", fontSize: 7, fontWeight: "bold", align: "left", color: "#444", zIndex: 7 },
+            { id: crypto.randomUUID(), type: "dynamic_text", x: 3, y: 29, width: 94, height: 6, field: "customer", fontSize: 11, fontWeight: "bold", align: "left", color: "#000", zIndex: 8 },
+            { id: crypto.randomUUID(), type: "dynamic_text", x: 3, y: 36, width: 94, height: 5, field: "address", fontSize: 8, fontWeight: "normal", align: "left", color: "#222", zIndex: 9 },
+            { id: crypto.randomUUID(), type: "dynamic_text", x: 3, y: 41, width: 94, height: 5, field: "city", fontSize: 8, fontWeight: "normal", align: "left", color: "#222", zIndex: 10 },
+            { id: crypto.randomUUID(), type: "barcode", x: 3, y: 48, width: 60, height: 18, field: "order", format: "CODE128", showValue: true, lineWidth: 1.5, barHeight: 40, zIndex: 11 },
+            { id: crypto.randomUUID(), type: "qrcode", x: 75, y: 48, width: 22, height: 18, field: "order", errorLevel: "M", zIndex: 12 },
+          ],
+        },
+        createdAt: now,
+      },
+      {
+        id: palletTplId,
+        companyId: null,
+        name: "Palete Padrão (Sistema)",
+        context: "pallet_label",
+        widthMm: 100,
+        heightMm: 70,
+        dpi: 203,
+        active: true,
+        layoutJson: {
+          components: [
+            { id: crypto.randomUUID(), type: "text", x: 3, y: 3, width: 94, height: 8, content: "ETIQUETA DE PALLET", fontSize: 12, fontWeight: "bold", align: "center", color: "#000", zIndex: 0 },
+            { id: crypto.randomUUID(), type: "line", x: 3, y: 12, width: 94, height: 0.5, orientation: "horizontal", strokeWidth: 1, color: "#000", zIndex: 1 },
+            { id: crypto.randomUUID(), type: "text", x: 3, y: 14, width: 30, height: 5, content: "CÓDIGO", fontSize: 7, fontWeight: "bold", align: "left", color: "#444", zIndex: 2 },
+            { id: crypto.randomUUID(), type: "dynamic_text", x: 3, y: 19, width: 60, height: 8, field: "code", fontSize: 16, fontWeight: "bold", align: "left", color: "#000", zIndex: 3 },
+            { id: crypto.randomUUID(), type: "text", x: 65, y: 14, width: 32, height: 5, content: "STATUS", fontSize: 7, fontWeight: "bold", align: "left", color: "#444", zIndex: 4 },
+            { id: crypto.randomUUID(), type: "dynamic_text", x: 65, y: 19, width: 32, height: 6, field: "status", fontSize: 10, fontWeight: "bold", align: "left", color: "#000", zIndex: 5 },
+            { id: crypto.randomUUID(), type: "text", x: 3, y: 29, width: 30, height: 5, content: "ENDEREÇO", fontSize: 7, fontWeight: "bold", align: "left", color: "#444", zIndex: 6 },
+            { id: crypto.randomUUID(), type: "dynamic_text", x: 3, y: 34, width: 60, height: 6, field: "address", fontSize: 11, fontWeight: "bold", align: "left", color: "#000", zIndex: 7 },
+            { id: crypto.randomUUID(), type: "barcode", x: 3, y: 44, width: 60, height: 22, field: "code", format: "CODE128", showValue: true, lineWidth: 1.5, barHeight: 50, zIndex: 8 },
+            { id: crypto.randomUUID(), type: "qrcode", x: 75, y: 44, width: 22, height: 22, field: "code", errorLevel: "M", zIndex: 9 },
+          ],
+        },
+        createdAt: now,
+      },
+    ]);
+
+    await db.insert(labelDefaultAssignments).values([
+      { companyId: 0, context: "volume_label", templateId: volumeTplId, updatedAt: now },
+      { companyId: 0, context: "pallet_label", templateId: palletTplId, updatedAt: now },
+    ]).onConflictDoNothing();
+
+    console.log("Label templates seeded (volume + palete)");
+  } catch (e: any) {
+    console.log("Label seed skipped:", e.message);
+  }
+}
+
 async function seedSystemSettings() {
   const existingSettings = await db.select().from(systemSettings);
   if (existingSettings.length > 0) return;
@@ -43,6 +119,7 @@ export async function seedDatabase() {
 
   await seedSections();
   await seedSystemSettings();
+  await seedLabelTemplates();
 
   // Check if already seeded
   console.log("Checking for existing users...");

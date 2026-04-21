@@ -14,7 +14,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Printer, RotateCcw, Save, CheckCircle2, User, Cpu } from "lucide-react";
+import { ArrowLeft, Printer, RotateCcw, Save, CheckCircle2, User, Cpu, Tag } from "lucide-react";
+import { LabelDefaultsSection } from "@/components/label-defaults-section";
 import { Link, useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { invalidatePrintConfigCache } from "@/hooks/use-print";
@@ -214,6 +215,23 @@ export default function PrintSettingsPage() {
             </Card>
           </Link>
         )}
+
+        <Link href="/admin/label-templates">
+          <Card className="cursor-pointer hover:border-primary/50 transition-colors group">
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="rounded-lg bg-primary/10 p-2.5 shrink-0 group-hover:bg-primary/20 transition-colors">
+                <Tag className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">Modelos de Etiquetas</p>
+                <p className="text-xs text-muted-foreground">Editor visual de etiquetas (volume, palete, etc.)</p>
+              </div>
+              <ArrowLeft className="h-4 w-4 text-muted-foreground rotate-180 shrink-0" />
+            </CardContent>
+          </Card>
+        </Link>
+
+        <LabelDefaultsSection />
 
         {/* Seletor de usuário */}
         <Card>

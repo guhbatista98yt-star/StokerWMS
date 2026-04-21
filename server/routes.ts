@@ -9,6 +9,7 @@ import { getCompanyBalcaoPickupPoints } from "./company-config";
 
 import { registerWmsRoutes } from "./wms-routes";
 import { registerPrintRoutes, refreshPrinterCache } from "./print-routes";
+import { registerLabelRoutes } from "./label-routes";
 import { getConnectedAgents } from "./print-agent";
 import { z } from "zod";
 import { spawn } from "child_process";
@@ -4509,6 +4510,7 @@ export async function registerRoutes(
 
   registerWmsRoutes(app);
   registerPrintRoutes(app);
+  registerLabelRoutes(app);
 
   return httpServer;
 }

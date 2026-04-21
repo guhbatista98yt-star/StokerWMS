@@ -276,6 +276,30 @@ export function registerPrintRoutes(app: Express) {
     res.json({ success: true, default_printer: defaultPrinter, printers: allPrinters });
   });
 
+  app.get("/api/print/label-template-resolve", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const context = String(req.query.context || "");
+      const companyId = (req as any).companyId;
+      if (!context || !companyId) {
+        res.json({ template: null });
+        return;
+      }
+      const assignment = await storage.getLabelDefaultAssignment(context as any, companyId);
+      if (!assignment?.templateId) {
+        res.json({ template: null });
+        return;
+      }
+      const template = await storage.getLabelTemplateById(assignment.templateId, companyId);
+      if (!template || !template.active) {
+        res.json({ template: null });
+        return;
+      }
+      res.json({ template });
+    } catch (e: any) {
+      res.json({ template: null });
+    }
+  });
+
   /** Envia trabalho de impressão.
    *  - Impressoras locais: responde 202 e executa Chrome em background.
    *  - Impressoras de agente (MACHINE\\Printer): roteia via WebSocket. */

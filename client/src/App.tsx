@@ -82,6 +82,8 @@ import PermissoesPage from "@/pages/admin/permissoes";
 import LimpezaPage from "@/pages/admin/limpeza";
 import KpiDashboardPage from "@/pages/admin/kpi-dashboard";
 import PrintAgentsPage from "@/pages/admin/print-agents";
+import LabelTemplatesPage from "@/pages/admin/label-templates";
+import LabelStudioPage from "@/pages/admin/label-studio";
 import SeparationSettingsPage from "@/pages/supervisor/separation-settings";
 import PrintSettingsPage from "@/pages/supervisor/print-settings";
 import BarcodeManagementPage from "@/pages/supervisor/barcode-management";
@@ -354,6 +356,18 @@ function Router() {
       <Route path="/admin/print-agents">
         <ProtectedRoute allowedRoles={["administrador"]}>
           <PrintAgentsPage />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/admin/label-templates">
+        <ProtectedRoute allowedRoles={["administrador", "supervisor"]}>
+          <LabelTemplatesPage />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/admin/label-studio/:id">
+        <ProtectedRoute allowedRoles={["administrador", "supervisor"]}>
+          <LabelStudioPage />
         </ProtectedRoute>
       </Route>
 

@@ -1,4 +1,4 @@
-import { pgTable, text, integer, doublePrecision, boolean, serial, uniqueIndex, index, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, doublePrecision, boolean, serial, uniqueIndex, index, jsonb, primaryKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -787,3 +787,178 @@ export const scanLog = pgTable("scan_log", {
   dedupIdx: uniqueIndex("scan_log_dedup_idx").on(t.msgId, t.userId, t.companyIdInt),
   createdAtIdx: index("scan_log_created_at_idx").on(t.createdAt),
 }));
+
+// ─── Label Studio ──────────────────────────────────────────────────────────────
+export const labelContextEnum = ["volume_label", "pallet_label", "product_label", "order_label"] as const;
+export type LabelContext = typeof labelContextEnum[number];
+
+export const LABEL_CONTEXT_LABELS: Record<LabelContext, string> = {
+  volume_label:  "Etiqueta de Volume",
+  pallet_label:  "Etiqueta de Palete",
+  product_label: "Etiqueta de Produto",
+  order_label:   "Etiqueta de Pedido",
+};
+
+export type LabelComponentType = "text" | "dynamic_text" | "barcode" | "qrcode" | "line" | "rectangle";
+
+export interface LabelComponentBase {
+  id: string;
+  type: LabelComponentType;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation?: number;
+  zIndex?: number;
+}
+
+export interface TextComponent extends LabelComponentBase {
+  type: "text";
+  content: string;
+  fontSize: number;
+  fontWeight?: "normal" | "bold";
+  fontFamily?: string;
+  align?: "left" | "center" | "right";
+  color?: string;
+}
+
+export interface DynamicTextComponent extends LabelComponentBase {
+  type: "dynamic_text";
+  field: string;
+  label?: string;
+  fontSize: number;
+  fontWeight?: "normal" | "bold";
+  fontFamily?: string;
+  align?: "left" | "center" | "right";
+  color?: string;
+  prefix?: string;
+  suffix?: string;
+}
+
+export interface BarcodeComponent extends LabelComponentBase {
+  type: "barcode";
+  field: string;
+  format: "CODE128" | "CODE39" | "EAN13" | "EAN8" | "ITF14";
+  showValue?: boolean;
+  lineWidth?: number;
+  barHeight?: number;
+}
+
+export interface QRCodeComponent extends LabelComponentBase {
+  type: "qrcode";
+  field: string;
+  errorLevel?: "L" | "M" | "Q" | "H";
+}
+
+export interface LineComponent extends LabelComponentBase {
+  type: "line";
+  orientation: "horizontal" | "vertical";
+  strokeWidth?: number;
+  color?: string;
+  dashed?: boolean;
+}
+
+export interface RectangleComponent extends LabelComponentBase {
+  type: "rectangle";
+  fillColor?: string;
+  strokeColor?: string;
+  strokeWidth?: number;
+  borderRadius?: number;
+}
+
+export type LabelComponent =
+  | TextComponent
+  | DynamicTextComponent
+  | BarcodeComponent
+  | QRCodeComponent
+  | LineComponent
+  | RectangleComponent;
+
+export interface LabelLayout {
+  components: LabelComponent[];
+}
+
+export interface DataField {
+  key: string;
+  label: string;
+  example?: string;
+  category?: string;
+}
+
+export const LABEL_DATA_FIELDS: Record<LabelContext, DataField[]> = {
+  volume_label: [
+    { key: "order",        label: "Número do Pedido",   example: "PED-001",     category: "Pedido" },
+    { key: "customer",     label: "Nome do Cliente",     example: "Mercado ABC", category: "Pedido" },
+    { key: "address",      label: "Endereço",            example: "Rua das Flores, 123", category: "Endereço" },
+    { key: "neighborhood", label: "Bairro",              example: "Centro",      category: "Endereço" },
+    { key: "city",         label: "Cidade",              example: "São Paulo",   category: "Endereço" },
+    { key: "state",        label: "Estado (UF)",         example: "SP",          category: "Endereço" },
+    { key: "vol",          label: "Volume Atual",        example: "1",           category: "Volume" },
+    { key: "totalVol",     label: "Total de Volumes",    example: "3",           category: "Volume" },
+    { key: "route",        label: "Código da Rota",      example: "R01",         category: "Rota" },
+    { key: "routeName",    label: "Nome da Rota",        example: "Centro",      category: "Rota" },
+    { key: "loadCode",     label: "Código de Carga",     example: "CARGA-001",   category: "Pedido" },
+    { key: "operator",     label: "Operador",            example: "João Silva",  category: "Operação" },
+    { key: "date",         label: "Data",                example: "21/04/2026",  category: "Operação" },
+    { key: "time",         label: "Hora",                example: "10:30",       category: "Operação" },
+    { key: "sender",       label: "Remetente",           example: "Stoker WMS",  category: "Operação" },
+    { key: "sacola",       label: "Qtd Sacola",          example: "2",           category: "Contagem" },
+    { key: "caixa",        label: "Qtd Caixa",           example: "1",           category: "Contagem" },
+    { key: "saco",         label: "Qtd Saco",            example: "0",           category: "Contagem" },
+    { key: "avulso",       label: "Qtd Avulso",          example: "3",           category: "Contagem" },
+  ],
+  pallet_label: [
+    { key: "code",     label: "Código do Pallet",  example: "PAL-001",    category: "Pallet" },
+    { key: "status",   label: "Status",            example: "alocado",    category: "Pallet" },
+    { key: "address",  label: "Endereço WMS",      example: "A-01-01",    category: "Endereço" },
+    { key: "items",    label: "Conteúdo",          example: "Produto A x10", category: "Pallet" },
+    { key: "operator", label: "Operador",          example: "João Silva", category: "Operação" },
+    { key: "date",     label: "Data",              example: "21/04/2026", category: "Operação" },
+    { key: "company",  label: "Empresa",           example: "Stoker WMS", category: "Operação" },
+    { key: "nf",       label: "Número da NF",      example: "NF-12345",   category: "Fiscal" },
+    { key: "lot",      label: "Lote",              example: "L-001",      category: "Fiscal" },
+  ],
+  product_label: [
+    { key: "name",        label: "Nome do Produto",   example: "Arroz 5kg",  category: "Produto" },
+    { key: "erpCode",     label: "Código ERP",        example: "P001",       category: "Produto" },
+    { key: "barcode",     label: "Código de Barras",  example: "7891234567890", category: "Produto" },
+    { key: "unit",        label: "Unidade",           example: "UN",         category: "Produto" },
+    { key: "price",       label: "Preço",             example: "R$ 24,90",   category: "Produto" },
+  ],
+  order_label: [
+    { key: "erpOrderId",   label: "Número ERP",       example: "PED-001",    category: "Pedido" },
+    { key: "customerName", label: "Cliente",          example: "Mercado ABC", category: "Pedido" },
+    { key: "routeName",    label: "Rota",             example: "Centro",     category: "Pedido" },
+    { key: "totalValue",   label: "Valor Total",      example: "R$ 150,00",  category: "Pedido" },
+    { key: "date",         label: "Data",             example: "21/04/2026", category: "Operação" },
+  ],
+};
+
+export const labelTemplates = pgTable("label_templates", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  companyId: integer("company_id"),
+  name: text("name").notNull(),
+  context: text("context").notNull().$type<LabelContext>(),
+  widthMm: integer("width_mm").notNull().default(100),
+  heightMm: integer("height_mm").notNull().default(70),
+  dpi: integer("dpi").notNull().default(203),
+  active: boolean("active").notNull().default(true),
+  layoutJson: jsonb("layout_json").notNull().$type<LabelLayout>().default({ components: [] }),
+  createdAt: text("created_at").notNull().default(new Date().toISOString()),
+  updatedAt: text("updated_at"),
+});
+
+export const insertLabelTemplateSchema = createInsertSchema(labelTemplates).omit({ id: true, createdAt: true, updatedAt: true });
+export type LabelTemplate = typeof labelTemplates.$inferSelect;
+export type InsertLabelTemplate = z.infer<typeof insertLabelTemplateSchema>;
+
+export const labelDefaultAssignments = pgTable("label_default_assignments", {
+  companyId: integer("company_id").notNull().default(0),
+  context: text("context").notNull().$type<LabelContext>(),
+  templateId: text("template_id"),
+  updatedAt: text("updated_at").notNull().default(new Date().toISOString()),
+}, (table) => ({
+  pk: primaryKey({ columns: [table.companyId, table.context] }),
+}));
+
+export type LabelDefaultAssignment = typeof labelDefaultAssignments.$inferSelect;
