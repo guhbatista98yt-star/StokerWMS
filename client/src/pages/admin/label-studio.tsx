@@ -766,6 +766,19 @@ export default function LabelStudioPage() {
     onError: (e: any) => toast({ title: "Erro ao salvar", description: e?.message, variant: "destructive" }),
   });
 
+  const duplicateMutation = useMutation({
+    mutationFn: async () => {
+      const name = template ? `${template.name} (cópia)` : "Cópia";
+      const res = await apiRequest("POST", `/api/labels/templates/${id}/duplicate`, { name });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({ title: "Modelo duplicado", description: "Redirecionando para o editor..." });
+      navigate(`/admin/label-studio/${data.id}`);
+    },
+    onError: (e: any) => toast({ title: "Erro ao duplicar", description: e?.message, variant: "destructive" }),
+  });
+
   // ─── Operações com componentes ──────────────────────────────────────────
   const updateComponent = useCallback((updated: LabelComponent, fromInteraction = false) => {
     if (fromInteraction) {
@@ -1138,6 +1151,28 @@ export default function LabelStudioPage() {
           {rightPanelOpen ? <PanelRightClose className="h-3.5 w-3.5" /> : <PanelRightOpen className="h-3.5 w-3.5" />}
         </Button>
       </div>
+
+      {/* Banner somente leitura */}
+      {isReadOnly && (
+        <div className="flex items-center justify-between gap-3 px-4 py-2 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-800 shrink-0">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            <p className="text-xs text-amber-800 dark:text-amber-200">
+              Este é um modelo do sistema e <strong>não pode ser editado diretamente</strong>. Duplique-o para criar uma versão editável.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="shrink-0 border-amber-400 text-amber-800 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/40"
+            onClick={() => duplicateMutation.mutate()}
+            disabled={duplicateMutation.isPending}
+            data-testid="btn-duplicate-to-edit"
+          >
+            {duplicateMutation.isPending ? "Duplicando..." : "Duplicar e editar"}
+          </Button>
+        </div>
+      )}
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Toolbox + camadas (recolhível) */}
