@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { flushSync } from "react-dom";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { ScanLine, Check, X, AlertTriangle, Keyboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { VirtualKeyboard } from "@/components/ui/virtual-keyboard";
 
 interface ScanInputProps {
   placeholder?: string;
@@ -47,7 +47,9 @@ export function ScanInput({
   manualInputAllowed = true,
 }: ScanInputProps) {
   const [internalValue, setInternalValue] = useState("");
-  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  // nativeKbdActive=true → inputMode "text" para abrir o teclado nativo do dispositivo.
+  // Quando false, mantém inputMode original (geralmente "none") para evitar abrir teclado em handhelds.
+  const [nativeKbdActive, setNativeKbdActive] = useState(false);
   const refocusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -157,11 +159,22 @@ export function ScanInput({
   };
 
   const toggleKeyboard = () => {
-    setKeyboardOpen(prev => {
-      const next = !prev;
-      if (!next) setTimeout(() => inputRef.current?.focus(), 50);
-      return next;
-    });
+    const willActivate = !nativeKbdActive;
+    // flushSync atualiza o DOM (inputMode) imediatamente, ainda DENTRO do gesto do usuário.
+    // Isso é crítico para iOS Safari, que só abre o teclado nativo se o focus() ocorrer
+    // de forma síncrona dentro do gesto (clique). setTimeout quebra a "user activation".
+    flushSync(() => setNativeKbdActive(willActivate));
+    const el = inputRef.current;
+    if (!el) return;
+    if (willActivate) {
+      // Re-foca de forma síncrona para o SO (iOS/Android/tablet) abrir o teclado nativo
+      try { el.blur(); } catch {}
+      el.focus();
+    } else {
+      // Voltando para modo scanner: tira teclado nativo e mantém foco para receber leituras
+      try { el.blur(); } catch {}
+      el.focus();
+    }
   };
 
   const statusColors = {
@@ -210,7 +223,7 @@ export function ScanInput({
           placeholder={placeholder}
           disabled={disabled}
           readOnly={effectiveReadOnly}
-          inputMode={inputMode}
+          inputMode={nativeKbdActive ? "text" : inputMode}
           data-scan-input="true"
           className={cn(
             "pl-11 h-14 text-lg font-mono transition-all",
@@ -228,11 +241,11 @@ export function ScanInput({
               onClick={toggleKeyboard}
               className={cn(
                 "h-7 w-7 rounded-lg transition-colors",
-                keyboardOpen
+                nativeKbdActive
                   ? "text-primary bg-primary/10 hover:bg-primary/20"
                   : "text-muted-foreground hover:text-foreground"
               )}
-              title={keyboardOpen ? "Fechar teclado" : "Abrir teclado virtual"}
+              title={nativeKbdActive ? "Voltar para modo scanner" : "Abrir teclado do dispositivo"}
               data-testid="button-keyboard-toggle"
               data-scan-exclude="true"
             >
@@ -257,21 +270,6 @@ export function ScanInput({
           </p>
         )}
       </div>
-
-      {keyboardOpen && canShowKeyboardToggle && (
-        <div className="absolute z-50 left-0 right-0 top-full mt-1">
-          <VirtualKeyboard
-            value={value}
-            onChange={setValue}
-            onConfirm={() => {
-              fireScan();
-              // Mantém o teclado aberto para próxima leitura.
-            }}
-            onClose={() => setKeyboardOpen(false)}
-            enabled={manualInputAllowed}
-          />
-        </div>
-      )}
     </div>
   );
 }

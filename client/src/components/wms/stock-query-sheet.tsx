@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Loader2, Search, Package, BarChart2, Keyboard, X, Barcode as BarcodeIcon, MapPin as MapPinIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { VirtualKeyboard } from "@/components/ui/virtual-keyboard";
 
 interface StockQuerySheetProps {
   open: boolean;
@@ -27,7 +27,8 @@ interface StockProduct {
 export function StockQuerySheet({ open, onOpenChange, companyId, manualInputAllowed = true }: StockQuerySheetProps) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
-  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  // nativeKbdActive=true → inputMode "text" para o SO abrir o teclado nativo do dispositivo.
+  const [nativeKbdActive, setNativeKbdActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -41,11 +42,23 @@ export function StockQuerySheet({ open, onOpenChange, companyId, manualInputAllo
     if (!open) {
       setQuery("");
       setDebounced("");
-      setKeyboardOpen(false);
+      setNativeKbdActive(false);
     } else {
       setTimeout(() => inputRef.current?.focus(), 80);
     }
   }, [open]);
+
+  const toggleNativeKbd = () => {
+    const willActivate = !nativeKbdActive;
+    // flushSync atualiza o DOM (inputMode) imediatamente, ainda DENTRO do gesto do clique.
+    // Necessário para iOS Safari abrir o teclado nativo (sem isso, o focus em setTimeout
+    // perde a "user activation" e o teclado não aparece).
+    flushSync(() => setNativeKbdActive(willActivate));
+    const el = inputRef.current;
+    if (!el) return;
+    try { el.blur(); } catch {}
+    el.focus();
+  };
 
   const handleChange = (v: string) => {
     setQuery(v);
@@ -85,7 +98,7 @@ export function StockQuerySheet({ open, onOpenChange, companyId, manualInputAllo
               }}
               onKeyDown={(e) => { if (e.key === "Enter") submitNow(); }}
               className="w-full pl-9 pr-16 h-10 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              inputMode="none"
+              inputMode={nativeKbdActive ? "text" : "none"}
               autoComplete="off"
               data-scan-exclude="true"
               data-testid="input-stock-search"
@@ -109,12 +122,12 @@ export function StockQuerySheet({ open, onOpenChange, companyId, manualInputAllo
                   type="button"
                   className={cn(
                     "h-7 w-7 rounded-lg flex items-center justify-center transition-colors",
-                    keyboardOpen ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted",
+                    nativeKbdActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted",
                   )}
-                  onClick={() => setKeyboardOpen(v => !v)}
+                  onClick={toggleNativeKbd}
                   data-testid="button-stock-keyboard"
                   data-scan-exclude="true"
-                  title={keyboardOpen ? "Fechar teclado" : "Abrir teclado virtual"}
+                  title={nativeKbdActive ? "Voltar para modo scanner" : "Abrir teclado do dispositivo"}
                 >
                   <Keyboard className="h-3.5 w-3.5" />
                 </button>
@@ -129,19 +142,6 @@ export function StockQuerySheet({ open, onOpenChange, companyId, manualInputAllo
             ou digitar parte do <span className="font-semibold text-foreground">nome do produto</span>.
           </p>
         </div>
-
-        {/* Teclado virtual quando aberto */}
-        {keyboardOpen && (
-          <div className="px-3 py-2 border-b border-border/30 shrink-0">
-            <VirtualKeyboard
-              value={query}
-              onChange={(v) => { setQuery(v); }}
-              onConfirm={submitNow}
-              onClose={() => setKeyboardOpen(false)}
-              enabled={manualInputAllowed}
-            />
-          </div>
-        )}
 
         {/* Resultados */}
         <div className="flex-1 overflow-y-auto">
