@@ -19,6 +19,7 @@ import {
   AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
   Maximize2, Square as SquareIcon, AlertTriangle, Printer, PanelRightClose, PanelRightOpen,
+  PanelLeft, PanelRight, PanelTop, PanelBottom,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { renderLabelToHtml } from "@/lib/label-renderer";
@@ -55,45 +56,87 @@ function compLabel(c: LabelComponent): string {
   return "Caixa";
 }
 
-function Ruler({ length, zoom, orient }: { length: number; zoom: number; orient: "h" | "v" }) {
+function Ruler({ length, zoom, side }: { length: number; zoom: number; side: "top" | "bottom" | "left" | "right" }) {
   const pxLen = mmToCanvasPx(length, zoom);
   const ticks: { pos: number; label?: string }[] = [];
   for (let mm = 0; mm <= length; mm += 5) {
     ticks.push({ pos: mmToCanvasPx(mm, zoom), label: mm % 10 === 0 ? String(mm) : undefined });
   }
-  // Tema: usa as variáveis do tema (claro ou escuro) via classes Tailwind no wrapper.
-  // O SVG herda cores via currentColor para os textos e por classe para o fundo.
   const TICK_COLOR = "currentColor";
-  if (orient === "h") {
+  const isHorizontal = side === "top" || side === "bottom";
+
+  // Posicionamento absoluto: cada régua "encosta" no lado correspondente do canvas (do lado de fora)
+  const wrapperStyle: React.CSSProperties = {
+    position: "absolute",
+    overflow: "hidden",
+    pointerEvents: "none",
+    userSelect: "none",
+    width: isHorizontal ? pxLen : RULER_SIZE_PX,
+    height: isHorizontal ? RULER_SIZE_PX : pxLen,
+  };
+  if (side === "top")    { wrapperStyle.top = -RULER_SIZE_PX; wrapperStyle.left = 0; }
+  if (side === "bottom") { wrapperStyle.bottom = -RULER_SIZE_PX; wrapperStyle.left = 0; }
+  if (side === "left")   { wrapperStyle.left = -RULER_SIZE_PX; wrapperStyle.top = 0; }
+  if (side === "right")  { wrapperStyle.right = -RULER_SIZE_PX; wrapperStyle.top = 0; }
+
+  if (isHorizontal) {
+    // Topo: ticks descem do alto; Baixo: ticks sobem da base (espelhado)
+    const baseY = side === "top" ? RULER_SIZE_PX : 0;
+    const tickDir = side === "top" ? -1 : 1;
     return (
-      <div className="text-muted-foreground" style={{ position: "absolute", top: -RULER_SIZE_PX, left: 0, width: pxLen, height: RULER_SIZE_PX, overflow: "hidden", pointerEvents: "none", userSelect: "none" }}>
+      <div className="text-muted-foreground" style={wrapperStyle}>
         <svg width={pxLen} height={RULER_SIZE_PX}>
           <rect width={pxLen} height={RULER_SIZE_PX} className="fill-muted" />
           {ticks.map(({ pos, label }) => (
             <g key={pos}>
-              <line x1={pos} y1={RULER_SIZE_PX} x2={pos} y2={label !== undefined ? RULER_SIZE_PX - 8 : RULER_SIZE_PX - 4} stroke={TICK_COLOR} strokeOpacity={0.55} strokeWidth={1} />
-              {label !== undefined && <text x={pos + 2} y={RULER_SIZE_PX - 9} fontSize={8} fill={TICK_COLOR}>{label}</text>}
+              <line
+                x1={pos} y1={baseY}
+                x2={pos} y2={baseY + tickDir * (label !== undefined ? 8 : 4)}
+                stroke={TICK_COLOR} strokeOpacity={0.55} strokeWidth={1}
+              />
+              {label !== undefined && (
+                <text x={pos + 2} y={side === "top" ? RULER_SIZE_PX - 9 : 11} fontSize={8} fill={TICK_COLOR}>{label}</text>
+              )}
             </g>
           ))}
-          <line x1={0} y1={RULER_SIZE_PX - 0.5} x2={pxLen} y2={RULER_SIZE_PX - 0.5} stroke={TICK_COLOR} strokeOpacity={0.3} strokeWidth={1} />
+          <line
+            x1={0} y1={side === "top" ? RULER_SIZE_PX - 0.5 : 0.5}
+            x2={pxLen} y2={side === "top" ? RULER_SIZE_PX - 0.5 : 0.5}
+            stroke={TICK_COLOR} strokeOpacity={0.3} strokeWidth={1}
+          />
         </svg>
       </div>
     );
   }
+  // Vertical (left ou right)
+  const baseX = side === "left" ? RULER_SIZE_PX : 0;
+  const tickDir = side === "left" ? -1 : 1;
   return (
-    <div className="text-muted-foreground" style={{ position: "absolute", left: -RULER_SIZE_PX, top: 0, width: RULER_SIZE_PX, height: pxLen, overflow: "hidden", pointerEvents: "none", userSelect: "none" }}>
+    <div className="text-muted-foreground" style={wrapperStyle}>
       <svg width={RULER_SIZE_PX} height={pxLen}>
         <rect width={RULER_SIZE_PX} height={pxLen} className="fill-muted" />
         {ticks.map(({ pos, label }) => (
           <g key={pos}>
-            <line x1={RULER_SIZE_PX} y1={pos} x2={label !== undefined ? RULER_SIZE_PX - 8 : RULER_SIZE_PX - 4} y2={pos} stroke={TICK_COLOR} strokeOpacity={0.55} strokeWidth={1} />
+            <line
+              x1={baseX} y1={pos}
+              x2={baseX + tickDir * (label !== undefined ? 8 : 4)} y2={pos}
+              stroke={TICK_COLOR} strokeOpacity={0.55} strokeWidth={1}
+            />
             {label !== undefined && (
-              <text x={RULER_SIZE_PX - 9} y={pos + 3} fontSize={8} fill={TICK_COLOR} textAnchor="middle"
-                transform={`rotate(-90, ${RULER_SIZE_PX - 9}, ${pos + 3})`}>{label}</text>
+              <text
+                x={side === "left" ? RULER_SIZE_PX - 9 : 9}
+                y={pos + 3}
+                fontSize={8} fill={TICK_COLOR} textAnchor="middle"
+                transform={`rotate(-90, ${side === "left" ? RULER_SIZE_PX - 9 : 9}, ${pos + 3})`}
+              >{label}</text>
             )}
           </g>
         ))}
-        <line x1={RULER_SIZE_PX - 0.5} y1={0} x2={RULER_SIZE_PX - 0.5} y2={pxLen} stroke={TICK_COLOR} strokeOpacity={0.3} strokeWidth={1} />
+        <line
+          x1={side === "left" ? RULER_SIZE_PX - 0.5 : 0.5} y1={0}
+          x2={side === "left" ? RULER_SIZE_PX - 0.5 : 0.5} y2={pxLen}
+          stroke={TICK_COLOR} strokeOpacity={0.3} strokeWidth={1}
+        />
       </svg>
     </div>
   );
@@ -378,6 +421,15 @@ export default function LabelStudioPage() {
   const [showPreview, setShowPreview] = useState(false);
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewPosition, setPreviewPositionState] = useState<"right" | "left" | "top" | "bottom">(() => {
+    if (typeof window === "undefined") return "right";
+    const v = window.localStorage.getItem("label-studio-preview-pos");
+    return v === "left" || v === "top" || v === "bottom" || v === "right" ? v : "right";
+  });
+  const setPreviewPosition = (p: "right" | "left" | "top" | "bottom") => {
+    setPreviewPositionState(p);
+    try { window.localStorage.setItem("label-studio-preview-pos", p); } catch {}
+  };
   const [dragging, setDragging] = useState<{ id: string; startX: number; startY: number; origX: number; origY: number } | null>(null);
   const [resizing, setResizing] = useState<{ id: string; handle: string; startX: number; startY: number; origX: number; origY: number; origW: number; origH: number } | null>(null);
   const [snapGrid, setSnapGrid] = useState(true);
@@ -860,9 +912,18 @@ export default function LabelStudioPage() {
           )}
         </div>
 
-        {/* Canvas */}
+        {/* Área central: canvas + (opcionalmente) preview lateral/inferior */}
+        <div
+          className={cn(
+            "flex flex-1 min-h-0 overflow-hidden",
+            previewPosition === "right" && "flex-row",
+            previewPosition === "left" && "flex-row-reverse",
+            previewPosition === "bottom" && "flex-col",
+            previewPosition === "top" && "flex-col-reverse",
+          )}
+        >
         <div className="flex-1 overflow-auto bg-muted/30 flex items-center justify-center p-8 relative" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
-          <div style={{ position: "relative", marginTop: RULER_SIZE_PX, marginLeft: RULER_SIZE_PX, flexShrink: 0 }}>
+          <div style={{ position: "relative", margin: RULER_SIZE_PX, flexShrink: 0 }}>
             <div
               ref={canvasRef}
               style={{ position: "relative", width: canvasW, height: canvasH, background: "white", boxShadow: "0 4px 24px rgba(0,0,0,0.15)", cursor: dragging ? "grabbing" : "default", flexShrink: 0, outline: "1px solid hsl(var(--border))" }}
@@ -872,8 +933,10 @@ export default function LabelStudioPage() {
               }}
               data-testid="label-canvas"
             >
-              <Ruler length={template.widthMm} zoom={zoom} orient="h" />
-              <Ruler length={template.heightMm} zoom={zoom} orient="v" />
+              <Ruler length={template.widthMm} zoom={zoom} side="top" />
+              <Ruler length={template.widthMm} zoom={zoom} side="bottom" />
+              <Ruler length={template.heightMm} zoom={zoom} side="left" />
+              <Ruler length={template.heightMm} zoom={zoom} side="right" />
               {showGrid && (
                 <svg style={{ position: "absolute", top: 0, left: 0, width: canvasW, height: canvasH, pointerEvents: "none", zIndex: 1 }}>
                   <defs>
@@ -939,25 +1002,78 @@ export default function LabelStudioPage() {
           </div>
         </div>
 
-        {/* Preview real */}
-        {showPreview && (
-          <div className="w-72 border-l border-border bg-card flex flex-col shrink-0 overflow-hidden" data-testid="preview-panel">
-            <div className="px-2 py-2 border-b border-border flex items-center gap-1.5">
-              <Eye className="h-3.5 w-3.5 text-muted-foreground" />
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex-1">Preview Real</p>
-              <span className="text-[10px] text-muted-foreground">dados de exemplo</span>
-            </div>
-            <div className="flex-1 overflow-auto p-2 flex items-start justify-center bg-muted/40">
-              {previewLoading ? (
-                <p className="text-xs text-muted-foreground pt-4">Renderizando...</p>
-              ) : previewHtml ? (
-                <iframe srcDoc={previewHtml} style={{ border: "1px solid #ccc", background: "white", width: "100%", minHeight: 240 }} title="Label Preview" data-testid="preview-iframe" />
-              ) : (
-                <p className="text-xs text-muted-foreground pt-4">Nenhum componente</p>
+        {/* Preview real — posicionável (right/left/top/bottom) e em tamanho real (1:1) */}
+        {showPreview && (() => {
+          const isVerticalPanel = previewPosition === "right" || previewPosition === "left";
+          const realW = template ? template.widthMm * CANVAS_SCALE : 0;
+          const realH = template ? template.heightMm * CANVAS_SCALE : 0;
+          const borderClass =
+            previewPosition === "right"  ? "border-l" :
+            previewPosition === "left"   ? "border-r" :
+            previewPosition === "top"    ? "border-b" : "border-t";
+          return (
+            <div
+              className={cn(
+                "bg-card flex flex-col shrink-0 overflow-hidden border-border",
+                borderClass,
+                isVerticalPanel ? "h-full" : "w-full",
               )}
+              style={isVerticalPanel
+                ? { width: Math.max(288, Math.min(realW + 32, 560)) }
+                : { height: Math.max(220, Math.min(realH + 64, 420)) }}
+              data-testid="preview-panel"
+            >
+              <div className="px-2 py-2 border-b border-border flex items-center gap-1.5">
+                <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex-1">
+                  Preview Real <span className="text-[10px] text-muted-foreground/80 normal-case">· 1:1</span>
+                </p>
+                <div className="flex items-center gap-0.5 mr-1" title="Posição do preview">
+                  <Button variant={previewPosition === "left"   ? "secondary" : "ghost"} size="sm" className="h-6 w-6 p-0"
+                    onClick={() => setPreviewPosition("left")} title="Mover para a esquerda" data-testid="btn-preview-pos-left">
+                    <PanelLeft className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant={previewPosition === "top"    ? "secondary" : "ghost"} size="sm" className="h-6 w-6 p-0"
+                    onClick={() => setPreviewPosition("top")} title="Mover para o topo" data-testid="btn-preview-pos-top">
+                    <PanelTop className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant={previewPosition === "bottom" ? "secondary" : "ghost"} size="sm" className="h-6 w-6 p-0"
+                    onClick={() => setPreviewPosition("bottom")} title="Mover para baixo" data-testid="btn-preview-pos-bottom">
+                    <PanelBottom className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant={previewPosition === "right"  ? "secondary" : "ghost"} size="sm" className="h-6 w-6 p-0"
+                    onClick={() => setPreviewPosition("right")} title="Mover para a direita" data-testid="btn-preview-pos-right">
+                    <PanelRight className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                <span className="text-[10px] text-muted-foreground">{template ? `${template.widthMm}×${template.heightMm}mm` : "—"}</span>
+              </div>
+              <div className="flex-1 overflow-auto p-3 flex items-center justify-center bg-muted/40">
+                {previewLoading ? (
+                  <p className="text-xs text-muted-foreground">Renderizando...</p>
+                ) : previewHtml && template ? (
+                  <iframe
+                    srcDoc={previewHtml}
+                    style={{
+                      border: "1px solid #ccc",
+                      background: "white",
+                      width: realW,
+                      height: realH,
+                      flexShrink: 0,
+                      boxShadow: "0 2px 12px rgba(0,0,0,0.10)",
+                    }}
+                    scrolling="no"
+                    title="Label Preview"
+                    data-testid="preview-iframe"
+                  />
+                ) : (
+                  <p className="text-xs text-muted-foreground">Nenhum componente</p>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
+        </div>{/* /área central */}
 
         {/* Propriedades / Campos disponíveis (recolhível) */}
         {rightPanelOpen ? (
