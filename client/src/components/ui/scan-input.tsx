@@ -238,6 +238,7 @@ export function ScanInput({
               type="button"
               variant="ghost"
               size="icon"
+              onPointerDown={(e) => e.preventDefault()}
               onClick={toggleKeyboard}
               className={cn(
                 "h-7 w-7 rounded-lg transition-colors",

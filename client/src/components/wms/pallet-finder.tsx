@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { flushSync } from "react-dom";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
@@ -93,12 +94,10 @@ export function PalletFinder({
   }, [onPalletSelected, toast]);
 
   const toggleKeyboard = () => {
-    setKeyboardEnabled(v => !v);
+    flushSync(() => setKeyboardEnabled(v => !v));
     if (inputRef.current) {
       inputRef.current.blur();
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
+      inputRef.current.focus();
     }
   };
 
@@ -153,6 +152,7 @@ export function PalletFinder({
                   variant={keyboardEnabled ? "default" : "ghost"}
                   size="sm"
                   className="h-8 w-8 p-0 rounded-lg"
+                  onPointerDown={(e) => e.preventDefault()}
                   onClick={toggleKeyboard}
                   data-testid="button-keyboard-toggle"
                 >

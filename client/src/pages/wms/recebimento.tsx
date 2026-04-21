@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { flushSync } from "react-dom";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
@@ -572,9 +573,11 @@ export default function RecebimentoPage() {
                   variant={keyboardEnabled ? "default" : "ghost"}
                   size="sm"
                   className="h-8 w-8 p-0 rounded-lg"
+                  onPointerDown={(e) => e.preventDefault()}
                   onClick={() => {
-                    setKeyboardEnabled(v => !v);
-                    setTimeout(() => scanInputRef.current?.focus(), 50);
+                    flushSync(() => setKeyboardEnabled(v => !v));
+                    scanInputRef.current?.blur();
+                    scanInputRef.current?.focus();
                   }}
                   data-testid="button-toggle-keyboard-scan"
                 >

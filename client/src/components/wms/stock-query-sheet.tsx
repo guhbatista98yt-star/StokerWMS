@@ -124,6 +124,7 @@ export function StockQuerySheet({ open, onOpenChange, companyId, manualInputAllo
                     "h-7 w-7 rounded-lg flex items-center justify-center transition-colors",
                     nativeKbdActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted",
                   )}
+                  onPointerDown={(e) => e.preventDefault()}
                   onClick={toggleNativeKbd}
                   data-testid="button-stock-keyboard"
                   data-scan-exclude="true"

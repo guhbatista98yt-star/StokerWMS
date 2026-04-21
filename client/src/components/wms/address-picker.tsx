@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
+import { flushSync } from "react-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -204,7 +205,12 @@ export function AddressPicker({ availableAddresses, onAddressSelect, onClear, va
             size="sm"
             className="h-7 w-7 p-0"
             title={keyboardEnabled ? "Desativar teclado" : "Ativar teclado"}
-            onClick={() => setKeyboardEnabled(k => !k)}
+            onPointerDown={(e) => e.preventDefault()}
+            onClick={() => {
+              flushSync(() => setKeyboardEnabled(k => !k));
+              bairroRef.current?.blur();
+              bairroRef.current?.focus();
+            }}
             data-testid="btn-toggle-keyboard-address"
           >
             <Keyboard className="h-3.5 w-3.5" />
@@ -260,7 +266,8 @@ export function AddressPicker({ availableAddresses, onAddressSelect, onClear, va
         <button
           type="button"
           className="underline underline-offset-2 hover:text-foreground transition-colors"
-          onClick={() => { setKeyboardEnabled(k => !k); bairroRef.current?.focus(); }}
+          onPointerDown={(e) => e.preventDefault()}
+          onClick={() => { flushSync(() => setKeyboardEnabled(k => !k)); bairroRef.current?.blur(); bairroRef.current?.focus(); }}
         >
           {keyboardEnabled ? "desativar teclado" : "ativar teclado"}
         </button>
