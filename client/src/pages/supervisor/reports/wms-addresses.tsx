@@ -8,10 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Loader2, MapPin, Printer, Package } from "lucide-react";
 import { useLocation } from "wouter";
+import { getAddressLabels } from "@/lib/address-labels";
 
 export default function WmsAddressesReportPage() {
   const [, navigate] = useLocation();
   const { companyId } = useAuth();
+  const addrLabels = getAddressLabels(companyId);
   const [typeFilter, setTypeFilter] = useState("all");
 
   const { data, isLoading, isError } = useQuery({
@@ -69,7 +71,7 @@ export default function WmsAddressesReportPage() {
         </div>
         <table>
           <thead><tr>
-            <th>Código</th><th>Bairro</th><th>Rua</th><th>Bloco</th><th>Nível</th>
+            <th>Código</th><th>${addrLabels.bairro}</th><th>${addrLabels.rua}</th><th>${addrLabels.bloco}</th><th>${addrLabels.nivel}</th>
             <th>Tipo</th><th>Status</th><th>Pallet</th><th>Qtd. Itens</th>
           </tr></thead>
           <tbody>
@@ -183,10 +185,10 @@ export default function WmsAddressesReportPage() {
               <thead>
                 <tr className="border-b bg-muted/30">
                   <th className="text-left py-2 px-3 font-medium">Código</th>
-                  <th className="text-left py-2 px-3 font-medium">Bairro</th>
-                  <th className="text-left py-2 px-3 font-medium">Rua</th>
-                  <th className="text-left py-2 px-3 font-medium">Bloco</th>
-                  <th className="text-left py-2 px-3 font-medium">Nível</th>
+                  <th className="text-left py-2 px-3 font-medium">{addrLabels.bairro}</th>
+                  <th className="text-left py-2 px-3 font-medium">{addrLabels.rua}</th>
+                  <th className="text-left py-2 px-3 font-medium">{addrLabels.bloco}</th>
+                  <th className="text-left py-2 px-3 font-medium">{addrLabels.nivel}</th>
                   <th className="text-left py-2 px-3 font-medium">Tipo</th>
                   <th className="text-center py-2 px-3 font-medium">Status</th>
                   <th className="text-left py-2 px-3 font-medium">Pallet</th>

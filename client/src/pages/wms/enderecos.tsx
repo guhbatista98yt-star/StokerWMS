@@ -18,10 +18,12 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Plus, MapPin, Loader2, ToggleLeft, ToggleRight, Trash2, Search, Package, X, Filter, History, PackageMinus, PackagePlus, ArrowRightLeft, Warehouse } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
+import { getAddressLabels } from "@/lib/address-labels";
 
 export default function EnderecosPage() {
   const [, navigate] = useLocation();
   const { user, companyId, companiesData } = useAuth();
+  const addrLabels = getAddressLabels(companyId);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
@@ -288,10 +290,10 @@ export default function EnderecosPage() {
             <CardHeader><CardTitle className="text-base">Novo Endereço</CardTitle></CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                <Input placeholder="Bairro" value={bairro} onChange={e => setBairro(e.target.value.toUpperCase())} data-testid="input-bairro" />
-                <Input placeholder="Rua" value={rua} onChange={e => setRua(e.target.value.toUpperCase())} data-testid="input-rua" />
-                <Input placeholder="Bloco" value={bloco} onChange={e => setBloco(e.target.value.toUpperCase())} data-testid="input-bloco" />
-                <Input placeholder="Nível" value={nivel} onChange={e => setNivel(e.target.value.toUpperCase())} data-testid="input-nivel" />
+                <Input placeholder={addrLabels.bairro} value={bairro} onChange={e => setBairro(e.target.value.toUpperCase())} data-testid="input-bairro" />
+                <Input placeholder={addrLabels.rua} value={rua} onChange={e => setRua(e.target.value.toUpperCase())} data-testid="input-rua" />
+                <Input placeholder={addrLabels.bloco} value={bloco} onChange={e => setBloco(e.target.value.toUpperCase())} data-testid="input-bloco" />
+                <Input placeholder={addrLabels.nivel} value={nivel} onChange={e => setNivel(e.target.value.toUpperCase())} data-testid="input-nivel" />
               </div>
               <div className="flex items-center gap-3">
                 <Select value={type} onValueChange={setType}>

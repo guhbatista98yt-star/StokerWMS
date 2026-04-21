@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { MapPin, CheckCircle2, XCircle, AlertTriangle, Keyboard } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { getAddressLabels } from "@/lib/address-labels";
 
 interface WmsAddress {
   id: string;
@@ -23,6 +25,8 @@ interface AddressPickerProps {
 }
 
 export function AddressPicker({ availableAddresses, onAddressSelect, onClear, value, label, occupiedWarning }: AddressPickerProps) {
+  const { companyId } = useAuth();
+  const addrLabels = getAddressLabels(companyId);
   const [bairro, setBairro] = useState("");
   const [rua, setRua] = useState("");
   const [bloco, setBloco] = useState("");
@@ -166,10 +170,10 @@ export function AddressPicker({ availableAddresses, onAddressSelect, onClear, va
   const fieldClass = "text-center font-bold text-lg h-12";
 
   const fields = [
-    { label: "Bairro", name: "bairro", ref: bairroRef, value: bairro, set: setBairro, next: ruaRef },
-    { label: "Rua",    name: "rua",    ref: ruaRef,    value: rua,    set: setRua,    next: blocoRef },
-    { label: "Bloco",  name: "bloco",  ref: blocoRef,  value: bloco,  set: setBloco,  next: nivelRef },
-    { label: "Nível",  name: "nível",  ref: nivelRef,  value: nivel,  set: setNivel,  next: null },
+    { label: addrLabels.bairro, name: "bairro", ref: bairroRef, value: bairro, set: setBairro, next: ruaRef },
+    { label: addrLabels.rua,    name: "rua",    ref: ruaRef,    value: rua,    set: setRua,    next: blocoRef },
+    { label: addrLabels.bloco,  name: "bloco",  ref: blocoRef,  value: bloco,  set: setBloco,  next: nivelRef },
+    { label: addrLabels.nivel,  name: "nível",  ref: nivelRef,  value: nivel,  set: setNivel,  next: null },
   ];
 
   return (
