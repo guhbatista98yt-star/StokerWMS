@@ -1,0 +1,46 @@
+PS C:\Users\Micro\Documents\StokerWMS> python sync_db2.py --serve
+
+===================================================================
+  STOKER SYNC  |  2026-04-21 19:26:29  |  modo=serve · SO=Windows
+===================================================================
+
+
+------------------------------------------------------
+  VERIFICANDO SCHEMA DO BANCO
+------------------------------------------------------
+[19:26:29] -   Todas as 33 tabelas já existem
+[19:26:30] -   Todas as colunas verificadas — nada a adicionar
+[19:26:30] -   Índices verificados
+[19:26:30] + Schema verificado com sucesso
+
+------------------------------------------------------
+  INICIANDO CICLO DE SYNC
+------------------------------------------------------
+[19:26:30] > DB2 — conectando...
+[19:27:00] X Falha ao conectar no DB2: ('08001', '[08001] [IBM][CLI Driver] SQL30081N  Foi detectado um erro de comunicação. Protocolo de comunicação sendo utilizado: "TCP/IP". API de Comunicação sendo utilizada: "SOCKETS". Localização onde o erro foi detectado: "192.168.1.200". Função de comunicação que está detectando o erro: "selectForConnectTimeout". Código(s) de erro específico(s) de protocolo: "0", "*", "*".  SQLSTATE=08001\r\n (-30081) (SQLDriverConnect)')
+[19:27:00] + Loop de sync em background (300s)
+
+------------------------------------------------------
+  INICIANDO SERVIDOR WEB
+------------------------------------------------------
+[19:27:00] ! Porta 411 em uso pelo PID 3248 — liberando...
+[19:27:00] + Servidor disponível em → http://localhost:411
+Seeding database...
+Checking for existing users...
+Existing users count: 3
+Database already seeded
+7:27:03 PM [express] [Routes] Registering routes...
+7:27:03 PM [express] [Auto-Sync] Desativado — sync gerenciado pelo processo Python (--serve).
+7:27:03 PM [print] [agent] WebSocket server iniciado em /ws/print-agent
+7:27:03 PM [express] [scanning-ws] WebSocket scanning server iniciado em /ws/scanning
+7:27:04 PM [express] Servidor iniciado na porta 411
+7:27:05 PM [print] 5 impressora(s) carregada(s) | padrão: "CutePDF Writer"
+7:27:11 PM [express] [scanning-ws] Gustavo conectado
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+7:27:43 PM [express] [scanning-ws] Gustavo conectado
+7:27:47 PM [express] [scanning-ws] Gustavo desconectado
+7:27:52 PM [express] [scanning-ws] Gustavo conectado
+7:28:39 PM [express] [Barcodes] Quick-link: product=19919 unit=7899452010445 pkg=78994552010448 qty=50 by=Gustavo
+7:29:18 PM [express] [scanning-ws] Gustavo desconectado
+7:29:35 PM [express] [scanning-ws] Gustavo conectado

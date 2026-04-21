@@ -3541,9 +3541,7 @@ export function registerWmsRoutes(app: Express) {
 
         if (existingPkg.length > 0) {
           const old = existingPkg[0];
-          if (old.packagingQty === data.packagingQty && old.packagingType === (data.packagingType ?? null)) {
-            return;
-          }
+          if (old.packagingQty !== data.packagingQty || old.packagingType !== (data.packagingType ?? null)) {
           await tx.update(productBarcodes).set({
             packagingQty: data.packagingQty,
             packagingType: data.packagingType ?? null,
@@ -3555,6 +3553,7 @@ export function registerWmsRoutes(app: Express) {
             barcodeType: "EMBALAGEM", oldQty: old.packagingQty, newQty: data.packagingQty,
             userId, userName, notes: data.notes ?? "Atualizado via vínculo rápido", createdAt: now,
           });
+          }
         } else {
           for (const c of conflicting) {
             if (c.productId === product.id && c.type === "EMBALAGEM") {
@@ -3584,6 +3583,28 @@ export function registerWmsRoutes(app: Express) {
             userId, userName, notes: data.notes ?? "Criado via vínculo rápido", createdAt: now,
           });
         }
+
+        // Sincroniza o campo legado products.boxBarcodes (JSONB) com a tabela
+        // normalizada productBarcodes. Diversos consumidores (incluindo o
+        // getWorkUnits usado pelos módulos de coleta — Separação, Conferência,
+        // Balcão) ainda fazem o lookup do EAN olhando product.boxBarcodes.
+        // Sem este sync, o vínculo recém-criado existe em productBarcodes mas
+        // não aparece no cache local do operador, e a próxima leitura mostra
+        // "Produto não encontrado nos seus pedidos em aberto".
+        const activePkgs = await tx.select().from(productBarcodes).where(
+          and(
+            eq(productBarcodes.productId, product.id),
+            eq(productBarcodes.type, "EMBALAGEM"),
+            eq(productBarcodes.active, true),
+          )
+        );
+        const newBoxBarcodes = activePkgs.map(p => ({
+          code: p.barcode,
+          qty: p.packagingQty || 1,
+        }));
+        await tx.update(products).set({
+          boxBarcodes: newBoxBarcodes.length > 0 ? newBoxBarcodes : null,
+        }).where(eq(products.id, product.id));
       });
 
       log(`[Barcodes] Quick-link: product=${product.erpCode} unit=${data.productBarcode} pkg=${data.packageBarcode} qty=${data.packagingQty} by=${userName}`);
