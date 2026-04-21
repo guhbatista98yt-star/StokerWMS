@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, Plus, MoreVertical, Pencil, Copy, Trash2, Star,
-  ToggleLeft, ToggleRight, Tag, Layers, Search, Eye, ZoomIn, ZoomOut,
+  ToggleLeft, ToggleRight, Tag, Layers, Search, Eye, ZoomIn, ZoomOut, Maximize2,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { renderLabelToHtml } from "@/lib/label-renderer";
@@ -41,15 +41,21 @@ function ContextBadge({ context }: { context: LabelContext }) {
   );
 }
 
+const MM_TO_PX_PREVIEW = 3.7795275591;
+
 function PreviewModal({ template, onClose }: { template: LabelTemplate | null; onClose: () => void }) {
   const [html, setHtml] = useState<string | null>(null);
-  const [zoom, setZoom] = useState(100);
   const [loading, setLoading] = useState(false);
+  // zoom em fração (1 = 100% do canvas técnico). null = "ajustar à janela" (auto).
+  const [zoom, setZoom] = useState<number | null>(null);
+  const [fitScale, setFitScale] = useState(1);
+  const stageRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!template) { setHtml(null); return; }
     let cancelled = false;
     setLoading(true);
+    setZoom(null); // sempre reabre em "ajustar à janela"
     const ctx = template.context as LabelContext;
     const sample: Record<string, string> = Object.fromEntries(
       (LABEL_DATA_FIELDS[ctx] ?? []).map(f => [f.key, f.example ?? f.label])
@@ -60,18 +66,50 @@ function PreviewModal({ template, onClose }: { template: LabelTemplate | null; o
     return () => { cancelled = true; };
   }, [template]);
 
+  // Calcula a escala para caber inteira na área do palco (com margem confortável).
+  useEffect(() => {
+    if (!template) return;
+    const PADDING = 32; // margem visual confortável (px)
+    function compute() {
+      const el = stageRef.current;
+      if (!el || !template) return;
+      const w = el.clientWidth - PADDING * 2;
+      const h = el.clientHeight - PADDING * 2;
+      const labelW = template.widthMm * MM_TO_PX_PREVIEW;
+      const labelH = template.heightMm * MM_TO_PX_PREVIEW;
+      if (w <= 0 || h <= 0) return;
+      const s = Math.min(w / labelW, h / labelH, 1.5);
+      setFitScale(Math.max(0.05, s));
+    }
+    compute();
+    const ro = new ResizeObserver(compute);
+    if (stageRef.current) ro.observe(stageRef.current);
+    window.addEventListener("resize", compute);
+    return () => { ro.disconnect(); window.removeEventListener("resize", compute); };
+  }, [template, html]);
+
   if (!template) return null;
   const updated = template.updatedAt || template.createdAt;
+  const isFit = zoom === null;
+  const effectiveScale = isFit ? fitScale : zoom!;
+  const labelW = template.widthMm * MM_TO_PX_PREVIEW;
+  const labelH = template.heightMm * MM_TO_PX_PREVIEW;
+  // Quando o usuário aumenta além do que cabe, permitimos rolagem; caso contrário, sem scroll.
+  const overflowsX = effectiveScale * labelW > (stageRef.current?.clientWidth ?? Infinity) - 8;
+  const overflowsY = effectiveScale * labelH > (stageRef.current?.clientHeight ?? Infinity) - 8;
+  const allowPan = !isFit && (overflowsX || overflowsY);
+
   return (
     <Dialog open={!!template} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl p-0 gap-0 overflow-hidden flex flex-col h-[80vh]">
+        <DialogHeader className="px-4 pt-4 pb-2 shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Eye className="h-4 w-4" />
             {template.name}
           </DialogTitle>
         </DialogHeader>
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground border-b border-border pb-2">
+
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground border-b border-border px-4 pb-2 shrink-0">
           <ContextBadge context={template.context as LabelContext} />
           {template.groupName && <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">{template.groupName}</span>}
           <span>·</span>
@@ -83,27 +121,89 @@ function PreviewModal({ template, onClose }: { template: LabelTemplate | null; o
           <div className="flex-1" />
           <span>Atualizado: {new Date(updated).toLocaleString("pt-BR")}</span>
         </div>
-        <div className="flex items-center gap-1 justify-end">
-          <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom(z => Math.max(25, z - 25))}><ZoomOut className="h-3.5 w-3.5" /></Button>
-          <span className="text-xs text-muted-foreground w-12 text-center">{zoom}%</span>
-          <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom(z => Math.min(300, z + 25))}><ZoomIn className="h-3.5 w-3.5" /></Button>
+
+        {/* Barra de zoom */}
+        <div className="flex items-center gap-1.5 justify-end px-4 py-2 border-b border-border shrink-0">
+          <Button
+            variant={isFit ? "secondary" : "outline"}
+            size="sm" className="h-7 px-2 text-xs"
+            onClick={() => setZoom(null)}
+            data-testid="btn-preview-fit"
+            title="Ajustar à janela — etiqueta inteira visível"
+          >
+            <Maximize2 className="h-3.5 w-3.5 mr-1" />Ajustar
+          </Button>
+          <Button
+            variant={zoom === 1 ? "secondary" : "outline"}
+            size="sm" className="h-7 px-2 text-xs"
+            onClick={() => setZoom(1)}
+            data-testid="btn-preview-100"
+            title="100% — escala técnica (96 DPI no navegador)"
+          >
+            100%
+          </Button>
+          <div className="w-px h-5 bg-border mx-1" />
+          <Button
+            variant="outline" size="sm" className="h-7 w-7 p-0"
+            onClick={() => setZoom(z => Math.max(0.1, (z ?? fitScale) - 0.1))}
+            data-testid="btn-preview-zoom-out"
+            title="Diminuir zoom"
+          >
+            <ZoomOut className="h-3.5 w-3.5" />
+          </Button>
+          <span className="text-xs text-muted-foreground w-12 text-center tabular-nums" data-testid="text-preview-zoom">
+            {Math.round(effectiveScale * 100)}%
+          </span>
+          <Button
+            variant="outline" size="sm" className="h-7 w-7 p-0"
+            onClick={() => setZoom(z => Math.min(5, (z ?? fitScale) + 0.1))}
+            data-testid="btn-preview-zoom-in"
+            title="Aumentar zoom"
+          >
+            <ZoomIn className="h-3.5 w-3.5" />
+          </Button>
         </div>
-        <div className="bg-muted/40 p-4 rounded max-h-[60vh] overflow-auto flex items-start justify-center">
+
+        {/* Palco / canvas */}
+        <div
+          ref={stageRef}
+          className={`flex-1 min-h-0 bg-muted/30 ${allowPan ? "overflow-auto" : "overflow-hidden"} flex items-center justify-center`}
+          data-testid="preview-stage"
+        >
           {loading ? (
             <p className="text-sm text-muted-foreground py-8">Renderizando...</p>
           ) : html ? (
-            <div style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}>
-              <iframe
-                srcDoc={html}
-                style={{ border: "1px solid #ccc", background: "white", width: `${template.widthMm * 3.7795275591}px`, height: `${template.heightMm * 3.7795275591}px` }}
-                title="Visualização"
-              />
+            <div
+              style={{
+                width: labelW * effectiveScale,
+                height: labelH * effectiveScale,
+                flexShrink: 0,
+              }}
+            >
+              <div
+                style={{
+                  width: labelW,
+                  height: labelH,
+                  transform: `scale(${effectiveScale})`,
+                  transformOrigin: "top left",
+                  boxShadow: "0 1px 6px rgba(0,0,0,0.18)",
+                  background: "white",
+                  border: "1px solid hsl(var(--border))",
+                }}
+              >
+                <iframe
+                  srcDoc={html}
+                  style={{ border: 0, background: "white", width: labelW, height: labelH, display: "block" }}
+                  title="Visualização"
+                />
+              </div>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground py-8">Sem componentes</p>
           )}
         </div>
-        <DialogFooter>
+
+        <DialogFooter className="px-4 py-2 border-t border-border shrink-0">
           <Button variant="outline" onClick={onClose}>Fechar</Button>
         </DialogFooter>
       </DialogContent>

@@ -1,0 +1,54 @@
+Ajuste o modal de visualização da etiqueta existente. O comportamento atual com scroll interno horizontal e vertical está incorreto para o objetivo do preview.
+
+Corrigir a visualização para funcionar assim:
+
+1) Visualização da etiqueta
+- A etiqueta deve aparecer inteira dentro do modal por padrão.
+- Remover scroll interno horizontal e vertical da área principal de preview.
+- A etiqueta deve ficar centralizada no modal.
+- Manter a proporção correta da etiqueta.
+- O preview não deve cortar a etiqueta por padrão.
+
+2) Escala padrão
+- Ao abrir o modal, usar “Ajustar à janela” como comportamento padrão.
+- O sistema deve calcular automaticamente a melhor escala para exibir a etiqueta inteira na área disponível, sem scroll.
+- Preservar margens visuais confortáveis ao redor da etiqueta.
+
+3) Controles de zoom
+- Manter zoom in e zoom out.
+- Adicionar opção clara de:
+  - Ajustar à janela
+  - 100%
+- Quando estiver em “Ajustar à janela”, a etiqueta inteira deve caber na tela.
+- Evitar que o zoom padrão deixe partes ocultas.
+
+4) Remover comportamento inadequado
+- Não usar overflow interno no preview principal como comportamento padrão.
+- Só permitir pan/arraste se o usuário realmente ampliar além da área visível.
+- Mesmo assim, isso deve acontecer apenas em zoom manual maior, nunca ao abrir o modal.
+
+5) Fidelidade visual
+- Mostrar a etiqueta com nitidez.
+- Respeitar largura x altura reais do layout.
+- Melhorar a renderização para evitar sensação de preview apertado ou cortado.
+
+6) Estrutura recomendada
+- Modal com cabeçalho
+- Barra de ações de zoom
+- Área central limpa para preview
+- Etiqueta centralizada em um palco/canvas
+- Sem barras de rolagem dentro do conteúdo principal no estado inicial
+
+7) Observação técnica importante
+- Diferenciar:
+  - Ajustar à janela = etiqueta inteira visível
+  - 100% = escala técnica do canvas
+- Não assumir que 100% representa tamanho físico real na tela, a menos que exista lógica de calibração de DPI.
+- Se não houver calibração física, manter apenas proporção correta e boa visualização.
+
+8) Entrega esperada
+- Corrigir o modal atual sem recriar tudo do zero
+- Remover os scrolls internos indevidos
+- Fazer a etiqueta abrir inteira e centralizada
+- Informar quais arquivos foram alterados
+- Explicar resumidamente como ficou a lógica de escala
