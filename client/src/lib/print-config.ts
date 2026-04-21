@@ -7,7 +7,10 @@
 
 export type PrintType =
   | "volume_label"
-  | "pallet_label";
+  | "pallet_label"
+  | "product_label"
+  | "order_label"
+  | "address_label";
 
 export interface PrintConfig {
   printer: string;
@@ -57,8 +60,17 @@ export function getAllPrintConfigs(userId?: string | number | null): Record<stri
 }
 
 export const PRINT_TYPE_LABELS: Record<PrintType, string> = {
-  volume_label: "Etiqueta de Volume",
-  pallet_label: "Etiqueta de Palete",
+  volume_label:  "Etiqueta de Volume",
+  pallet_label:  "Etiqueta de Palete",
+  product_label: "Etiqueta de Produto",
+  order_label:   "Etiqueta de Pedido",
+  address_label: "Etiqueta de Endereço",
 };
 
-export const PRINT_TYPES: PrintType[] = ["volume_label", "pallet_label"];
+export const PRINT_TYPES: PrintType[] = [
+  "volume_label",
+  "pallet_label",
+  "product_label",
+  "order_label",
+  "address_label",
+];

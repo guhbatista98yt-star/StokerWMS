@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, and, sql, desc, inArray, isNull, gt, lt, or, like, ne } from "drizzle-orm";
+import { eq, and, sql, desc, inArray, isNull, gt, gte, lt, lte, or, like, ne } from "drizzle-orm";
 import {
   users, orders, orderItems, products, routes, workUnits, exceptions, auditLogs, sessions, sections, sectionGroups, db2Mappings, cacheOrcamentos, orderVolumes, systemSettings, nfItems, productBarcodes, scanLog,
   wmsAddresses, pallets, palletItems, addressPickingLog,
@@ -2664,7 +2664,7 @@ export class DatabaseStorage implements IStorage {
   async fetchProductsForLabels(companyId: number, query: string, limit = 50): Promise<any[]> {
     const q = query.trim();
     if (!q) {
-      const rows = await db.select().from(products).limit(limit);
+      const rows = await db.select().from(products).orderBy(desc(products.id)).limit(limit);
       return rows;
     }
     const pattern = `%${q}%`;
@@ -2673,43 +2673,107 @@ export class DatabaseStorage implements IStorage {
     ).limit(limit);
     return rows;
   }
-  async fetchOrdersForLabels(companyId: number, query: string, limit = 50): Promise<any[]> {
+  async fetchOrdersForLabels(
+    companyId: number,
+    query: string,
+    limit = 50,
+    opts: { startDate?: string; endDate?: string; onlyWithVolumes?: boolean } = {},
+  ): Promise<any[]> {
     const q = query.trim();
-    const baseFilter = eq(orders.companyId, companyId);
-    if (!q) {
-      const rows = await db.select().from(orders).where(baseFilter).orderBy(desc(orders.createdAt)).limit(limit);
+    const conds: any[] = [eq(orders.companyId, companyId)];
+    if (q) {
+      const pattern = `%${q}%`;
+      conds.push(or(
+        like(orders.erpOrderId, pattern),
+        like(orders.customerName, pattern),
+        like(orders.loadCode, pattern),
+      ));
+    }
+    if (opts.startDate) conds.push(gte(orders.createdAt, opts.startDate));
+    if (opts.endDate)   conds.push(lte(orders.createdAt, opts.endDate));
+
+    if (opts.onlyWithVolumes) {
+      // JOIN com order_volumes — devolve só pedidos que têm volume cadastrado e total > 0
+      const rows = await db.select({
+        id: orders.id,
+        erpOrderId: orders.erpOrderId,
+        customerName: orders.customerName,
+        cnpjCpf: orders.cnpjCpf,
+        city: orders.city,
+        state: orders.state,
+        address: orders.address,
+        neighborhood: orders.neighborhood,
+        loadCode: orders.loadCode,
+        totalValue: orders.totalValue,
+        createdAt: orders.createdAt,
+        totalVolumes: orderVolumes.totalVolumes,
+        sacola: orderVolumes.sacola,
+        caixa: orderVolumes.caixa,
+        saco: orderVolumes.saco,
+        avulso: orderVolumes.avulso,
+      }).from(orders)
+        .innerJoin(orderVolumes, eq(orderVolumes.orderId, orders.id))
+        .where(and(...conds, gt(orderVolumes.totalVolumes, 0)))
+        .orderBy(desc(orders.createdAt))
+        .limit(limit);
       return rows;
     }
-    const pattern = `%${q}%`;
-    const rows = await db.select().from(orders).where(
-      and(baseFilter, or(like(orders.erpOrderId, pattern), like(orders.customerName, pattern), like(orders.loadCode, pattern)))
-    ).limit(limit);
+
+    // Para order_label trazemos LEFT JOIN com volumes só p/ informar a contagem (se houver)
+    const rows = await db.select({
+      id: orders.id,
+      erpOrderId: orders.erpOrderId,
+      customerName: orders.customerName,
+      cnpjCpf: orders.cnpjCpf,
+      city: orders.city,
+      state: orders.state,
+      address: orders.address,
+      neighborhood: orders.neighborhood,
+      loadCode: orders.loadCode,
+      totalValue: orders.totalValue,
+      createdAt: orders.createdAt,
+      totalVolumes: orderVolumes.totalVolumes,
+    }).from(orders)
+      .leftJoin(orderVolumes, eq(orderVolumes.orderId, orders.id))
+      .where(and(...conds))
+      .orderBy(desc(orders.createdAt))
+      .limit(limit);
     return rows;
   }
-  async fetchPalletsForLabels(companyId: number, query: string, limit = 50): Promise<any[]> {
+  async fetchPalletsForLabels(
+    companyId: number,
+    query: string,
+    limit = 50,
+    opts: { startDate?: string; endDate?: string } = {},
+  ): Promise<any[]> {
     const q = query.trim();
-    const baseFilter = eq(pallets.companyId, companyId);
-    if (!q) {
-      const rows = await db.select().from(pallets).where(baseFilter).orderBy(desc(pallets.createdAt)).limit(limit);
-      return rows;
+    const conds: any[] = [eq(pallets.companyId, companyId)];
+    if (q) {
+      conds.push(like(pallets.code, `%${q}%`));
     }
-    const pattern = `%${q}%`;
-    const rows = await db.select().from(pallets).where(
-      and(baseFilter, like(pallets.code, pattern))
-    ).limit(limit);
+    if (opts.startDate) conds.push(gte(pallets.createdAt, opts.startDate));
+    if (opts.endDate)   conds.push(lte(pallets.createdAt, opts.endDate));
+    const rows = await db.select().from(pallets)
+      .where(and(...conds))
+      .orderBy(desc(pallets.createdAt))
+      .limit(limit);
     return rows;
   }
   async fetchAddressesForLabels(companyId: number, query: string, limit = 100): Promise<any[]> {
     const q = query.trim();
     const baseFilter = and(eq(wmsAddresses.companyId, companyId), eq(wmsAddresses.active, true));
     if (!q) {
-      const rows = await db.select().from(wmsAddresses).where(baseFilter).limit(limit);
+      const rows = await db.select().from(wmsAddresses).where(baseFilter).orderBy(wmsAddresses.code).limit(limit);
       return rows;
     }
     const pattern = `%${q}%`;
     const rows = await db.select().from(wmsAddresses).where(
-      and(baseFilter, or(like(wmsAddresses.code, pattern), like(wmsAddresses.bairro, pattern)))
-    ).limit(limit);
+      and(baseFilter, or(
+        like(wmsAddresses.code, pattern),
+        like(wmsAddresses.bairro, pattern),
+        like(wmsAddresses.rua, pattern),
+      ))
+    ).orderBy(wmsAddresses.code).limit(limit);
     return rows;
   }
 }

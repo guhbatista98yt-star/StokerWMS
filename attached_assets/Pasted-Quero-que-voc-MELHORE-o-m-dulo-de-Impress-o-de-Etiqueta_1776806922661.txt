@@ -1,0 +1,294 @@
+Quero que você MELHORE o módulo de Impressão de Etiquetas já existente, reaproveitando a base atual e sem recriar do zero. O foco é corrigir a origem dos dados, melhorar performance, aproveitar as buscas já existentes nos módulos operacionais, automatizar a quantidade de etiquetas conforme volume quando aplicável e usar a mesma configuração de impressão já usada no sistema para cada contexto.
+
+OBJETIVO GERAL
+O módulo de Impressão de Etiquetas deve:
+- usar a origem de dados correta conforme o tipo de etiqueta
+- reaproveitar a lógica de busca já existente em cada módulo
+- evitar carregamento massivo desnecessário
+- permitir busca por período inicial/final quando aplicável
+- calcular corretamente a quantidade de etiquetas por volume
+- usar a mesma configuração de impressora/etiqueta do usuário já usada nos módulos operacionais
+- manter consistência com os botões e fluxos já existentes no sistema
+
+========================================
+1) ORIGEM DOS DADOS CORRETA POR CONTEXTO
+========================================
+A origem dos dados precisa seguir o módulo correto do sistema.
+
+Regras:
+- Se a etiqueta for de Produto, usar a mesma lógica/configuração do módulo de busca de produtos.
+- Se a etiqueta for de Endereço, usar a mesma lógica/configuração do módulo de busca de endereços.
+- Se a etiqueta for de Pedido, usar a mesma lógica/configuração do módulo de pedidos.
+- Se a etiqueta for de Palete/Pallet, usar a mesma lógica/configuração do módulo de pallet.
+- Se a etiqueta for de Volume, usar a mesma lógica/configuração do módulo de volume.
+- E assim por diante para outros tipos.
+
+Objetivo:
+- evitar duplicação de lógica
+- evitar inconsistência de dados
+- garantir que a origem usada na impressão seja a mesma já validada no restante do sistema
+- aproveitar filtros, estrutura e comportamento já existentes em cada módulo
+
+========================================
+2) FILTRO POR DATA / PERÍODO
+========================================
+Adicionar filtro de data ou período de início e fim para buscar os dados antes de listar os registros, principalmente em origens operacionais.
+
+Quero no mínimo:
+- data inicial
+- data final
+ou
+- seletor de período equivalente
+
+Esse filtro deve ser usado principalmente para:
+- pedidos
+- volumes
+- pallets
+- movimentações operacionais
+
+Objetivo:
+- melhorar performance
+- reduzir volume de dados
+- evitar carregar histórico excessivo
+- facilitar a localização correta dos registros
+
+========================================
+3) NÃO CARREGAR DADOS DEMAIS SEM FILTRO
+========================================
+Corrigir a lógica atual para não listar grandes volumes de registros logo ao trocar a origem.
+
+Regras:
+- não carregar automaticamente grandes listas sem critério
+- exigir filtro mínimo quando fizer sentido
+- só buscar registros depois que o usuário preencher os filtros necessários
+- evitar consultas amplas e lentas sem necessidade
+
+========================================
+4) BUSCA CONDICIONAL POR ORIGEM
+========================================
+Cada origem deve exibir os filtros mais adequados ao seu contexto, reaproveitando o comportamento do módulo correspondente.
+
+Exemplos:
+- Produto:
+  - código
+  - descrição
+  - código de barras
+- Endereço:
+  - endereço
+  - rua / módulo / posição / nível, se existir
+- Pedido:
+  - número do pedido
+  - cliente
+  - período inicial/final
+  - status, se existir
+- Pallet:
+  - código do pallet
+  - endereço
+  - período, se fizer sentido
+- Volume:
+  - pedido
+  - cliente
+  - período inicial/final
+
+Não criar uma busca genérica pobre. Reaproveitar a inteligência já existente no sistema.
+
+========================================
+5) FLUXO CORRETO DA TELA
+========================================
+Quero um fluxo mais lógico e operacional:
+
+1. escolher a origem dos dados
+2. carregar os filtros adequados daquela origem
+3. preencher filtros mínimos
+4. buscar registros
+5. selecionar registros
+6. escolher o modelo compatível
+7. revisar quantidade/layout
+8. pré-visualizar
+9. imprimir
+
+Se necessário, reorganizar a ordem visual dos blocos para seguir esse fluxo.
+
+========================================
+6) QUANTIDADE AUTOMÁTICA DE ETIQUETAS POR VOLUME
+========================================
+Se o pedido tiver volume cadastrado, a quantidade de etiquetas geradas deve seguir automaticamente a quantidade real de volumes do pedido.
+
+Exemplo:
+- pedido com 3 volumes cadastrados
+- ao selecionar esse pedido para impressão de etiqueta de volume
+- o sistema deve gerar automaticamente 3 etiquetas
+
+Regras:
+- a quantidade base não deve depender apenas do campo manual “cópias por registro” quando a origem for volume
+- o sistema deve usar a quantidade real de volumes do pedido
+- se houver numeração de volume, gerar corretamente no padrão:
+  - volume 1 de 3
+  - volume 2 de 3
+  - volume 3 de 3
+- o preview também deve refletir essa lógica
+- o total estimado de etiquetas deve ser recalculado automaticamente
+
+Se não houver volume cadastrado:
+- exibir aviso claro
+ou
+- manter o comportamento padrão somente se isso já for regra segura no sistema
+
+========================================
+7) DIFERENCIAR QUANTIDADE BASE X CÓPIAS EXTRAS
+========================================
+A tela precisa distinguir claramente:
+- quantidade base de etiquetas geradas automaticamente
+- cópias extras por registro
+
+Lógica desejada:
+- quantidade base = quantidade real de volumes do pedido
+- cópias por registro = multiplicador opcional
+
+Exemplo:
+- pedido com 3 volumes
+- cópias por registro = 2
+- total final = 6 etiquetas
+
+Isso precisa ficar claro na interface.
+
+========================================
+8) USAR A CONFIGURAÇÃO DE IMPRESSÃO DO USUÁRIO
+========================================
+Ao clicar em Imprimir, o sistema deve usar a mesma configuração do usuário já utilizada hoje nos módulos operacionais.
+
+Regra:
+- se a impressão for de etiqueta de volume, usar a mesma configuração/padrão já utilizado no módulo de Volume
+- se a impressão for de etiqueta de endereço, usar a mesma configuração/padrão já utilizado no módulo de Endereçamento
+- se for de pedido, pallet, produto ou outro contexto, aplicar a configuração correspondente já existente, se houver
+
+Ou seja:
+- usar o mesmo padrão do botão de impressão que já é usado em Volume, Endereçamento e demais módulos equivalentes
+- respeitar a impressora configurada para o usuário
+- respeitar o modelo/padrão de etiqueta vinculado ao contexto
+- respeitar a forma de envio já existente, seja navegador ou Print Tool, conforme a arquitetura atual
+
+========================================
+9) NÃO CRIAR LÓGICA PARALELA DE IMPRESSÃO
+========================================
+Não quero uma nova lógica separada. Quero reaproveitar exatamente a rotina/padrão já existente nos botões operacionais de impressão.
+
+Objetivo:
+- manter consistência operacional
+- evitar divergência entre módulos
+- evitar impressão em impressora errada
+- aproveitar o que já está pronto e validado no sistema
+
+Se já existir rotina pronta que identifica impressora/configuração do usuário nos módulos de Volume e Endereçamento, reutilizar essa mesma rotina no módulo Impressão de Etiquetas.
+
+========================================
+10) COMPATIBILIDADE ENTRE ORIGEM E MODELO
+========================================
+O sistema deve filtrar automaticamente os modelos compatíveis com a origem escolhida.
+
+Exemplos:
+- origem = Pedido -> mostrar apenas modelos de etiqueta de pedido
+- origem = Endereço -> mostrar apenas modelos de endereço
+- origem = Produto -> mostrar apenas modelos de produto
+- origem = Volume -> mostrar apenas modelos de volume
+- origem = Pallet -> mostrar apenas modelos de pallet
+
+Objetivo:
+- evitar erro operacional
+- deixar a tela mais limpa
+- impedir combinação incompatível entre origem e modelo
+
+========================================
+11) RESUMO OPERACIONAL DA TELA
+========================================
+Melhorar o resumo lateral para mostrar com clareza:
+- origem dos dados
+- modelo da etiqueta
+- período aplicado, se existir
+- quantidade de registros encontrados
+- quantidade de registros selecionados
+- quantidade de volumes detectada, quando aplicável
+- cópias por registro
+- total final de etiquetas
+- layout de mídia aplicado, se existir
+- configuração/impressora aplicada conforme o contexto do usuário
+
+Exemplo:
+- Registros: 1
+- Volumes detectados: 3
+- Cópias por volume: 1
+- Total final de etiquetas: 3
+- Impressora aplicada: [configuração do usuário para Volume]
+
+========================================
+12) LAYOUT DE MÍDIA
+========================================
+Manter o layout de mídia como opcional, mas mais claro.
+
+- Explicar melhor quando ele interfere
+- Refletir corretamente no total de páginas/etiquetas
+- Se houver composição de mídia maior com várias etiquetas, manter coerência com o cálculo final
+
+========================================
+13) PERFORMANCE
+========================================
+Melhorar a performance da listagem:
+- limitar quantidade inicial de resultados
+- usar paginação, lazy loading ou carregamento incremental quando necessário
+- evitar travamentos em listas muito grandes
+- aplicar debounce nas buscas digitadas, se fizer sentido
+- carregar detalhes apenas quando necessário
+
+========================================
+14) VALIDAÇÕES IMPORTANTES
+========================================
+Adicionar validações para evitar erro operacional:
+- se a origem exigir período e ele não for informado, avisar
+- se não houver registros para o filtro aplicado, avisar
+- se não houver modelo compatível com a origem, avisar
+- se houver inconsistência entre origem e modelo, bloquear e avisar
+- se origem for volume e o pedido não tiver volume cadastrado, avisar
+- se não houver configuração de impressora definida para aquele contexto, avisar
+- se o usuário tentar imprimir sem modelo válido, avisar
+
+========================================
+15) PRÉ-VISUALIZAÇÃO E IMPRESSÃO
+========================================
+A pré-visualização deve refletir exatamente a lógica final:
+- quantidade de etiquetas por volume
+- dados reais do registro
+- numeração correta de volume, quando existir
+- modelo compatível com a origem
+- configuração correta da impressão
+
+Ao clicar em imprimir:
+- usar a mesma rotina/padrão já utilizado nos módulos operacionais equivalentes
+- não criar fluxo paralelo desnecessário
+- reaproveitar ao máximo a estrutura já existente
+
+========================================
+16) CUIDADOS TÉCNICOS
+========================================
+- Não quebrar o fluxo atual de impressão
+- Não duplicar lógica se ela já existir em outros módulos
+- Reaproveitar serviços, helpers, endpoints, queries e configurações já existentes
+- Garantir consistência entre frontend e backend
+- Manter compatibilidade com os modelos e configurações atuais dos usuários
+
+========================================
+17) ENTREGA ESPERADA
+========================================
+Ao final:
+- corrigir a origem dos dados conforme o módulo correto
+- adicionar filtro por data/período quando aplicável
+- impedir carregamento massivo desnecessário
+- reaproveitar a lógica de busca já existente em cada módulo
+- filtrar modelos compatíveis com a origem escolhida
+- fazer a quantidade de etiquetas seguir automaticamente a quantidade de volumes cadastrados quando aplicável
+- diferenciar quantidade base e cópias extras
+- usar a mesma configuração de impressão do usuário conforme o contexto
+- usar o mesmo padrão dos botões já existentes nos módulos operacionais
+- melhorar o resumo da tela de impressão
+- validar cenários sem volume, sem configuração ou com modelo incompatível
+- listar arquivos alterados
+- informar exatamente o que foi ajustado no frontend, backend, lógica de busca e lógica de impressão

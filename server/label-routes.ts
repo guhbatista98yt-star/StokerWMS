@@ -284,13 +284,27 @@ export function registerLabelRoutes(app: Express) {
   });
 
   // ─── Datasource para impressão em lote ───────────────────────────────────────
+  // Suporta filtros condicionais por contexto:
+  //   q:           busca textual
+  //   startDate:   data inicial (createdAt >= startDate)  — pedidos/volumes/pallets
+  //   endDate:     data final   (createdAt <= endDate)    — pedidos/volumes/pallets
+  //   limit:       máx 200 (default 50)
+  // Para volume_label só devolve pedidos com volume > 0 (join order_volumes).
+  // Para order_label / volume_label devolve totalVolumes.
   app.get("/api/labels/datasource/:context", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const companyId = requireCompanyId(req, res);
       if (!companyId) return;
       const ctx = req.params.context as LabelContext;
-      const q = String(req.query.q ?? "");
+      const q = String(req.query.q ?? "").trim();
       const limit = Math.min(Number(req.query.limit) || 50, 200);
+      const startDate = req.query.startDate ? String(req.query.startDate) : undefined;
+      const endDate   = req.query.endDate   ? String(req.query.endDate)   : undefined;
+      // endDate inclusivo: se vier "YYYY-MM-DD" expandimos para o fim do dia
+      const endDateInclusive = endDate && /^\d{4}-\d{2}-\d{2}$/.test(endDate)
+        ? `${endDate}T23:59:59.999Z`
+        : endDate;
+
       let rows: any[] = [];
       if (ctx === "product_label") {
         rows = await storage.fetchProductsForLabels(companyId, q, limit);
@@ -298,8 +312,8 @@ export function registerLabelRoutes(app: Express) {
           id: r.id, name: r.name, erpCode: r.erpCode, barcode: r.barcode ?? "",
           unit: r.unit, price: r.price ? `R$ ${Number(r.price).toFixed(2).replace(".", ",")}` : "",
         }));
-      } else if (ctx === "order_label" || ctx === "volume_label") {
-        rows = await storage.fetchOrdersForLabels(companyId, q, limit);
+      } else if (ctx === "order_label") {
+        rows = await storage.fetchOrdersForLabels(companyId, q, limit, { startDate, endDate: endDateInclusive });
         rows = rows.map(r => ({
           id: r.id, erpOrderId: r.erpOrderId, order: r.erpOrderId,
           customerName: r.customerName, customer: r.customerName,
@@ -308,11 +322,33 @@ export function registerLabelRoutes(app: Express) {
           address: r.address ?? "", neighborhood: r.neighborhood ?? "",
           loadCode: r.loadCode ?? "",
           totalValue: r.totalValue ? `R$ ${Number(r.totalValue).toFixed(2).replace(".", ",")}` : "",
+          totalVolumes: Number(r.totalVolumes) || 0,
+          createdAt: r.createdAt,
+        }));
+      } else if (ctx === "volume_label") {
+        rows = await storage.fetchOrdersForLabels(companyId, q, limit, {
+          startDate, endDate: endDateInclusive, onlyWithVolumes: true,
+        });
+        rows = rows.map(r => ({
+          id: r.id, erpOrderId: r.erpOrderId, order: r.erpOrderId,
+          customerName: r.customerName, customer: r.customerName,
+          cnpjCpf: r.cnpjCpf ?? "",
+          city: r.city ?? "", state: r.state ?? "",
+          address: r.address ?? "", neighborhood: r.neighborhood ?? "",
+          loadCode: r.loadCode ?? "",
+          totalValue: r.totalValue ? `R$ ${Number(r.totalValue).toFixed(2).replace(".", ",")}` : "",
+          totalVolumes: Number(r.totalVolumes) || 0,
+          sacola: Number(r.sacola) || 0,
+          caixa: Number(r.caixa) || 0,
+          saco: Number(r.saco) || 0,
+          avulso: Number(r.avulso) || 0,
+          createdAt: r.createdAt,
         }));
       } else if (ctx === "pallet_label") {
-        rows = await storage.fetchPalletsForLabels(companyId, q, limit);
+        rows = await storage.fetchPalletsForLabels(companyId, q, limit, { startDate, endDate: endDateInclusive });
         rows = rows.map(r => ({
           id: r.id, code: r.code, status: r.status, address: r.addressId ?? "",
+          createdAt: r.createdAt,
         }));
       } else if (ctx === "address_label") {
         rows = await storage.fetchAddressesForLabels(companyId, q, limit);
