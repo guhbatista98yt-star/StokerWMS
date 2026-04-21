@@ -1,5 +1,9 @@
-node_modules
-dist
+node_modules/
+build/
+.env
+.log
+.local/
+dist/
 .DS_Store
 server/public
 vite.config.ts.*
