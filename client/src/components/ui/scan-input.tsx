@@ -152,9 +152,17 @@ export function ScanInput({
   }, [value, onScan, setValue]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && value.trim()) {
+    if (e.key === "Enter") {
       e.preventDefault();
-      fireScan();
+      if (value.trim()) fireScan();
+      // Se o teclado nativo estava aberto, Enter fecha o teclado.
+      // Voltamos para inputMode original ("none") ANTES do blur — assim,
+      // mesmo que o auto-refocus reabra o foco no input, o SO não reabre
+      // o teclado virtual (inputMode="none" suprime).
+      if (nativeKbdActive) {
+        flushSync(() => setNativeKbdActive(false));
+        try { inputRef.current?.blur(); } catch {}
+      }
     }
   };
 
