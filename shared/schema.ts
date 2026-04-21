@@ -716,7 +716,7 @@ export type InsertProductAddress = z.infer<typeof insertProductAddressSchema>;
 export const barcodeTypeEnum = ["UNITARIO", "EMBALAGEM"] as const;
 export type BarcodeType = typeof barcodeTypeEnum[number];
 
-export const barcodeOperationEnum = ["criacao", "edicao", "substituicao", "desativacao", "ativacao"] as const;
+export const barcodeOperationEnum = ["criacao", "edicao", "substituicao", "desativacao", "ativacao", "exclusao"] as const;
 export type BarcodeOperation = typeof barcodeOperationEnum[number];
 
 export const productBarcodes = pgTable("product_barcodes", {

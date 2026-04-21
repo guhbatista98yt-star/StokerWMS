@@ -3258,29 +3258,28 @@ export function registerWmsRoutes(app: Express) {
     }
   });
 
-  app.patch("/api/barcodes/:id/deactivate", isAuthenticated, requireCompany, requireRole("supervisor", "administrador"), async (req: Request, res: Response) => {
+  app.delete("/api/barcodes/:id", isAuthenticated, requireCompany, requireRole("supervisor", "administrador"), async (req: Request, res: Response) => {
     try {
       const companyId = getCompanyId(req);
       const userId = getUserId(req);
       const userName = req.user?.name || req.user?.username || "unknown";
-      const notes = req.body.notes || null;
+      const notes = (req.body && req.body.notes) || null;
 
       const [existing] = await db.select().from(productBarcodes).where(
         and(eq(productBarcodes.id, req.params.id), eq(productBarcodes.companyId, companyId))
       ).limit(1);
       if (!existing) return res.status(404).json({ error: "Código não encontrado" });
-      if (!existing.active) return res.status(400).json({ error: "Código já está inativo" });
 
       const now = new Date().toISOString();
-      const updated = await db.transaction(async (tx) => {
-        const [upd] = await tx.update(productBarcodes).set({
-          active: false, deactivatedAt: now, deactivatedBy: userId, updatedAt: now, updatedBy: userId,
-        }).where(eq(productBarcodes.id, req.params.id)).returning();
+      await db.transaction(async (tx) => {
+        // Apaga definitivamente o registro da tabela normalizada.
+        await tx.delete(productBarcodes).where(eq(productBarcodes.id, req.params.id));
 
+        // Registra no histórico (barcodeId é text sem FK, então sobrevive ao delete).
         await tx.insert(barcodeChangeHistory).values({
           barcodeId: existing.id,
           productId: existing.productId,
-          operation: "desativacao",
+          operation: "exclusao",
           oldBarcode: existing.barcode,
           barcodeType: existing.type as BarcodeType,
           oldQty: existing.packagingQty,
@@ -3289,14 +3288,33 @@ export function registerWmsRoutes(app: Express) {
           notes,
           createdAt: now,
         });
-        return upd;
+
+        // Sincroniza o JSONB legado products.boxBarcodes — se removemos uma EMBALAGEM,
+        // o campo precisa refletir o estado atual para que getWorkUnits e demais
+        // consumidores não continuem mostrando o EAN apagado.
+        if (existing.type === "EMBALAGEM") {
+          const activePkgs = await tx.select().from(productBarcodes).where(
+            and(
+              eq(productBarcodes.productId, existing.productId),
+              eq(productBarcodes.type, "EMBALAGEM"),
+              eq(productBarcodes.active, true),
+            )
+          );
+          const newBoxBarcodes = activePkgs.map(p => ({
+            code: p.barcode,
+            qty: p.packagingQty || 1,
+          }));
+          await tx.update(products).set({
+            boxBarcodes: newBoxBarcodes.length > 0 ? newBoxBarcodes : null,
+          }).where(eq(products.id, existing.productId));
+        }
       });
 
-      log(`[Barcodes] Deactivated: id=${existing.id} barcode=${existing.barcode} by=${userName}`);
-      res.json(updated);
+      log(`[Barcodes] Deleted: id=${existing.id} barcode=${existing.barcode} by=${userName}`);
+      res.json({ status: "success", id: existing.id });
     } catch (error) {
-      log(`[WMS] [Barcodes] Deactivate error:: ${error instanceof Error ? error.message : String(error)}`);
-      res.status(500).json({ error: "Erro ao desativar código" });
+      log(`[WMS] [Barcodes] Delete error:: ${error instanceof Error ? error.message : String(error)}`);
+      res.status(500).json({ error: "Erro ao apagar código" });
     }
   });
 

@@ -204,9 +204,9 @@ export default function BarcodeManagementPage() {
   });
 
   const deactivateMutation = useMutation({
-    mutationFn: async ({ id, notes }: { id: string; notes: string }) => apiRequest("PATCH", `/api/barcodes/${id}/deactivate`, { notes }),
+    mutationFn: async ({ id, notes }: { id: string; notes: string }) => apiRequest("DELETE", `/api/barcodes/${id}`, { notes }),
     onSuccess: () => { invalidateBarcodes(); setDeactivateDialog(null); setDeactivateNotes(""); },
-    onError: (e: Error) => toast({ variant: "destructive", title: "Erro", description: e.message || "Erro ao desativar" }),
+    onError: (e: Error) => toast({ variant: "destructive", title: "Erro", description: e.message || "Erro ao apagar" }),
   });
 
   const activateMutation = useMutation({
@@ -499,7 +499,7 @@ export default function BarcodeManagementPage() {
                                       variant="ghost" size="icon"
                                       className="h-5 w-5 rounded text-red-400 hover:text-red-600"
                                       onClick={() => openDeactivateBarcode(item, row)}
-                                      title="Desativar"
+                                      title="Apagar"
                                       data-testid={`button-deact-bc-${item.id}`}
                                     >
                                       <PowerOff className="h-2.5 w-2.5" />
@@ -728,11 +728,11 @@ export default function BarcodeManagementPage() {
 
       <Dialog open={!!deactivateDialog} onOpenChange={v => { if (!v) { setDeactivateDialog(null); setDeactivateNotes(""); } }}>
         <DialogContent className="max-w-sm rounded-2xl">
-          <DialogHeader><DialogTitle>Desativar Código</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Apagar Código</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Desativar o código <span className="font-mono font-medium text-foreground">{deactivateDialog?.barcode}</span> do produto{" "}
-              <span className="font-medium text-foreground">{deactivateDialog?.productName}</span>?
+              Apagar definitivamente o código <span className="font-mono font-medium text-foreground">{deactivateDialog?.barcode}</span> do produto{" "}
+              <span className="font-medium text-foreground">{deactivateDialog?.productName}</span>? Esta ação não pode ser desfeita.
             </p>
             <Textarea
               data-testid="input-deactivate-notes"
@@ -747,7 +747,7 @@ export default function BarcodeManagementPage() {
             <Button variant="outline" className="rounded-xl" onClick={() => setDeactivateDialog(null)}>Cancelar</Button>
             <Button variant="destructive" className="rounded-xl" onClick={() => deactivateDialog && deactivateMutation.mutate({ id: deactivateDialog.id, notes: deactivateNotes })} disabled={deactivateMutation.isPending} data-testid="button-confirm-deactivate">
               {deactivateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Desativar
+              Apagar
             </Button>
           </DialogFooter>
         </DialogContent>
