@@ -10,6 +10,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, Save, Eye, EyeOff, Type, AlignLeft, Barcode, QrCode,
@@ -19,7 +20,7 @@ import {
   AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
   Maximize2, Square as SquareIcon, AlertTriangle, Printer, PanelRightClose, PanelRightOpen,
-  PanelLeft, PanelRight, PanelTop, PanelBottom,
+  PanelLeft, PanelRight, PanelTop, PanelBottom, Settings2, RectangleHorizontal, RectangleVertical,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { renderLabelToHtml } from "@/lib/label-renderer";
@@ -407,6 +408,199 @@ function PropertiesPanel({
   );
 }
 
+// ─── Configuração da Etiqueta (popover) ────────────────────────────────────
+function DocumentSettings({
+  currentWidthMm, currentHeightMm, originalWidthMm, originalHeightMm,
+  displayUnit, setDisplayUnit, isReadOnly, outOfBoundsCount, onChange, onReset,
+}: {
+  currentWidthMm: number;
+  currentHeightMm: number;
+  originalWidthMm: number;
+  originalHeightMm: number;
+  displayUnit: "mm" | "cm" | "in";
+  setDisplayUnit: (u: "mm" | "cm" | "in") => void;
+  isReadOnly: boolean;
+  outOfBoundsCount: number;
+  onChange: (widthMm: number, heightMm: number) => void;
+  onReset: () => void;
+}) {
+  const toDisplay = (mm: number) => {
+    if (displayUnit === "cm") return (mm / 10).toFixed(2);
+    if (displayUnit === "in") return (mm / 25.4).toFixed(3);
+    return String(Math.round(mm));
+  };
+  const fromDisplay = (raw: string): number | null => {
+    const n = parseFloat(raw.replace(",", "."));
+    if (!isFinite(n) || n <= 0) return null;
+    let mm = n;
+    if (displayUnit === "cm") mm = n * 10;
+    if (displayUnit === "in") mm = n * 25.4;
+    // schema é integer em mm
+    return Math.max(5, Math.min(500, Math.round(mm)));
+  };
+
+  const PRESETS: { label: string; w: number; h: number }[] = [
+    { label: "100×150 (envio)", w: 100, h: 150 },
+    { label: "100×70",  w: 100, h: 70 },
+    { label: "100×50",  w: 100, h: 50 },
+    { label: "60×40",   w: 60,  h: 40 },
+    { label: "50×30",   w: 50,  h: 30 },
+    { label: "38×25",   w: 38,  h: 25 },
+  ];
+
+  const swapOrientation = () => onChange(currentHeightMm, currentWidthMm);
+  const isLandscape = currentWidthMm >= currentHeightMm;
+  const isOriginal = currentWidthMm === originalWidthMm && currentHeightMm === originalHeightMm;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Configuração da Etiqueta
+        </h4>
+        <div className="flex items-center gap-1" data-testid="group-display-unit">
+          {(["mm", "cm", "in"] as const).map(u => (
+            <Button
+              key={u}
+              type="button"
+              variant={displayUnit === u ? "secondary" : "ghost"}
+              size="sm"
+              className="h-6 px-1.5 text-[10px]"
+              onClick={() => setDisplayUnit(u)}
+              data-testid={`btn-unit-${u}`}
+            >
+              {u}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {isReadOnly && (
+        <p className="text-[11px] text-amber-600 dark:text-amber-400">
+          Modelo do sistema (somente leitura). Altere uma cópia para editar.
+        </p>
+      )}
+
+      <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-1">
+          <Label htmlFor="doc-width" className="text-[11px]">Largura ({displayUnit})</Label>
+          <Input
+            id="doc-width"
+            type="number"
+            inputMode="decimal"
+            step={displayUnit === "mm" ? "1" : displayUnit === "cm" ? "0.1" : "0.01"}
+            value={toDisplay(currentWidthMm)}
+            onChange={(e) => {
+              const mm = fromDisplay(e.target.value);
+              if (mm !== null) onChange(mm, currentHeightMm);
+            }}
+            disabled={isReadOnly}
+            className="h-8 text-xs"
+            data-testid="input-doc-width"
+          />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="doc-height" className="text-[11px]">Altura ({displayUnit})</Label>
+          <Input
+            id="doc-height"
+            type="number"
+            inputMode="decimal"
+            step={displayUnit === "mm" ? "1" : displayUnit === "cm" ? "0.1" : "0.01"}
+            value={toDisplay(currentHeightMm)}
+            onChange={(e) => {
+              const mm = fromDisplay(e.target.value);
+              if (mm !== null) onChange(currentWidthMm, mm);
+            }}
+            disabled={isReadOnly}
+            className="h-8 text-xs"
+            data-testid="input-doc-height"
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[11px] text-muted-foreground">Orientação</span>
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant={isLandscape ? "secondary" : "ghost"}
+            size="sm"
+            className="h-7 px-2 text-[10px]"
+            onClick={() => { if (!isLandscape) swapOrientation(); }}
+            disabled={isReadOnly}
+            data-testid="btn-orient-landscape"
+            title="Paisagem"
+          >
+            <RectangleHorizontal className="h-3.5 w-3.5 mr-1" /> Paisagem
+          </Button>
+          <Button
+            type="button"
+            variant={!isLandscape ? "secondary" : "ghost"}
+            size="sm"
+            className="h-7 px-2 text-[10px]"
+            onClick={() => { if (isLandscape) swapOrientation(); }}
+            disabled={isReadOnly}
+            data-testid="btn-orient-portrait"
+            title="Retrato"
+          >
+            <RectangleVertical className="h-3.5 w-3.5 mr-1" /> Retrato
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <p className="text-[11px] text-muted-foreground">Predefinições (mm)</p>
+        <div className="grid grid-cols-3 gap-1">
+          {PRESETS.map(p => (
+            <Button
+              key={p.label}
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 text-[10px] px-1"
+              onClick={() => onChange(p.w, p.h)}
+              disabled={isReadOnly}
+              data-testid={`btn-preset-${p.w}x${p.h}`}
+            >
+              {p.w}×{p.h}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {outOfBoundsCount > 0 && (
+        <div className="flex items-start gap-2 rounded border border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-800 p-2">
+          <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+          <p className="text-[11px] text-amber-800 dark:text-amber-300" data-testid="text-oob-warning">
+            {outOfBoundsCount} {outOfBoundsCount === 1 ? "componente está fora" : "componentes estão fora"} da área útil. Ajuste posições ou aumente o tamanho.
+          </p>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between pt-1 border-t border-border">
+        <p className="text-[10px] text-muted-foreground">
+          Original: {originalWidthMm}×{originalHeightMm}mm
+        </p>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-6 px-2 text-[10px]"
+          onClick={onReset}
+          disabled={isReadOnly || isOriginal}
+          data-testid="btn-reset-dims"
+        >
+          Restaurar
+        </Button>
+      </div>
+
+      <p className="text-[10px] text-muted-foreground italic">
+        As alterações entram em vigor imediatamente no canvas e na pré-visualização. Salve para persistir.
+      </p>
+    </div>
+  );
+}
+
 export default function LabelStudioPage() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
@@ -430,6 +624,20 @@ export default function LabelStudioPage() {
     setPreviewPositionState(p);
     try { window.localStorage.setItem("label-studio-preview-pos", p); } catch {}
   };
+  // Dimensões editáveis (mm internamente, sempre). Quando null, usa as do template.
+  const [editedWidthMm, setEditedWidthMm] = useState<number | null>(null);
+  const [editedHeightMm, setEditedHeightMm] = useState<number | null>(null);
+  // Unidade exibida no painel "Configuração da Etiqueta" (apenas display).
+  const [displayUnit, setDisplayUnit] = useState<"mm" | "cm" | "in">(() => {
+    if (typeof window === "undefined") return "mm";
+    const v = window.localStorage.getItem("label-studio-unit");
+    return v === "cm" || v === "in" ? v : "mm";
+  });
+  const setDisplayUnitPersisted = (u: "mm" | "cm" | "in") => {
+    setDisplayUnit(u);
+    try { window.localStorage.setItem("label-studio-unit", u); } catch {}
+  };
+  const [docSettingsOpen, setDocSettingsOpen] = useState(false);
   const [dragging, setDragging] = useState<{ id: string; startX: number; startY: number; origX: number; origY: number } | null>(null);
   const [resizing, setResizing] = useState<{ id: string; handle: string; startX: number; startY: number; origX: number; origY: number; origW: number; origH: number } | null>(null);
   const [snapGrid, setSnapGrid] = useState(true);
@@ -459,11 +667,23 @@ export default function LabelStudioPage() {
       setLayout(initial);
       setHistory([initial]);
       setHistoryIdx(0);
+      // Reset dimensões editadas para refletir o template carregado/salvo
+      setEditedWidthMm(null);
+      setEditedHeightMm(null);
       setIsDirty(false);
     }
   }, [template]);
 
   // ─── Histórico (undo/redo) ───────────────────────────────────────────────
+  // Dimensões efetivas (preferem valor editado sobre o do template).
+  // Definidas aqui para que callbacks abaixo possam referenciá-las.
+  const widthMm = editedWidthMm ?? template?.widthMm ?? 0;
+  const heightMm = editedHeightMm ?? template?.heightMm ?? 0;
+  const dimsChanged =
+    !!template &&
+    ((editedWidthMm !== null && editedWidthMm !== template.widthMm) ||
+      (editedHeightMm !== null && editedHeightMm !== template.heightMm));
+
   const pushHistory = useCallback((next: LabelLayout) => {
     setHistory(prev => {
       const trimmed = prev.slice(0, historyIdx + 1);
@@ -519,16 +739,21 @@ export default function LabelStudioPage() {
     const sampleData: Record<string, string> = Object.fromEntries(
       (LABEL_DATA_FIELDS[ctx] ?? []).map(f => [f.key, f.example ?? f.label])
     );
-    const previewTemplate = { ...template, layoutJson: layout };
+    const effW = editedWidthMm ?? template.widthMm;
+    const effH = editedHeightMm ?? template.heightMm;
+    const previewTemplate = { ...template, widthMm: effW, heightMm: effH, layoutJson: layout };
     renderLabelToHtml(previewTemplate, sampleData).then(html => {
       if (!cancelled) { setPreviewHtml(html); setPreviewLoading(false); }
     }).catch(() => { if (!cancelled) setPreviewLoading(false); });
     return () => { cancelled = true; };
-  }, [showPreview, layout, template]);
+  }, [showPreview, layout, template, editedWidthMm, editedHeightMm]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest("PUT", `/api/labels/templates/${id}`, { layoutJson: layout });
+      const body: { layoutJson: LabelLayout; widthMm?: number; heightMm?: number } = { layoutJson: layout };
+      if (editedWidthMm !== null && template && editedWidthMm !== template.widthMm) body.widthMm = editedWidthMm;
+      if (editedHeightMm !== null && template && editedHeightMm !== template.heightMm) body.heightMm = editedHeightMm;
+      const res = await apiRequest("PUT", `/api/labels/templates/${id}`, body);
       return res.json();
     },
     onSuccess: () => {
@@ -609,15 +834,15 @@ export default function LabelStudioPage() {
     if (!comp || comp.locked) return;
     const updated = { ...comp };
     if (mode === "left") updated.x = 0;
-    if (mode === "right") updated.x = template.widthMm - comp.width;
-    if (mode === "center-h") updated.x = (template.widthMm - comp.width) / 2;
+    if (mode === "right") updated.x = widthMm - comp.width;
+    if (mode === "center-h") updated.x = (widthMm - comp.width) / 2;
     if (mode === "top") updated.y = 0;
-    if (mode === "bottom") updated.y = template.heightMm - comp.height;
-    if (mode === "center-v") updated.y = (template.heightMm - comp.height) / 2;
+    if (mode === "bottom") updated.y = heightMm - comp.height;
+    if (mode === "center-v") updated.y = (heightMm - comp.height) / 2;
     updated.x = Math.round(updated.x * 10) / 10;
     updated.y = Math.round(updated.y * 10) / 10;
     updateComponent(updated);
-  }, [selectedId, template, updateComponent]);
+  }, [selectedId, template, widthMm, heightMm, updateComponent]);
 
   // ─── Drag/resize ─────────────────────────────────────────────────────────
   const handleCanvasMouseDown = useCallback((e: React.MouseEvent, compId: string) => {
@@ -633,7 +858,7 @@ export default function LabelStudioPage() {
       const rect = canvasRef.current.getBoundingClientRect();
       const mxMm = canvasPxToMm(e.clientX - rect.left, zoom);
       const myMm = canvasPxToMm(e.clientY - rect.top, zoom);
-      if (mxMm >= 0 && myMm >= 0 && mxMm <= template.widthMm && myMm <= template.heightMm) {
+      if (mxMm >= 0 && myMm >= 0 && mxMm <= widthMm && myMm <= heightMm) {
         setMousePos({ x: Math.round(mxMm * 10) / 10, y: Math.round(myMm * 10) / 10 });
       } else {
         setMousePos(null);
@@ -654,10 +879,10 @@ export default function LabelStudioPage() {
       if (nw < MIN) { if (handle.includes("w")) nx = origX + origW - MIN; nw = MIN; }
       if (nh < MIN) { if (handle.includes("n")) ny = origY + origH - MIN; nh = MIN; }
       const snap = (v: number) => snapGrid ? snapMm(v) : Math.round(v * 10) / 10;
-      nx = Math.max(0, Math.min(template.widthMm - MIN, snap(nx)));
-      ny = Math.max(0, Math.min(template.heightMm - MIN, snap(ny)));
-      nw = Math.max(MIN, Math.min(template.widthMm - nx, snap(nw)));
-      nh = Math.max(MIN, Math.min(template.heightMm - ny, snap(nh)));
+      nx = Math.max(0, Math.min(widthMm - MIN, snap(nx)));
+      ny = Math.max(0, Math.min(heightMm - MIN, snap(ny)));
+      nw = Math.max(MIN, Math.min(widthMm - nx, snap(nw)));
+      nh = Math.max(MIN, Math.min(heightMm - ny, snap(nh)));
       updateComponent({ ...comp, x: nx, y: ny, width: nw, height: nh }, true);
       return;
     }
@@ -670,10 +895,10 @@ export default function LabelStudioPage() {
     const rawY = dragging.origY + dy;
     const snappedX = snapGrid ? snapMm(rawX) : Math.round(rawX * 10) / 10;
     const snappedY = snapGrid ? snapMm(rawY) : Math.round(rawY * 10) / 10;
-    const newX = Math.max(0, Math.min(template.widthMm - comp.width, snappedX));
-    const newY = Math.max(0, Math.min(template.heightMm - comp.height, snappedY));
+    const newX = Math.max(0, Math.min(widthMm - comp.width, snappedX));
+    const newY = Math.max(0, Math.min(heightMm - comp.height, snappedY));
     updateComponent({ ...comp, x: newX, y: newY }, true);
-  }, [dragging, resizing, layout.components, zoom, template, updateComponent, snapGrid]);
+  }, [dragging, resizing, layout.components, zoom, template, widthMm, heightMm, updateComponent, snapGrid]);
 
   const handleMouseUp = useCallback(() => {
     if (dragging || resizing) {
@@ -723,23 +948,23 @@ export default function LabelStudioPage() {
         if (e.key === "ArrowRight") nx += step;
         if (e.key === "ArrowUp") ny -= step;
         if (e.key === "ArrowDown") ny += step;
-        nx = Math.max(0, Math.min(template.widthMm - comp.width, Math.round(nx * 10) / 10));
-        ny = Math.max(0, Math.min(template.heightMm - comp.height, Math.round(ny * 10) / 10));
+        nx = Math.max(0, Math.min(widthMm - comp.width, Math.round(nx * 10) / 10));
+        ny = Math.max(0, Math.min(heightMm - comp.height, Math.round(ny * 10) / 10));
         updateComponent({ ...comp, x: nx, y: ny });
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [undo, redo, selectedId, deleteComponent, duplicateComponent, clipboard, commitLayout, updateComponent, template, isReadOnly, isDirty, saveMutation, toast]);
+  }, [undo, redo, selectedId, deleteComponent, duplicateComponent, clipboard, commitLayout, updateComponent, template, widthMm, heightMm, isReadOnly, isDirty, saveMutation, toast]);
 
   // ─── Validações visuais ──────────────────────────────────────────────────
   const validationWarnings = useMemo(() => {
     if (!template) return [];
     const warns: { compId: string; msg: string }[] = [];
     for (const c of layout.components) {
-      if (c.x < 0 || c.y < 0 || c.x + c.width > template.widthMm || c.y + c.height > template.heightMm) {
+      if (c.x < 0 || c.y < 0 || c.x + c.width > widthMm || c.y + c.height > heightMm) {
         warns.push({ compId: c.id, msg: `${compLabel(c)}: fora da área imprimível` });
-      } else if (c.x < SAFETY_MARGIN_MM || c.y < SAFETY_MARGIN_MM || c.x + c.width > template.widthMm - SAFETY_MARGIN_MM || c.y + c.height > template.heightMm - SAFETY_MARGIN_MM) {
+      } else if (c.x < SAFETY_MARGIN_MM || c.y < SAFETY_MARGIN_MM || c.x + c.width > widthMm - SAFETY_MARGIN_MM || c.y + c.height > heightMm - SAFETY_MARGIN_MM) {
         warns.push({ compId: c.id, msg: `${compLabel(c)}: invade margem de segurança` });
       }
       if (c.type === "barcode" && (c.width < 20 || c.height < 8)) {
@@ -747,7 +972,7 @@ export default function LabelStudioPage() {
       }
     }
     return warns;
-  }, [layout, template]);
+  }, [layout, template, widthMm, heightMm]);
 
   const tryNavigateBack = () => {
     if (isDirty) setShowExitConfirm("/admin/label-templates");
@@ -766,8 +991,8 @@ export default function LabelStudioPage() {
 
   const context = template.context as LabelContext;
   const fields = LABEL_DATA_FIELDS[context] ?? [];
-  const canvasW = mmToCanvasPx(template.widthMm, zoom);
-  const canvasH = mmToCanvasPx(template.heightMm, zoom);
+  const canvasW = mmToCanvasPx(widthMm, zoom);
+  const canvasH = mmToCanvasPx(heightMm, zoom);
   const TOOLBAR_ITEMS: { type: LabelComponent["type"]; label: string; Icon: LucideIcon }[] = [
     { type: "text", label: "Texto", Icon: Type },
     { type: "dynamic_text", label: "Campo", Icon: AlignLeft },
@@ -782,7 +1007,7 @@ export default function LabelStudioPage() {
     const container = canvasRef.current.parentElement.parentElement;
     const availW = container.clientWidth - 80;
     const availH = container.clientHeight - 80;
-    const z = Math.min(availW / mmToCanvasPx(template.widthMm, 100), availH / mmToCanvasPx(template.heightMm, 100)) * 100;
+    const z = Math.min(availW / mmToCanvasPx(widthMm, 100), availH / mmToCanvasPx(heightMm, 100)) * 100;
     setZoom(Math.max(25, Math.min(400, Math.round(z))));
   };
 
@@ -799,7 +1024,11 @@ export default function LabelStudioPage() {
             {isReadOnly && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">Sistema (somente leitura)</span>}
             {template.groupName && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">{template.groupName}</span>}
           </h1>
-          <p className="text-[11px] text-muted-foreground">{LABEL_CONTEXT_LABELS[context]} · {template.widthMm}×{template.heightMm}mm · {template.dpi} DPI</p>
+          <p className="text-[11px] text-muted-foreground">
+            {LABEL_CONTEXT_LABELS[context]} · {widthMm}×{heightMm}mm
+            {dimsChanged && <span className="text-amber-600 dark:text-amber-400"> (era {template.widthMm}×{template.heightMm})</span>}
+            {" "}· {template.dpi} DPI
+          </p>
         </div>
 
         <div className="flex-1" />
@@ -833,6 +1062,44 @@ export default function LabelStudioPage() {
           <Button variant="outline" size="sm" className="h-7 px-2 text-[10px]" onClick={fitToScreen} title="Ajustar à tela"><Maximize2 className="h-3 w-3 mr-1" />Ajustar</Button>
           <Button variant="outline" size="sm" className="h-7 px-2 text-[10px]" onClick={() => setZoom(100)} title="100% (tamanho real)"><SquareIcon className="h-3 w-3 mr-1" />1:1</Button>
         </div>
+
+        {/* Configuração da Etiqueta */}
+        <Popover open={docSettingsOpen} onOpenChange={setDocSettingsOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant={dimsChanged ? "secondary" : "outline"}
+              size="sm"
+              className="h-7 px-2 text-[10px]"
+              title="Configuração da etiqueta (tamanho)"
+              data-testid="btn-doc-settings"
+            >
+              <Settings2 className="h-3.5 w-3.5 mr-1" />
+              {widthMm}×{heightMm}mm{dimsChanged && "*"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-3" align="end">
+            <DocumentSettings
+              currentWidthMm={widthMm}
+              currentHeightMm={heightMm}
+              originalWidthMm={template.widthMm}
+              originalHeightMm={template.heightMm}
+              displayUnit={displayUnit}
+              setDisplayUnit={setDisplayUnitPersisted}
+              isReadOnly={!!isReadOnly}
+              outOfBoundsCount={layout.components.filter(c =>
+                c.x < 0 || c.y < 0 || c.x + c.width > widthMm || c.y + c.height > heightMm
+              ).length}
+              onChange={(w, h) => {
+                if (w !== widthMm) { setEditedWidthMm(w); setIsDirty(true); }
+                if (h !== heightMm) { setEditedHeightMm(h); setIsDirty(true); }
+              }}
+              onReset={() => {
+                setEditedWidthMm(null);
+                setEditedHeightMm(null);
+              }}
+            />
+          </PopoverContent>
+        </Popover>
 
         {/* Toggles */}
         <Button variant={snapGrid ? "secondary" : "outline"} size="sm" className="h-7 w-7 p-0" onClick={() => setSnapGrid(v => !v)} title="Snap ao grid (0,5mm)" data-testid="btn-toggle-snap">
@@ -933,10 +1200,10 @@ export default function LabelStudioPage() {
               }}
               data-testid="label-canvas"
             >
-              <Ruler length={template.widthMm} zoom={zoom} side="top" />
-              <Ruler length={template.widthMm} zoom={zoom} side="bottom" />
-              <Ruler length={template.heightMm} zoom={zoom} side="left" />
-              <Ruler length={template.heightMm} zoom={zoom} side="right" />
+              <Ruler length={widthMm} zoom={zoom} side="top" />
+              <Ruler length={widthMm} zoom={zoom} side="bottom" />
+              <Ruler length={heightMm} zoom={zoom} side="left" />
+              <Ruler length={heightMm} zoom={zoom} side="right" />
               {showGrid && (
                 <svg style={{ position: "absolute", top: 0, left: 0, width: canvasW, height: canvasH, pointerEvents: "none", zIndex: 1 }}>
                   <defs>
@@ -952,8 +1219,8 @@ export default function LabelStudioPage() {
                   position: "absolute",
                   top: mmToCanvasPx(SAFETY_MARGIN_MM, zoom),
                   left: mmToCanvasPx(SAFETY_MARGIN_MM, zoom),
-                  width: mmToCanvasPx(template.widthMm - SAFETY_MARGIN_MM * 2, zoom),
-                  height: mmToCanvasPx(template.heightMm - SAFETY_MARGIN_MM * 2, zoom),
+                  width: mmToCanvasPx(widthMm - SAFETY_MARGIN_MM * 2, zoom),
+                  height: mmToCanvasPx(heightMm - SAFETY_MARGIN_MM * 2, zoom),
                   border: "1px dashed rgba(239, 68, 68, 0.4)",
                   pointerEvents: "none",
                   zIndex: 999,
@@ -1005,8 +1272,8 @@ export default function LabelStudioPage() {
         {/* Preview real — posicionável (right/left/top/bottom) e em tamanho real (1:1) */}
         {showPreview && (() => {
           const isVerticalPanel = previewPosition === "right" || previewPosition === "left";
-          const realW = template ? template.widthMm * CANVAS_SCALE : 0;
-          const realH = template ? template.heightMm * CANVAS_SCALE : 0;
+          const realW = template ? widthMm * CANVAS_SCALE : 0;
+          const realH = template ? heightMm * CANVAS_SCALE : 0;
           const borderClass =
             previewPosition === "right"  ? "border-l" :
             previewPosition === "left"   ? "border-r" :
@@ -1046,7 +1313,7 @@ export default function LabelStudioPage() {
                     <PanelRight className="h-3.5 w-3.5" />
                   </Button>
                 </div>
-                <span className="text-[10px] text-muted-foreground">{template ? `${template.widthMm}×${template.heightMm}mm` : "—"}</span>
+                <span className="text-[10px] text-muted-foreground">{template ? `${widthMm}×${heightMm}mm` : "—"}</span>
               </div>
               <div className="flex-1 overflow-auto p-3 flex items-center justify-center bg-muted/40">
                 {previewLoading ? (
