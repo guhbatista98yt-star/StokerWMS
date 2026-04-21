@@ -65,12 +65,24 @@ export default function LabelPrintPage() {
   const [copiesPerRecord, setCopiesPerRecord] = useState(1);
   const [mediaLayoutId, setMediaLayoutId] = useState<string>("none");
   const [printing, setPrinting] = useState(false);
+  // Cooldown de 5s no botão Imprimir, mesmo padrão dos demais módulos
+  // (recebimento, conferência, pallet) — evita disparos acidentais
+  // duplicados que geram lotes repetidos na fila da impressora.
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
+  const PRINT_COOLDOWN_MS = 5000;
 
   // Debounce na busca textual (350ms) — evita disparo a cada tecla.
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 350);
     return () => clearTimeout(t);
   }, [search]);
+
+  // Tick do cooldown — decrementa a cada segundo até zerar.
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return;
+    const t = setTimeout(() => setCooldownSeconds(s => Math.max(0, s - 1)), 1000);
+    return () => clearTimeout(t);
+  }, [cooldownSeconds]);
 
   // Reset ao trocar contexto (domínio diferente).
   useEffect(() => {
@@ -231,6 +243,8 @@ export default function LabelPrintPage() {
   }
 
   async function handlePrint(previewOnly: boolean) {
+    // Cooldown só vale para impressão real, não para pré-visualização.
+    if (!previewOnly && cooldownSeconds > 0) return;
     // Validações operacionais.
     if (!template) {
       return toast({ title: "Selecione um modelo de etiqueta", variant: "destructive" });
@@ -572,13 +586,20 @@ export default function LabelPrintPage() {
                     !template
                     || selectedRecords.size === 0
                     || printing
+                    || cooldownSeconds > 0
                     || !contextPrinterConfig?.printer
                     || (context === "volume_label" && ordersMissingVolumes.length > 0)
                   }
                   data-testid="btn-print"
                 >
                   <Printer className="h-4 w-4 mr-1.5 shrink-0" />
-                  <span className="truncate">{printing ? "Enviando..." : "Imprimir"}</span>
+                  <span className="truncate">
+                    {printing
+                      ? "Enviando..."
+                      : cooldownSeconds > 0
+                        ? `Aguarde ${cooldownSeconds}s`
+                        : "Imprimir"}
+                  </span>
                 </Button>
               </div>
             </CardContent>
