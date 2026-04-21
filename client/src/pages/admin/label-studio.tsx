@@ -19,7 +19,7 @@ import {
   Undo2, Redo2, Copy, Lock, Unlock, EyeOff as EyeOffIcon, Eye as EyeIcon,
   AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
-  Maximize2, Square as SquareIcon, AlertTriangle, Printer, PanelRightClose, PanelRightOpen,
+  Maximize2, Square as SquareIcon, AlertTriangle, Printer,
   PanelLeft, PanelRight, PanelTop, PanelBottom, Settings2, RectangleHorizontal, RectangleVertical,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
@@ -1126,29 +1126,13 @@ export default function LabelStudioPage() {
         </Button>
 
         {!isReadOnly && (
-          <Button size="sm" onClick={() => saveMutation.mutate()} disabled={!isDirty || saveMutation.isPending} data-testid="btn-save-studio" className={cn(!isDirty && "opacity-50")}>
-            <Save className="h-4 w-4 mr-1.5" />
+          <Button size="sm" className={cn("h-7", !isDirty && "opacity-50")} onClick={() => saveMutation.mutate()} disabled={!isDirty || saveMutation.isPending} data-testid="btn-save-studio">
+            <Save className="h-3.5 w-3.5 mr-1.5" />
             {saveMutation.isPending ? "Salvando..." : isDirty ? "Salvar*" : "Salvo"}
           </Button>
         )}
         <Button variant="outline" size="sm" className="h-7" onClick={() => navigate("/admin/label-print")} data-testid="btn-print-studio" title="Ir para impressão em lote">
           <Printer className="h-3.5 w-3.5 mr-1" />Imprimir
-        </Button>
-        <Button
-          variant="outline" size="sm" className="h-7 w-7 p-0"
-          onClick={() => setLeftPanelOpen(v => !v)}
-          title={leftPanelOpen ? "Esconder painel de componentes" : "Mostrar painel de componentes"}
-          data-testid="btn-toggle-left-panel"
-        >
-          <PanelLeft className={cn("h-3.5 w-3.5", !leftPanelOpen && "opacity-50")} />
-        </Button>
-        <Button
-          variant="outline" size="sm" className="h-7 w-7 p-0"
-          onClick={() => setRightPanelOpen(v => !v)}
-          title={rightPanelOpen ? "Esconder painel lateral" : "Mostrar painel lateral"}
-          data-testid="btn-toggle-right-panel"
-        >
-          {rightPanelOpen ? <PanelRightClose className="h-3.5 w-3.5" /> : <PanelRightOpen className="h-3.5 w-3.5" />}
         </Button>
       </div>
 
@@ -1190,8 +1174,11 @@ export default function LabelStudioPage() {
         )}
         {leftPanelOpen && (
         <div className="w-44 border-r border-border bg-card flex flex-col shrink-0 overflow-hidden">
-          <div className="px-2 py-2 border-b border-border">
+          <div className="px-2 py-1.5 border-b border-border flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Componentes</p>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 -mr-1 shrink-0" onClick={() => setLeftPanelOpen(false)} title="Esconder painel de componentes" data-testid="btn-collapse-components">
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </Button>
           </div>
           <div className="p-1.5 space-y-1">
             {TOOLBAR_ITEMS.map(({ type, label, Icon }) => (
@@ -1403,8 +1390,11 @@ export default function LabelStudioPage() {
         {/* Propriedades / Campos disponíveis (recolhível) */}
         {rightPanelOpen ? (
         <div className="w-60 border-l border-border bg-card overflow-y-auto shrink-0">
-          <div className="p-2 border-b border-border">
+          <div className="px-2 py-1.5 border-b border-border flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{selectedComp ? "Propriedades" : "Campos Disponíveis"}</p>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 -mr-1 shrink-0" onClick={() => setRightPanelOpen(false)} title="Esconder painel" data-testid="btn-collapse-fields">
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
           </div>
           {selectedComp ? (
             <div className="p-2">
