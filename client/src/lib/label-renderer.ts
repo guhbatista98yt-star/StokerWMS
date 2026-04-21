@@ -76,7 +76,8 @@ async function renderComponent(
   const yPx = comp.y * MM_TO_PX;
   const wPx = comp.width * MM_TO_PX;
   const hPx = comp.height * MM_TO_PX;
-  const baseStyle = `position:absolute;left:${xPx}px;top:${yPx}px;width:${wPx}px;height:${hPx}px;z-index:${comp.zIndex ?? 0};${comp.rotation ? `transform:rotate(${comp.rotation}deg);transform-origin:top left;` : ""}`;
+  const opacityCss = comp.opacity !== undefined && comp.opacity !== 1 ? `opacity:${comp.opacity};` : "";
+  const baseStyle = `position:absolute;left:${xPx}px;top:${yPx}px;width:${wPx}px;height:${hPx}px;z-index:${comp.zIndex ?? 0};${opacityCss}${comp.rotation ? `transform:rotate(${comp.rotation}deg);transform-origin:top left;` : ""}`;
 
   switch (comp.type) {
     case "text": {
@@ -130,9 +131,9 @@ export async function renderLabelToHtml(
   const widthPx = template.widthMm * MM_TO_PX;
   const heightPx = template.heightMm * MM_TO_PX;
 
-  const sortedComponents = [...layout.components].sort(
-    (a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0),
-  );
+  const sortedComponents = [...layout.components]
+    .filter(c => !c.hidden)
+    .sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0));
   const componentHtmls = await Promise.all(sortedComponents.map(c => renderComponent(c, data)));
 
   return `<!DOCTYPE html>

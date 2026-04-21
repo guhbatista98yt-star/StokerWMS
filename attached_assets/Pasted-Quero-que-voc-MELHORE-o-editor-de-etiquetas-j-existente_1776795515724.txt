@@ -1,0 +1,223 @@
+Quero que você MELHORE o editor de etiquetas já existente no módulo Impressoras, aproveitando a estrutura atual e sem recriar o módulo do zero. O foco é refinar UX/UI, usabilidade, precisão de edição e produtividade, com experiência inspirada em ZebraDesigner e BarTender 2022, seguindo a lógica visual das referências enviadas.
+
+IMPORTANTE
+- Não reconstruir tudo do zero se a base atual já funcionar.
+- Reaproveitar componentes, estados, endpoints e persistência existentes sempre que possível.
+- Fazer melhorias reais no editor atual.
+- Não adicionar botão de importação.
+- Não obrigar tipo fixo de etiqueta.
+- Identificação da etiqueta deve ser por título e, opcionalmente, por grupo.
+- Manter compatibilidade com os modelos já salvos.
+
+OBJETIVO DAS MELHORIAS
+Quero que o editor atual fique com navegação, manipulação visual e painel de propriedades mais próximos da experiência de softwares profissionais de etiquetas, principalmente no fluxo:
+- toolbox à esquerda
+- área central de edição
+- propriedades à direita
+- ações rápidas no topo
+- preview técnico e manipulável
+
+MELHORIAS VISUAIS E DE UX/UI
+1) Melhorar a organização da tela do editor
+- Deixar a interface mais técnica, limpa e profissional.
+- A área central deve destacar melhor a etiqueta.
+- O canvas deve ficar mais agradável de manipular.
+- Os painéis laterais devem ficar mais organizados e legíveis.
+- O visual geral deve lembrar a ergonomia do ZebraDesigner/BarTender, sem copiar literalmente.
+
+2) Melhorar a aba/área de Preview Real
+- O Preview Real precisa ser mais manipulável.
+- Permitir aumentar e diminuir zoom com fluidez.
+- Permitir ajuste à tela.
+- Permitir tamanho real.
+- Permitir arrastar/pan a área de visualização quando estiver ampliada.
+- Permitir visualizar melhor sangria.
+- Permitir visualizar margem de segurança.
+- Permitir visualizar limite útil da etiqueta.
+- Atualizar o preview em tempo real a cada alteração.
+- Melhorar nitidez e legibilidade do preview.
+
+3) Melhorar edição e produtividade
+- Implementar Ctrl+Z para desfazer.
+- Implementar Ctrl+Y ou Ctrl+Shift+Z para refazer.
+- Adicionar botões visuais de desfazer e refazer no topo.
+- O desfazer/refazer deve funcionar para:
+  - mover objeto
+  - redimensionar
+  - apagar
+  - editar texto
+  - mudar fonte
+  - trocar valor dinâmico
+  - alterar propriedades
+  - alterar posição/camada
+
+4) Ajustar lógica dos modelos
+- Não obrigar criação por tipo fixo de etiqueta.
+- Permitir título livre.
+- Permitir grupo opcional de etiquetas.
+- O grupo deve ser apenas organizacional, não obrigatório.
+- Exemplo de uso: Volume, Endereço, Produto, Expedição, Interno, mas sem travar o usuário.
+
+5) Ajustar “Visualizar (Somente leitura)”
+- Ao clicar no lápis em “Visualizar (Somente leitura)”, abrir um popup/modal com a visualização real da etiqueta.
+- Esse popup deve mostrar a etiqueta renderizada com boa qualidade.
+- Permitir zoom nesse popup.
+- Mostrar título da etiqueta, grupo opcional, tamanho e última atualização.
+- O popup deve ser limpo e focado na visualização.
+
+MELHORIAS FUNCIONAIS IMPORTANTES
+Adicionar ou corrigir no editor atual os seguintes pontos, mesmo que eu não tenha citado tudo antes:
+
+1. Réguas e guias
+- Exibir régua horizontal e vertical.
+- Permitir guias visuais básicas se já for viável.
+- Melhorar percepção de posicionamento.
+
+2. Grade e snap
+- Adicionar grade ligável/desligável.
+- Adicionar snap ligável/desligável.
+- Snap deve funcionar com grade e alinhamento entre objetos.
+
+3. Margem de segurança e sangria
+- Exibir visualmente a área segura da etiqueta.
+- Exibir sangria quando habilitada.
+- Diferenciar claramente:
+  - área total
+  - área útil
+  - área segura
+  - sangria
+
+4. Painel de propriedades mais completo
+Melhorar o painel de propriedades do objeto selecionado para conter no mínimo:
+- posição X
+- posição Y
+- largura
+- altura
+- rotação
+- fonte
+- tamanho da fonte
+- estilo/peso
+- alinhamento
+- cor do texto
+- cor de fundo
+- borda
+- opacidade
+- visibilidade
+- bloqueio
+- nome interno do objeto
+- camada/z-index
+- origem do dado
+- valor fixo ou dinâmico
+- propriedades do barcode/QR quando aplicável
+
+5. Camadas/objetos
+- Adicionar ou melhorar painel/lista de objetos da etiqueta.
+- Permitir selecionar com facilidade quando houver sobreposição.
+- Permitir reordenar camadas.
+- Permitir ocultar objeto.
+- Permitir bloquear objeto.
+- Permitir renomear objeto.
+
+6. Alinhamento e distribuição
+- Alinhar à esquerda
+- Alinhar à direita
+- Centralizar horizontalmente
+- Centralizar verticalmente
+- Alinhar topo/base
+- Distribuir horizontalmente
+- Distribuir verticalmente
+
+7. Edição mais segura
+- Avisar quando houver alteração não salva.
+- Confirmar saída se houver mudanças pendentes.
+- Confirmar exclusão de modelo.
+- Confirmar exclusão de objeto quando necessário.
+
+8. Autosave e estabilidade
+- Se viável na base atual, adicionar autosave de rascunho.
+- Mostrar indicador visual de “alterações não salvas”.
+- Evitar perda de trabalho em caso de navegação acidental.
+
+9. Preview com dados de exemplo
+- Permitir renderizar a etiqueta com dados fictícios de exemplo para facilitar conferência visual.
+- Isso ajuda a ver se fontes, tamanhos e códigos cabem corretamente.
+
+10. Validação visual
+- Avisar se objeto ficar fora da área imprimível.
+- Avisar se barcode estiver muito pequeno para leitura confiável.
+- Avisar se texto invadir margem de segurança.
+- Avisar se objeto ultrapassar sangria/limite útil de forma inadequada.
+
+11. Atalhos úteis
+- Ctrl+C
+- Ctrl+V
+- Delete
+- Ctrl+Z
+- Ctrl+Y ou Ctrl+Shift+Z
+- setas para mover objeto
+- Shift + setas para ajuste maior
+- duplo clique para editar texto
+
+12. Manipulação de objetos
+- Melhorar arrastar e soltar.
+- Melhorar redimensionamento por alças.
+- Permitir duplicar objeto.
+- Permitir copiar e colar objeto.
+- Permitir agrupar e desagrupar, se a base atual suportar sem grande impacto.
+
+13. Zoom e navegação
+- Zoom mais fluido.
+- Botões de zoom claros.
+- Campo percentual opcional de zoom.
+- Ajustar à tela.
+- Tamanho real.
+- Pan da área ampliada.
+
+14. Organização de modelos
+- Melhorar listagem de etiquetas.
+- Buscar por título.
+- Filtrar por grupo opcional.
+- Ordenar por nome, criação e última atualização.
+- Duplicar modelo existente com facilidade.
+
+15. Impressão e visualização final
+- Melhorar modo de preview limpo de impressão.
+- Permitir pré-visualização sem grid, sem guias e sem painéis.
+- Manter impressão pelo navegador e pela Print Tool já existente, se houver.
+
+COMPONENTES E DETALHES QUE VOCÊ DEVE VERIFICAR SE ESTÃO FALTANDO
+Revise o editor atual e, se algum desses itens ainda não existir, adicione de forma coerente:
+- texto fixo
+- texto dinâmico
+- código de barras 1D
+- QR Code
+- imagem/logo
+- linha
+- retângulo
+- círculo/elipse
+- data automática
+- hora automática
+- número sequencial
+- área de destaque
+- placeholders dinâmicos
+- rotação de objetos
+- ocultar/bloquear objeto
+- edição numérica precisa
+- unidade de medida mm/cm/polegada, se a base permitir
+
+COMPATIBILIDADE E PERSISTÊNCIA
+- Não quebrar etiquetas já cadastradas.
+- Manter compatibilidade com modelos salvos.
+- Ajustar persistência apenas se necessário.
+- Se criar novos campos/configurações, fazer migração segura.
+- Garantir que modelos antigos continuem abrindo corretamente.
+
+ENTREGA ESPERADA
+Ao finalizar:
+- aplicar as melhorias no editor já existente
+- não recriar do zero sem necessidade
+- listar arquivos alterados
+- resumir exatamente o que foi melhorado
+- informar o que já existia e o que foi acrescentado
+- informar se foi necessário ajustar banco, estrutura de layout ou persistência
+- manter a solução leve, profissional e extensível

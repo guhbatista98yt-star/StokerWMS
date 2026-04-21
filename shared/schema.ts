@@ -810,6 +810,10 @@ export interface LabelComponentBase {
   height: number;
   rotation?: number;
   zIndex?: number;
+  name?: string;
+  locked?: boolean;
+  hidden?: boolean;
+  opacity?: number;
 }
 
 export interface TextComponent extends LabelComponentBase {
@@ -939,6 +943,7 @@ export const labelTemplates = pgTable("label_templates", {
   companyId: integer("company_id"),
   name: text("name").notNull(),
   context: text("context").notNull().$type<LabelContext>(),
+  groupName: text("group_name"),
   widthMm: integer("width_mm").notNull().default(100),
   heightMm: integer("height_mm").notNull().default(70),
   dpi: integer("dpi").notNull().default(203),

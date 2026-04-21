@@ -768,6 +768,7 @@ async function runSafeMigrations() {
       company_id integer,
       name text NOT NULL,
       context text NOT NULL,
+      group_name text,
       width_mm integer NOT NULL DEFAULT 100,
       height_mm integer NOT NULL DEFAULT 70,
       dpi integer NOT NULL DEFAULT 203,
@@ -776,6 +777,7 @@ async function runSafeMigrations() {
       created_at text NOT NULL DEFAULT '',
       updated_at text
     )`,
+    `ALTER TABLE label_templates ADD COLUMN IF NOT EXISTS group_name text`,
     `CREATE TABLE IF NOT EXISTS label_default_assignments (
       company_id integer NOT NULL DEFAULT 0,
       context text NOT NULL,

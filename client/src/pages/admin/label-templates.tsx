@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -18,11 +18,12 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, Plus, MoreVertical, Pencil, Copy, Trash2,
-  ToggleLeft, ToggleRight, Tag, Layers, Upload,
+  ToggleLeft, ToggleRight, Tag, Layers, Search, Eye, ZoomIn, ZoomOut,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { renderLabelToHtml } from "@/lib/label-renderer";
 import {
-  type LabelTemplate, type LabelContext, type LabelLayout, labelContextEnum, LABEL_CONTEXT_LABELS,
+  type LabelTemplate, type LabelContext, type LabelLayout, labelContextEnum, LABEL_CONTEXT_LABELS, LABEL_DATA_FIELDS,
 } from "@shared/schema";
 
 function ContextBadge({ context }: { context: LabelContext }) {
@@ -39,17 +40,91 @@ function ContextBadge({ context }: { context: LabelContext }) {
   );
 }
 
+function PreviewModal({ template, onClose }: { template: LabelTemplate | null; onClose: () => void }) {
+  const [html, setHtml] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(100);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!template) { setHtml(null); return; }
+    let cancelled = false;
+    setLoading(true);
+    const ctx = template.context as LabelContext;
+    const sample: Record<string, string> = Object.fromEntries(
+      (LABEL_DATA_FIELDS[ctx] ?? []).map(f => [f.key, f.example ?? f.label])
+    );
+    renderLabelToHtml(template, sample)
+      .then(h => { if (!cancelled) { setHtml(h); setLoading(false); } })
+      .catch(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [template]);
+
+  if (!template) return null;
+  const updated = template.updatedAt || template.createdAt;
+  return (
+    <Dialog open={!!template} onOpenChange={onClose}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Eye className="h-4 w-4" />
+            {template.name}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground border-b border-border pb-2">
+          <ContextBadge context={template.context as LabelContext} />
+          {template.groupName && <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">{template.groupName}</span>}
+          <span>·</span>
+          <span>{template.widthMm}mm × {template.heightMm}mm</span>
+          <span>·</span>
+          <span>{template.dpi} DPI</span>
+          <span>·</span>
+          <span>{(template.layoutJson as LabelLayout)?.components?.length ?? 0} componente(s)</span>
+          <div className="flex-1" />
+          <span>Atualizado: {new Date(updated).toLocaleString("pt-BR")}</span>
+        </div>
+        <div className="flex items-center gap-1 justify-end">
+          <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom(z => Math.max(25, z - 25))}><ZoomOut className="h-3.5 w-3.5" /></Button>
+          <span className="text-xs text-muted-foreground w-12 text-center">{zoom}%</span>
+          <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom(z => Math.min(300, z + 25))}><ZoomIn className="h-3.5 w-3.5" /></Button>
+        </div>
+        <div className="bg-muted/40 p-4 rounded max-h-[60vh] overflow-auto flex items-start justify-center">
+          {loading ? (
+            <p className="text-sm text-muted-foreground py-8">Renderizando...</p>
+          ) : html ? (
+            <div style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}>
+              <iframe
+                srcDoc={html}
+                style={{ border: "1px solid #ccc", background: "white", width: `${template.widthMm * 3.7795275591}px`, height: `${template.heightMm * 3.7795275591}px` }}
+                title="Visualização"
+              />
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground py-8">Sem componentes</p>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Fechar</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function LabelTemplatesPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const qc = useQueryClient();
+  const [search, setSearch] = useState("");
   const [filterContext, setFilterContext] = useState<LabelContext | "all">("all");
+  const [filterGroup, setFilterGroup] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"name" | "updated" | "created">("updated");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState<LabelTemplate | null>(null);
-  const importInputRef = useRef<HTMLInputElement>(null);
+  const [showPreview, setShowPreview] = useState<LabelTemplate | null>(null);
   const [showDuplicateDialog, setShowDuplicateDialog] = useState<LabelTemplate | null>(null);
   const [newName, setNewName] = useState("");
   const [newContext, setNewContext] = useState<LabelContext>("volume_label");
+  const [newGroup, setNewGroup] = useState("");
   const [newWidth, setNewWidth] = useState(100);
   const [newHeight, setNewHeight] = useState(70);
   const [dupName, setDupName] = useState("");
@@ -59,7 +134,7 @@ export default function LabelTemplatesPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: { name: string; context: LabelContext; widthMm: number; heightMm: number }) => {
+    mutationFn: async (data: { name: string; context: LabelContext; groupName?: string; widthMm: number; heightMm: number }) => {
       const res = await apiRequest("POST", "/api/labels/templates", {
         ...data,
         active: true,
@@ -70,40 +145,12 @@ export default function LabelTemplatesPage() {
     onSuccess: (created) => {
       qc.invalidateQueries({ queryKey: ["/api/labels/templates"] });
       setShowCreateDialog(false);
+      setNewName(""); setNewGroup("");
       toast({ title: "Modelo criado", description: created.name });
       navigate(`/admin/label-studio/${created.id}`);
     },
     onError: () => toast({ title: "Erro ao criar modelo", variant: "destructive" }),
   });
-
-  const importMutation = useMutation({
-    mutationFn: async (payload: unknown) => {
-      const res = await apiRequest("POST", "/api/labels/templates/import", payload);
-      return res.json() as Promise<LabelTemplate>;
-    },
-    onSuccess: (created) => {
-      qc.invalidateQueries({ queryKey: ["/api/labels/templates"] });
-      toast({ title: "Modelo importado", description: created.name });
-      navigate(`/admin/label-studio/${created.id}`);
-    },
-    onError: () => toast({ title: "Erro ao importar modelo", variant: "destructive" }),
-  });
-
-  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const json = JSON.parse(ev.target?.result as string);
-        importMutation.mutate(json);
-      } catch {
-        toast({ title: "Arquivo inválido", description: "O arquivo não é um JSON válido.", variant: "destructive" });
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = "";
-  };
 
   const duplicateMutation = useMutation({
     mutationFn: async ({ id, name }: { id: string; name: string }) => {
@@ -139,7 +186,24 @@ export default function LabelTemplatesPage() {
     onError: () => toast({ title: "Erro ao excluir", variant: "destructive" }),
   });
 
-  const filtered = templates.filter(t => filterContext === "all" || t.context === filterContext);
+  const allGroups = useMemo(() => {
+    const set = new Set<string>();
+    templates.forEach(t => { if (t.groupName) set.add(t.groupName); });
+    return Array.from(set).sort();
+  }, [templates]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return templates
+      .filter(t => filterContext === "all" || t.context === filterContext)
+      .filter(t => filterGroup === "all" || (t.groupName ?? "") === filterGroup)
+      .filter(t => !q || t.name.toLowerCase().includes(q) || (t.groupName ?? "").toLowerCase().includes(q))
+      .sort((a, b) => {
+        if (sortBy === "name") return a.name.localeCompare(b.name);
+        if (sortBy === "created") return (b.createdAt ?? "").localeCompare(a.createdAt ?? "");
+        return (b.updatedAt ?? b.createdAt ?? "").localeCompare(a.updatedAt ?? a.createdAt ?? "");
+      });
+  }, [templates, filterContext, filterGroup, search, sortBy]);
 
   return (
     <div className="min-h-[100dvh] bg-background">
@@ -154,31 +218,48 @@ export default function LabelTemplatesPage() {
           </h1>
           <p className="text-xs text-muted-foreground">Modelos de etiquetas para impressão</p>
         </div>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => importInputRef.current?.click()}
-          disabled={importMutation.isPending}
-          data-testid="btn-import-template"
-        >
-          <Upload className="h-4 w-4 mr-1.5" />
-          {importMutation.isPending ? "Importando..." : "Importar"}
-        </Button>
-        <input
-          ref={importInputRef}
-          type="file"
-          accept=".json,application/json"
-          className="hidden"
-          onChange={handleImportFile}
-          data-testid="input-import-file"
-        />
         <Button size="sm" onClick={() => setShowCreateDialog(true)} data-testid="btn-create-template">
           <Plus className="h-4 w-4 mr-1.5" />
           Novo Modelo
         </Button>
       </div>
 
-      <main className="max-w-4xl mx-auto px-4 py-4 space-y-4">
+      <main className="max-w-5xl mx-auto px-4 py-4 space-y-4">
+        {/* Barra de pesquisa e filtros */}
+        <div className="flex flex-wrap gap-2 items-center">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+            <Input
+              placeholder="Buscar por título ou grupo..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-8 h-9"
+              data-testid="input-search-templates"
+            />
+          </div>
+          {allGroups.length > 0 && (
+            <Select value={filterGroup} onValueChange={setFilterGroup}>
+              <SelectTrigger className="w-[160px] h-9 text-xs" data-testid="select-filter-group">
+                <SelectValue placeholder="Grupo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os grupos</SelectItem>
+                {allGroups.map(g => (<SelectItem key={g} value={g}>{g}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          )}
+          <Select value={sortBy} onValueChange={v => setSortBy(v as typeof sortBy)}>
+            <SelectTrigger className="w-[140px] h-9 text-xs" data-testid="select-sort">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="updated">Última atualização</SelectItem>
+              <SelectItem value="created">Mais recentes</SelectItem>
+              <SelectItem value="name">Nome (A-Z)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="flex flex-wrap gap-2">
           <Button
             variant={filterContext === "all" ? "default" : "outline"}
@@ -186,7 +267,7 @@ export default function LabelTemplatesPage() {
             onClick={() => setFilterContext("all")}
             data-testid="filter-all"
           >
-            Todos
+            Todos os tipos
           </Button>
           {labelContextEnum.map(ctx => (
             <Button
@@ -220,6 +301,11 @@ export default function LabelTemplatesPage() {
                       <CardTitle className="text-sm font-semibold truncate">{t.name}</CardTitle>
                       <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                         <ContextBadge context={t.context as LabelContext} />
+                        {t.groupName && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                            {t.groupName}
+                          </span>
+                        )}
                         {t.companyId === null && (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                             Sistema
@@ -239,19 +325,15 @@ export default function LabelTemplatesPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setShowPreview(t)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Visualizar
+                        </DropdownMenuItem>
                         {t.companyId === null ? (
-                          <>
-                            <DropdownMenuItem asChild>
-                              <Link href={`/admin/label-studio/${t.id}`}>
-                                <Pencil className="h-4 w-4 mr-2" />
-                                Visualizar (somente leitura)
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => { setShowDuplicateDialog(t); setDupName(`${t.name} (cópia)`); }}>
-                              <Copy className="h-4 w-4 mr-2" />
-                              Duplicar para editar
-                            </DropdownMenuItem>
-                          </>
+                          <DropdownMenuItem onClick={() => { setShowDuplicateDialog(t); setDupName(`${t.name} (cópia)`); }}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Duplicar para editar
+                          </DropdownMenuItem>
                         ) : (
                           <>
                             <DropdownMenuItem asChild>
@@ -286,18 +368,27 @@ export default function LabelTemplatesPage() {
                   <p className="text-xs text-muted-foreground">
                     {(t.layoutJson as LabelLayout)?.components?.length ?? 0} componente(s)
                   </p>
-                  <Link href={`/admin/label-studio/${t.id}`}>
-                    <Button size="sm" variant="outline" className="w-full mt-3 h-8" data-testid={`btn-edit-template-${t.id}`}>
-                      <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                      Abrir Studio
+                  {t.companyId === null ? (
+                    <Button size="sm" variant="outline" className="w-full mt-3 h-8" onClick={() => setShowPreview(t)} data-testid={`btn-view-template-${t.id}`}>
+                      <Eye className="h-3.5 w-3.5 mr-1.5" />
+                      Visualizar
                     </Button>
-                  </Link>
+                  ) : (
+                    <Link href={`/admin/label-studio/${t.id}`}>
+                      <Button size="sm" variant="outline" className="w-full mt-3 h-8" data-testid={`btn-edit-template-${t.id}`}>
+                        <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                        Abrir Studio
+                      </Button>
+                    </Link>
+                  )}
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
       </main>
+
+      <PreviewModal template={showPreview} onClose={() => setShowPreview(null)} />
 
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="max-w-sm">
@@ -306,11 +397,21 @@ export default function LabelTemplatesPage() {
           </DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label>Nome do modelo</Label>
+              <Label>Título *</Label>
               <Input placeholder="Ex: Etiqueta de Volume Padrão" value={newName} onChange={e => setNewName(e.target.value)} data-testid="input-template-name" />
             </div>
             <div>
-              <Label>Tipo de etiqueta</Label>
+              <Label>Grupo (opcional)</Label>
+              <Input placeholder="Ex: Expedição, Interno..." value={newGroup} onChange={e => setNewGroup(e.target.value)} list="group-suggestions" data-testid="input-template-group" />
+              {allGroups.length > 0 && (
+                <datalist id="group-suggestions">
+                  {allGroups.map(g => (<option key={g} value={g} />))}
+                </datalist>
+              )}
+              <p className="text-[10px] text-muted-foreground mt-0.5">Apenas para organização — pode deixar vazio.</p>
+            </div>
+            <div>
+              <Label>Origem dos dados</Label>
               <Select value={newContext} onValueChange={v => setNewContext(v as LabelContext)}>
                 <SelectTrigger data-testid="select-template-context"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -319,6 +420,7 @@ export default function LabelTemplatesPage() {
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-[10px] text-muted-foreground mt-0.5">Define quais campos dinâmicos ficarão disponíveis.</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
@@ -334,7 +436,7 @@ export default function LabelTemplatesPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancelar</Button>
             <Button
-              onClick={() => createMutation.mutate({ name: newName.trim(), context: newContext, widthMm: newWidth, heightMm: newHeight })}
+              onClick={() => createMutation.mutate({ name: newName.trim(), context: newContext, groupName: newGroup.trim() || undefined, widthMm: newWidth, heightMm: newHeight })}
               disabled={!newName.trim() || createMutation.isPending}
               data-testid="btn-confirm-create"
             >
