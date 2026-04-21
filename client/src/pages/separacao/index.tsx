@@ -2105,6 +2105,11 @@ export default function SeparacaoPage() {
         prefilledProduct={currentProduct?.product
           ? { barcode: currentProduct.product.barcode, name: currentProduct.product.name, erpCode: currentProduct.product.erpCode ?? "" }
           : undefined}
+        onLinked={async () => {
+          // Refaz fetch do cache de work-units para que o EAN recém-vinculado
+          // seja reconhecido na próxima leitura sem precisar recarregar a página.
+          await queryClient.refetchQueries({ queryKey: workUnitsQueryKey });
+        }}
       />
 
       {/* Sheet de Consulta de Estoque (lateral direita) */}

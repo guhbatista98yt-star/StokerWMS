@@ -1784,6 +1784,9 @@ export default function ConferenciaPage() {
         prefilledProduct={currentProduct?.product
           ? { barcode: currentProduct.product.barcode, name: currentProduct.product.name, erpCode: currentProduct.product.erpCode ?? "" }
           : undefined}
+        onLinked={async () => {
+          await queryClient.refetchQueries({ queryKey: workUnitsQueryKey });
+        }}
       />
 
       <StockQuerySheet

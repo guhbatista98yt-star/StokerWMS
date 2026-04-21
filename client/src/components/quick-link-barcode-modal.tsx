@@ -21,9 +21,18 @@ interface QuickLinkBarcodeModalProps {
   prefilledProduct?: QuickLinkPrefilledProduct;
   /** Quando false, bloqueia digitação manual e teclado virtual. */
   manualInputAllowed?: boolean;
+  /**
+   * Callback chamado após o vínculo ser salvo no servidor com sucesso.
+   * O modal aguarda (await) a resolução antes de mostrar o toast de sucesso,
+   * permitindo que o pai refaça fetch dos seus próprios caches (work-units,
+   * picking lists, etc.) para que o EAN recém-criado seja reconhecido
+   * imediatamente na próxima leitura. Erros são engolidos: o vínculo já está
+   * salvo no servidor, a UI do pai apenas pode demorar um pouco mais a refletir.
+   */
+  onLinked?: () => void | Promise<void>;
 }
 
-export function QuickLinkBarcodeModal({ open, onClose, prefilledProduct, manualInputAllowed = true }: QuickLinkBarcodeModalProps) {
+export function QuickLinkBarcodeModal({ open, onClose, prefilledProduct, manualInputAllowed = true, onLinked }: QuickLinkBarcodeModalProps) {
   const { toast } = useToast();
 
   const [phase, setPhase] = useState<"unit" | "package">("unit");
@@ -126,10 +135,24 @@ export function QuickLinkBarcodeModal({ open, onClose, prefilledProduct, manualI
       setScanStatus("idle");
       setScanMessage("");
 
-      // Invalidar caches para que o novo código seja reconhecido imediatamente em coleta.
+      // Invalidar caches globais de catálogo para que o novo código seja reconhecido
+      // imediatamente em outras telas (cadastros, busca, etc.).
       queryClient.invalidateQueries({ queryKey: ["/api/barcodes"] });
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       queryClient.invalidateQueries({ queryKey: ["/api/products/search"] });
+
+      // Aguarda o pai refazer fetch dos seus caches específicos (ex.: work-units do
+      // módulo de coleta), garantindo que a próxima leitura do EAN recém-criado já
+      // encontre o produto. Sem isso, o cache local da página de coleta fica defasado
+      // e o operador vê "Produto não encontrado nos seus pedidos em aberto".
+      if (onLinked) {
+        try {
+          await onLinked();
+        } catch (cbErr) {
+          // Não bloquear o sucesso por erro no refetch do pai — o vínculo já foi salvo.
+          console.warn("[QuickLink] onLinked callback falhou:", cbErr);
+        }
+      }
 
       toast({ title: "Código vinculado!", description: `${saved} → ${resolvedProduct?.name ?? ""} (${qty} un)` });
     } catch (err) {
@@ -140,7 +163,7 @@ export function QuickLinkBarcodeModal({ open, onClose, prefilledProduct, manualI
     } finally {
       setSaving(false);
     }
-  }, [packageBarcode, qty, unitBarcode, resolvedProduct, toast]);
+  }, [packageBarcode, qty, unitBarcode, resolvedProduct, toast, onLinked]);
 
   const handleQtyChange = useCallback((val: string) => {
     const v = val.replace(/\D/g, "");
