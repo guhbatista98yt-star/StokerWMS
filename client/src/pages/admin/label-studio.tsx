@@ -1423,10 +1423,10 @@ export default function LabelStudioPage() {
         <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle>Alterações não salvas</DialogTitle></DialogHeader>
           <p className="text-sm text-muted-foreground">Você tem alterações que ainda não foram salvas. Deseja sair sem salvar?</p>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowExitConfirm(null)}>Continuar editando</Button>
-            <Button variant="destructive" onClick={() => { const dst = showExitConfirm; setShowExitConfirm(null); setIsDirty(false); if (dst) navigate(dst); }}>Sair sem salvar</Button>
-            <Button onClick={async () => { await saveMutation.mutateAsync(); const dst = showExitConfirm; setShowExitConfirm(null); if (dst) navigate(dst); }}>Salvar e sair</Button>
+          <DialogFooter className="flex-wrap gap-2 sm:justify-end">
+            <Button size="sm" variant="outline" onClick={() => setShowExitConfirm(null)}>Continuar editando</Button>
+            <Button size="sm" variant="destructive" onClick={() => { const dst = showExitConfirm; setShowExitConfirm(null); setIsDirty(false); if (dst) navigate(dst); }}>Sair sem salvar</Button>
+            <Button size="sm" onClick={async () => { await saveMutation.mutateAsync(); const dst = showExitConfirm; setShowExitConfirm(null); if (dst) navigate(dst); }}>Salvar e sair</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
