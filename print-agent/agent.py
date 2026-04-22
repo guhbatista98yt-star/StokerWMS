@@ -514,8 +514,113 @@ def _strip_external_fonts(html: str) -> str:
     return html
 
 
+def _extract_page_size_mm(html: str):
+    """Extrai dimensões de @page { size: Xmm Ymm } do CSS do HTML.
+    Retorna (width_mm, height_mm) ou (None, None) se não encontrar."""
+    import re
+    m = re.search(r'@page\s*\{[^}]*?size:\s*([\d.]+)\s*mm\s+([\d.]+)\s*mm', html, re.DOTALL)
+    if m:
+        return float(m.group(1)), float(m.group(2))
+    return None, None
+
+
+def _find_browser_win():
+    """Localiza Chrome ou Edge no Windows."""
+    candidates = [
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+        r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+    ]
+    return next((c for c in candidates if os.path.exists(c)), None)
+
+
+def _generate_pdf_via_chrome(html_content: str, pdf_path: str, job_id: str,
+                              width_mm: float, height_mm: float) -> bool:
+    """Gera PDF via Chrome/Edge headless com tamanho de papel explícito (mm → polegadas).
+    Retorna True se gerou com sucesso, False se browser não disponível ou falhou."""
+    browser = _find_browser_win()
+    if not browser:
+        return False
+
+    tmp_html = pdf_path.replace(".pdf", ".html")
+    try:
+        with open(tmp_html, "w", encoding="utf-8") as f:
+            f.write(html_content)
+
+        # Chrome --paper-width/--paper-height usam polegadas
+        w_in = width_mm / 25.4
+        h_in = height_mm / 25.4
+
+        file_url = "file:///" + tmp_html.replace("\\", "/")
+
+        for headless_flag in ["--headless=old", "--headless"]:
+            try:
+                if os.path.exists(pdf_path):
+                    os.remove(pdf_path)
+            except Exception:
+                pass
+
+            try:
+                r = subprocess.run(
+                    [
+                        browser,
+                        headless_flag,
+                        "--disable-gpu",
+                        "--no-sandbox",
+                        "--disable-dev-shm-usage",
+                        "--disable-extensions",
+                        f"--print-to-pdf={pdf_path}",
+                        "--print-to-pdf-no-header",
+                        "--no-pdf-header-footer",
+                        f"--paper-width={w_in:.5f}",
+                        f"--paper-height={h_in:.5f}",
+                        "--virtual-time-budget=5000",
+                        file_url,
+                    ],
+                    timeout=45,
+                    capture_output=True,
+                )
+            except Exception:
+                continue
+
+            if os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 100:
+                log.info(f"[{job_id}] Chrome headless OK ({width_mm}×{height_mm}mm, {headless_flag})")
+                return True
+
+        log.warning(f"[{job_id}] Chrome headless falhou para todos os flags")
+        return False
+
+    except Exception as e:
+        log.warning(f"[{job_id}] Chrome headless erro: {e}")
+        return False
+    finally:
+        try:
+            os.remove(tmp_html)
+        except Exception:
+            pass
+
+
 def generate_pdf_from_html(html_content: str, pdf_path: str, job_id: str) -> bool:
-    """Fallback: gera PDF via xhtml2pdf para jobs HTML legados."""
+    """Gera PDF a partir de HTML.
+
+    Estratégia (em ordem de prioridade):
+    1. Chrome/Edge headless com --paper-width/--paper-height explícitos (respeita @page CSS)
+    2. xhtml2pdf como fallback (não respeita @page size, mas funciona sem browser)
+    """
+    html_content = _strip_external_fonts(html_content)
+
+    # 1) Tentativa via Chrome headless com tamanho exato de papel
+    width_mm, height_mm = _extract_page_size_mm(html_content)
+    if width_mm and height_mm:
+        try:
+            if _generate_pdf_via_chrome(html_content, pdf_path, job_id, width_mm, height_mm):
+                return True
+        except Exception as e:
+            log.warning(f"[{job_id}] Chrome fallback para xhtml2pdf: {e}")
+
+    # 2) Fallback: xhtml2pdf (legado — ignora @page size, usa A4 por padrão)
+    log.info(f"[{job_id}] Usando xhtml2pdf como fallback")
     from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 
     def _worker():
@@ -527,8 +632,6 @@ def generate_pdf_from_html(html_content: str, pdf_path: str, job_id: str) -> boo
         with open(pdf_path, "wb") as f:
             pisa.CreatePDF(html_content, dest=f)
         return os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 100
-
-    html_content = _strip_external_fonts(html_content)
 
     with _pdf_lock:
         with ThreadPoolExecutor(max_workers=1) as executor:
@@ -585,7 +688,13 @@ def _send_to_printer(pdf_path: str, printer: str, copies: int, job_id: str) -> d
 
 
 def print_job(msg: dict) -> dict:
-    """Processa um job de impressão — template nativo (ReportLab) ou HTML legado (xhtml2pdf)."""
+    """Processa um job de impressão.
+
+    Prioridade:
+    1. pdfBase64 — PDF já gerado pelo servidor (tamanho correto garantido)
+    2. template + data — ReportLab nativo
+    3. html — Chrome headless → fallback xhtml2pdf
+    """
     tmp = tempfile.gettempdir()
     job_id = os.urandom(4).hex()
     pdf_path = os.path.join(tmp, f"stoker_{job_id}.pdf")
@@ -595,18 +704,26 @@ def print_job(msg: dict) -> dict:
     try:
         t_start = time.time()
 
+        pdf_b64 = msg.get("pdfBase64")
         template = msg.get("template")
         data = msg.get("data")
         html = msg.get("html")
 
-        if template and data:
+        if pdf_b64:
+            import base64
+            with open(pdf_path, "wb") as f:
+                f.write(base64.b64decode(pdf_b64))
+            if not (os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 100):
+                raise RuntimeError("pdfBase64 decodificado vazio ou inválido")
+            method = "server-PDF"
+        elif template and data:
             generate_pdf_from_template(template, data, pdf_path, job_id)
             method = "ReportLab"
         elif html:
             generate_pdf_from_html(html, pdf_path, job_id)
-            method = "xhtml2pdf"
+            method = "Chrome/xhtml2pdf"
         else:
-            return {"success": False, "error": "Job sem 'template'+'data' nem 'html'."}
+            return {"success": False, "error": "Job sem 'pdfBase64', 'template'+'data' nem 'html'."}
 
         result = _send_to_printer(pdf_path, printer, copies, job_id)
         t_total = time.time() - t_start
