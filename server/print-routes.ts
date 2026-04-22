@@ -115,9 +115,25 @@ function cleanup(...files: string[]) {
   }
 }
 
+/** Extrai (widthMm, heightMm) do CSS @page { size: Xmm Ymm } do HTML.
+ *  Necessário porque Chrome --print-to-pdf por padrão usa Letter,
+ *  mesmo com @page CSS — precisamos passar --paper-width/--paper-height explícitos. */
+function extractPageSizeMm(html: string): { widthMm: number; heightMm: number } | null {
+  const m = html.match(/@page\s*\{[^}]*?size:\s*([\d.]+)\s*mm\s+([\d.]+)\s*mm/);
+  if (!m) return null;
+  return { widthMm: parseFloat(m[1]), heightMm: parseFloat(m[2]) };
+}
+
 /** Tenta gerar PDF via headless Chrome/Edge.
- *  Chrome 112+ exige --headless=old para --print-to-pdf funcionar. */
-async function generatePdf(browserPath: string, fileUrl: string, pdfPath: string): Promise<{ success: boolean; error?: string }> {
+ *  Chrome 112+ exige --headless=old para --print-to-pdf funcionar.
+ *  Quando paperSize é fornecido, força o tamanho exato do papel via flags CLI
+ *  (Chrome ignora @page CSS e usa Letter por padrão sem essas flags). */
+async function generatePdf(
+  browserPath: string,
+  fileUrl: string,
+  pdfPath: string,
+  paperSize?: { widthMm: number; heightMm: number }
+): Promise<{ success: boolean; error?: string }> {
   const baseArgs = [
     "--disable-gpu", "--no-sandbox",
     "--disable-dev-shm-usage", "--disable-extensions",
@@ -126,8 +142,17 @@ async function generatePdf(browserPath: string, fileUrl: string, pdfPath: string
     "--no-pdf-header-footer",
     "--run-all-compositor-stages-before-draw",
     "--virtual-time-budget=5000",
-    fileUrl,
   ];
+
+  // Tamanho de papel explícito (mm → polegadas — unidade exigida pelo Chrome).
+  if (paperSize) {
+    const wIn = paperSize.widthMm / 25.4;
+    const hIn = paperSize.heightMm / 25.4;
+    baseArgs.push(`--paper-width=${wIn.toFixed(5)}`);
+    baseArgs.push(`--paper-height=${hIn.toFixed(5)}`);
+  }
+
+  baseArgs.push(fileUrl);
 
   // Tenta --headless=old primeiro (Chrome 112+), depois --headless (Chrome antigo)
   for (const flag of ["--headless=old", "--headless"]) {
@@ -177,7 +202,14 @@ async function printHtmlToPrinter(
       ? `file:///${htmlPath.replace(/\\/g, "/")}`
       : `file://${htmlPath}`;
 
-    const pdfResult = await generatePdf(browser, fileUrl, pdfPath);
+    // Extrai tamanho do papel do CSS @page para garantir que Chrome
+    // gere o PDF no tamanho exato (sem isso ele usa Letter por padrão).
+    const paperSize = extractPageSizeMm(html) ?? undefined;
+    if (paperSize) {
+      log(`#${jobId} papel: ${paperSize.widthMm}×${paperSize.heightMm}mm`, "print");
+    }
+
+    const pdfResult = await generatePdf(browser, fileUrl, pdfPath, paperSize);
     if (!pdfResult.success) return pdfResult;
 
     const n = Math.max(1, Math.min(copies, 99));
